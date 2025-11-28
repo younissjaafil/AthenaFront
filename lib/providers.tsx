@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-// import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { useState } from "react";
 import { ThemeProvider } from "./theme-provider";
 
@@ -19,11 +19,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    // TODO: Add ClerkProvider when ready to implement authentication
-    // <ClerkProvider>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>{children}</ThemeProvider>
-    </QueryClientProvider>
-    // </ClerkProvider>
+    <ClerkProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>{children}</ThemeProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
   );
 }

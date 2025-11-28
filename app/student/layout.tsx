@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { RoleGuard } from "@/components/auth/RoleRedirector";
 
 const studentNav = [
   { name: "Dashboard", href: "/student/dashboard", icon: "📊" },
@@ -20,6 +21,8 @@ export default function StudentLayout({
   const pathname = usePathname();
 
   return (
+    // Temporarily disabled for testing - uncomment when backend is ready
+    // <RoleGuard allowedRoles={["student", "creator", "admin"]}>
     <div className="min-h-screen flex">
       {/* Sidebar */}
       <aside className="w-64 bg-white dark:bg-gray-900 border-r border-border-light dark:border-gray-800 flex flex-col">
@@ -81,5 +84,6 @@ export default function StudentLayout({
         <div className="max-w-7xl mx-auto p-8">{children}</div>
       </main>
     </div>
+    // </RoleGuard>
   );
 }

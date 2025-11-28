@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///C:/Development/Athena_v1/AthenaFront/app/%28auth%29/sign-up/%5B%5B...sign-up%5D%5D/page.tsx"],"sourcesContent":["import { SignUp } from \"@clerk/nextjs\";\r\n\r\nexport default function SignUpPage() {\r\n  return (\r\n    <div className=\"flex items-center justify-center\">\r\n      <SignUp\r\n        appearance={{\r\n          elements: {\r\n            rootBox: \"mx-auto\",\r\n            card: \"bg-white dark:bg-gray-900 shadow-lg\",\r\n          },\r\n        }}\r\n      />\r\n    </div>\r\n  );\r\n}\r\n"],"names":[],"mappings":";;;;;AAAA;;;AAEe,SAAS;IACtB,qBACE,8OAAC;QAAI,WAAU;kBACb,cAAA,8OAAC,gMAAM;YACL,YAAY;gBACV,UAAU;oBACR,SAAS;oBACT,MAAM;gBACR;YACF;;;;;;;;;;;AAIR","debugId":null}}]
+}

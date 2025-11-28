@@ -1,11 +1,11 @@
 {
   "/_not-found/page": "/_not-found",
   "/design-system/page": "/design-system",
-  "/(auth)/sign-up/page": "/sign-up",
-  "/(public)/page": "/",
   "/(public)/explore/page": "/explore",
-  "/(auth)/sign-in/page": "/sign-in",
-  "/creator/dashboard/page": "/creator/dashboard",
+  "/(auth)/sign-up/[[...sign-up]]/page": "/sign-up/[[...sign-up]]",
+  "/(public)/page": "/",
+  "/(auth)/sign-in/[[...sign-in]]/page": "/sign-in/[[...sign-in]]",
+  "/admin/dashboard/page": "/admin/dashboard",
   "/student/dashboard/page": "/student/dashboard",
-  "/admin/dashboard/page": "/admin/dashboard"
+  "/creator/dashboard/page": "/creator/dashboard"
 }

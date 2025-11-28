@@ -1,5 +1,7 @@
 {
-  "/(auth)/sign-in/page": "app/(auth)/sign-in/page.js",
+  "/(auth)/sign-in/[[...sign-in]]/page": "app/(auth)/sign-in/[[...sign-in]]/page.js",
+  "/(auth)/sign-up/[[...sign-up]]/page": "app/(auth)/sign-up/[[...sign-up]]/page.js",
   "/(public)/explore/page": "app/(public)/explore/page.js",
-  "/(public)/page": "app/(public)/page.js"
+  "/(public)/page": "app/(public)/page.js",
+  "/student/dashboard/page": "app/student/dashboard/page.js"
 }
