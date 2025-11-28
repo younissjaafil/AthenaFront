@@ -4,29 +4,29 @@
 
 @layer base {
   body {
-    @apply bg-background-light text-gray-900;
+    @apply bg-background-light text-gray-900 dark:bg-gray-900 dark:text-gray-100;
   }
 
   h1 {
-    @apply text-h1;
+    @apply text-h1 dark:text-gray-100;
   }
 
   h2 {
-    @apply text-h2;
+    @apply text-h2 dark:text-gray-100;
   }
 
   h3 {
-    @apply text-h3;
+    @apply text-h3 dark:text-gray-100;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-background-card rounded-2xl shadow-card p-6 border border-border-light;
+    @apply bg-background-card rounded-2xl shadow-card p-6 border border-border-light dark:bg-gray-800 dark:border-gray-700;
   }
 
   .card-hover {
-    @apply card transition-shadow hover:shadow-card-hover;
+    @apply card transition-shadow hover:shadow-card-hover dark:hover:border-brand-purple-500;
   }
 
   .btn {
@@ -34,18 +34,42 @@
   }
 
   .btn-primary {
-    @apply btn bg-brand-purple-600 text-white hover:bg-brand-purple-700 active:scale-95;
+    @apply btn bg-brand-purple-600 text-white hover:bg-brand-purple-700 active:scale-95 dark:bg-brand-purple-500 dark:hover:bg-brand-purple-600;
   }
 
   .btn-secondary {
-    @apply btn bg-brand-teal-400 text-white hover:bg-brand-teal-500 active:scale-95;
+    @apply btn bg-brand-teal-400 text-white hover:bg-brand-teal-500 active:scale-95 dark:bg-brand-teal-500 dark:hover:bg-brand-teal-600;
   }
 
   .btn-outline {
-    @apply btn border-2 border-brand-purple-600 text-brand-purple-600 hover:bg-brand-purple-50 active:scale-95;
+    @apply btn border-2 border-brand-purple-600 text-brand-purple-600 hover:bg-brand-purple-50 active:scale-95 dark:border-brand-purple-400 dark:text-brand-purple-400 dark:hover:bg-brand-purple-950;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-gray-100 text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800;
   }
 
   .input {
-    @apply w-full px-4 py-2.5 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-purple-600 focus:border-transparent transition-all;
+    @apply w-full px-4 py-2.5 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-purple-600 focus:border-transparent transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:focus:ring-brand-purple-500;
+  }
+
+  .heading-1 {
+    @apply text-h1 text-gray-900 dark:text-gray-100;
+  }
+
+  .heading-2 {
+    @apply text-h2 text-gray-900 dark:text-gray-100;
+  }
+
+  .heading-3 {
+    @apply text-h3 text-gray-900 dark:text-gray-100;
+  }
+
+  .body-text {
+    @apply text-body text-gray-700 dark:text-gray-300;
+  }
+
+  .small-text {
+    @apply text-small text-gray-600 dark:text-gray-400;
   }
 }

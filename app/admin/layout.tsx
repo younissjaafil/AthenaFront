@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const adminNav = [
   { name: "Dashboard", href: "/admin/dashboard", icon: "📊" },
@@ -22,15 +23,18 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white flex flex-col">
+      <aside className="w-64 bg-gray-900 dark:bg-black text-white flex flex-col">
         {/* Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-gray-800">
-          <Link href="/" className="text-xl font-bold text-brand-teal-400">
-            Athena
-          </Link>
-          <span className="ml-2 text-xs font-semibold text-red-400 bg-red-900/30 px-2 py-0.5 rounded">
-            Admin
-          </span>
+        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-800 dark:border-gray-950">
+          <div className="flex items-center">
+            <Link href="/" className="text-xl font-bold text-brand-teal-400">
+              Athena
+            </Link>
+            <span className="ml-2 text-xs font-semibold text-red-400 bg-red-900/30 px-2 py-0.5 rounded">
+              Admin
+            </span>
+          </div>
+          <ThemeToggle />
         </div>
 
         {/* Navigation */}
@@ -45,7 +49,7 @@ export default function AdminLayout({
                   "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors",
                   isActive
                     ? "bg-brand-teal-500/20 text-brand-teal-400"
-                    : "text-gray-300 hover:bg-gray-800"
+                    : "text-gray-300 hover:bg-gray-800 dark:hover:bg-gray-950"
                 )}
               >
                 <span className="text-lg">{item.icon}</span>
@@ -56,7 +60,7 @@ export default function AdminLayout({
         </nav>
 
         {/* User Section */}
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-gray-800 dark:border-gray-950">
           <div className="flex items-center gap-3 px-4 py-2">
             <div className="w-8 h-8 rounded-full bg-red-900/50 flex items-center justify-center">
               <span className="text-sm font-medium text-red-400">A</span>
@@ -70,7 +74,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-gray-50">
+      <main className="flex-1 overflow-auto bg-gray-50 dark:bg-black">
         <div className="max-w-7xl mx-auto p-8">{children}</div>
       </main>
     </div>

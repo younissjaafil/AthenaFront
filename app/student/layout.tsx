@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const studentNav = [
   { name: "Dashboard", href: "/student/dashboard", icon: "📊" },
@@ -21,12 +22,16 @@ export default function StudentLayout({
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-border-light flex flex-col">
+      <aside className="w-64 bg-white dark:bg-gray-900 border-r border-border-light dark:border-gray-800 flex flex-col">
         {/* Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-border-light">
-          <Link href="/" className="text-xl font-bold text-brand-purple-600">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-border-light dark:border-gray-800">
+          <Link
+            href="/"
+            className="text-xl font-bold text-brand-purple-600 dark:text-brand-purple-400"
+          >
             Athena
           </Link>
+          <ThemeToggle />
         </div>
 
         {/* Navigation */}
@@ -40,8 +45,8 @@ export default function StudentLayout({
                 className={cn(
                   "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-brand-purple-50 text-brand-purple-700"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-brand-purple-50 text-brand-purple-700 dark:bg-brand-purple-950 dark:text-brand-purple-400"
+                    : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
                 )}
               >
                 <span className="text-lg">{item.icon}</span>
@@ -52,18 +57,18 @@ export default function StudentLayout({
         </nav>
 
         {/* User Section */}
-        <div className="p-4 border-t border-border-light">
+        <div className="p-4 border-t border-border-light dark:border-gray-800">
           <div className="flex items-center gap-3 px-4 py-2">
-            <div className="w-8 h-8 rounded-full bg-brand-purple-100 flex items-center justify-center">
-              <span className="text-sm font-medium text-brand-purple-700">
+            <div className="w-8 h-8 rounded-full bg-brand-purple-100 dark:bg-brand-purple-950 flex items-center justify-center">
+              <span className="text-sm font-medium text-brand-purple-700 dark:text-brand-purple-400">
                 S
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                 Student
               </p>
-              <p className="text-xs text-gray-500 truncate">
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                 student@athena.ai
               </p>
             </div>
@@ -72,7 +77,7 @@ export default function StudentLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto bg-background-light dark:bg-gray-950">
         <div className="max-w-7xl mx-auto p-8">{children}</div>
       </main>
     </div>

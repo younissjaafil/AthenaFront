@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Development/Athena_v1/AthenaFront/components/theme-toggle.tsx"],"sourcesContent":["\"use client\";\r\n\r\nimport { useTheme } from \"./../lib/theme-provider\";\r\n\r\nexport function ThemeToggle() {\r\n  const { theme, toggleTheme } = useTheme();\r\n\r\n  return (\r\n    <button\r\n      onClick={toggleTheme}\r\n      className=\"p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors\"\r\n      aria-label=\"Toggle theme\"\r\n    >\r\n      {theme === \"light\" ? (\r\n        <span className=\"text-xl\">🌙</span>\r\n      ) : (\r\n        <span className=\"text-xl\">☀️</span>\r\n      )}\r\n    </button>\r\n  );\r\n}\r\n"],"names":[],"mappings":";;;;;AAEA;AAFA;;;AAIO,SAAS;IACd,MAAM,EAAE,KAAK,EAAE,WAAW,EAAE,GAAG,IAAA,qIAAQ;IAEvC,qBACE,8OAAC;QACC,SAAS;QACT,WAAU;QACV,cAAW;kBAEV,UAAU,wBACT,8OAAC;YAAK,WAAU;sBAAU;;;;;iCAE1B,8OAAC;YAAK,WAAU;sBAAU;;;;;;;;;;;AAIlC","debugId":null}}]
+}
