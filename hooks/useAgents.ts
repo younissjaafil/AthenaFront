@@ -4,13 +4,58 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { createClientApiClient } from "@/lib/api-client";
 import type { Agent, CreateAgentDto, UpdateAgentDto } from "@/lib/types/agent";
+import type { PublicAgent } from "@/lib/types/conversation";
+import axios from "axios";
+
+const API_URL = process.env.NEXT_PUBLIC_ATHENA_CORE_URL;
 
 // Query keys
 export const agentKeys = {
   all: ["agents"] as const,
+  public: ["agents", "public"] as const,
+  free: ["agents", "free"] as const,
   myAgents: ["agents", "my-agents"] as const,
   detail: (id: string) => ["agents", id] as const,
+  category: (category: string) => ["agents", "category", category] as const,
 };
+
+// Fetch public agents (no auth required)
+export function usePublicAgents() {
+  return useQuery({
+    queryKey: agentKeys.public,
+    queryFn: async () => {
+      const response = await axios.get<PublicAgent[]>(`${API_URL}/api/agents`);
+      return response.data;
+    },
+  });
+}
+
+// Fetch free agents (no auth required)
+export function useFreeAgents() {
+  return useQuery({
+    queryKey: agentKeys.free,
+    queryFn: async () => {
+      const response = await axios.get<PublicAgent[]>(
+        `${API_URL}/api/agents/free`
+      );
+      return response.data;
+    },
+  });
+}
+
+// Fetch agents by category (no auth required)
+export function useAgentsByCategory(category: string) {
+  return useQuery({
+    queryKey: agentKeys.category(category),
+    queryFn: async () => {
+      const response = await axios.get<PublicAgent[]>(
+        `${API_URL}/api/agents/category/${encodeURIComponent(category)}`
+      );
+      return response.data;
+    },
+    enabled: !!category,
+  });
+}
 
 // Fetch my agents (for creators)
 export function useMyAgents() {
