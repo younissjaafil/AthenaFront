@@ -30,18 +30,18 @@ export default function StudentDashboard() {
     agents?.filter((a) => a.isFree || a.averageRating >= 4).slice(0, 4) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-full bg-slate-950">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">
             Welcome back! 👋
           </h1>
-          <p className="text-slate-400">
+          <p className="text-slate-400 text-sm sm:text-base">
             Continue learning with AI-powered conversations
           </p>
         </motion.div>
@@ -51,38 +51,42 @@ export default function StudentDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+          className="grid grid-cols-3 gap-3 sm:gap-4 mb-6"
         >
-          <div className="bg-gradient-to-br from-purple-600/10 to-purple-600/5 rounded-2xl border border-purple-500/20 p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-slate-400 text-sm">Active Chats</span>
-              <MessageSquare className="w-5 h-5 text-purple-400" />
+          <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-3 sm:p-5">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <span className="text-slate-400 text-xs sm:text-sm">
+                Active Chats
+              </span>
+              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
             </div>
-            <p className="text-3xl font-bold text-white">
+            <p className="text-xl sm:text-2xl font-bold text-white">
               {conversations?.length || 0}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-cyan-600/10 to-cyan-600/5 rounded-2xl border border-cyan-500/20 p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-slate-400 text-sm">Messages Sent</span>
-              <TrendingUp className="w-5 h-5 text-cyan-400" />
+          <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-3 sm:p-5">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <span className="text-slate-400 text-xs sm:text-sm">
+                Messages Sent
+              </span>
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
             </div>
-            <p className="text-3xl font-bold text-white">
+            <p className="text-xl sm:text-2xl font-bold text-white">
               {conversations?.reduce((acc, c) => acc + c.messageCount, 0) || 0}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-emerald-600/10 to-emerald-600/5 rounded-2xl border border-emerald-500/20 p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-slate-400 text-sm">Agents Explored</span>
-              <Bot className="w-5 h-5 text-emerald-400" />
+          <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-3 sm:p-5">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <span className="text-slate-400 text-xs sm:text-sm">Agents</span>
+              <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
             </div>
-            <p className="text-3xl font-bold text-white">
+            <p className="text-xl sm:text-2xl font-bold text-white">
               {new Set(conversations?.map((c) => c.agentId)).size || 0}
             </p>
           </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Recent Conversations */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -185,9 +189,10 @@ export default function StudentDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            className="lg:col-span-1"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-white flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-purple-400" />
                 Recommended
               </h2>
