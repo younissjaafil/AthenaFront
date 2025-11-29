@@ -4,6 +4,7 @@ export default function SignUpPage() {
   return (
     <div className="flex items-center justify-center">
       <SignUp
+        forceRedirectUrl="/onboarding/role"
         appearance={{
           elements: {
             rootBox: "mx-auto",

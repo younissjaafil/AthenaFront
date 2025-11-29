@@ -9,10 +9,23 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks(.*)",
 ]);
 
+// Onboarding route (requires auth but accessible to all authenticated users)
+const isOnboardingRoute = createRouteMatcher(["/onboarding(.*)"]);
+
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect();
+  // Allow public routes without authentication
+  if (isPublicRoute(request)) {
+    return;
   }
+
+  // Onboarding requires auth but is accessible to all authenticated users
+  if (isOnboardingRoute(request)) {
+    await auth.protect();
+    return;
+  }
+
+  // All other routes require authentication
+  await auth.protect();
 });
 
 export const config = {
