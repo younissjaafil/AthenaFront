@@ -2,14 +2,17 @@
   "/_not-found/page": "/_not-found",
   "/design-system/page": "/design-system",
   "/onboarding/role/page": "/onboarding/role",
-  "/admin/page": "/admin",
-  "/(public)/explore/page": "/explore",
   "/(auth)/sign-in/[[...sign-in]]/page": "/sign-in/[[...sign-in]]",
+  "/(public)/explore/page": "/explore",
   "/(auth)/sign-up/[[...sign-up]]/page": "/sign-up/[[...sign-up]]",
-  "/admin/dashboard/page": "/admin/dashboard",
   "/(public)/page": "/",
-  "/student/dashboard/page": "/student/dashboard",
-  "/student/page": "/student",
+  "/creator/agents/[agentId]/edit/page": "/creator/agents/[agentId]/edit",
+  "/admin/dashboard/page": "/admin/dashboard",
+  "/admin/page": "/admin",
+  "/creator/agents/new/page": "/creator/agents/new",
+  "/creator/dashboard/page": "/creator/dashboard",
   "/creator/page": "/creator",
-  "/creator/dashboard/page": "/creator/dashboard"
+  "/creator/agents/page": "/creator/agents",
+  "/student/page": "/student",
+  "/student/dashboard/page": "/student/dashboard"
 }

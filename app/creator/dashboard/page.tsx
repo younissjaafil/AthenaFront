@@ -1,103 +1,304 @@
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useMyAgents } from "@/hooks/useAgents";
+import {
+  StatsCard,
+  StaggerContainer,
+  StaggerItem,
+} from "@/components/ui/animated-card";
+import {
+  VisibilityBadge,
+  StatusBadge,
+  PricingBadge,
+} from "@/components/ui/badge";
+import type { Agent } from "@/lib/types/agent";
+
 export default function CreatorDashboard() {
+  const { data: user, isLoading: isUserLoading } = useCurrentUser();
+  const { data: agents, isLoading: isAgentsLoading, error } = useMyAgents();
+
+  const firstName = user?.firstName || "Creator";
+  const totalAgents = agents?.length || 0;
+  const activeAgents = agents?.filter((a) => a.status === "active").length || 0;
+  const totalConversations =
+    agents?.reduce((sum, a) => sum + (a.totalConversations || 0), 0) || 0;
+
+  // Show loading skeleton
+  if (isUserLoading) {
+    return <DashboardSkeleton />;
+  }
+
   return (
-    <div>
-      <div className="mb-8 flex items-center justify-between">
+    <div className="space-y-8">
+      {/* Hero Section */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+      >
         <div>
-          <h1 className="heading-1 mb-2">Creator Dashboard</h1>
-          <p className="text-gray-600">Manage your AI agents and content</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Welcome back, {firstName}! 👋
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            Here&apos;s what&apos;s happening with your agents today.
+          </p>
         </div>
-        <button className="btn-primary">+ Create New Agent</button>
-      </div>
+        <Link
+          href="/creator/agents/new"
+          className="btn-primary inline-flex items-center gap-2 self-start"
+        >
+          <span className="text-lg">+</span>
+          Create New Agent
+        </Link>
+      </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <span className="small-text text-gray-600">Total Agents</span>
-            <span className="text-2xl">🤖</span>
-          </div>
-          <p className="text-3xl font-bold text-brand-purple-600">8</p>
-          <p className="text-xs text-gray-500 mt-1">+2 this month</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <span className="small-text text-gray-600">Active Users</span>
-            <span className="text-2xl">👥</span>
-          </div>
-          <p className="text-3xl font-bold text-brand-teal-500">342</p>
-          <p className="text-xs text-gray-500 mt-1">+56 this week</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <span className="small-text text-gray-600">Total Sessions</span>
-            <span className="text-2xl">💬</span>
-          </div>
-          <p className="text-3xl font-bold text-gray-900">1,248</p>
-          <p className="text-xs text-gray-500 mt-1">+124 today</p>
-        </div>
-        <div className="card">
-          <div className="flex items-center justify-between mb-2">
-            <span className="small-text text-gray-600">Revenue</span>
-            <span className="text-2xl">💰</span>
-          </div>
-          <p className="text-3xl font-bold text-brand-purple-600">$2,450</p>
-          <p className="text-xs text-gray-500 mt-1">+$340 this month</p>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatsCard
+          title="Total Agents"
+          value={totalAgents}
+          change={totalAgents > 0 ? `${activeAgents} active` : undefined}
+          icon="🤖"
+          delay={0}
+        />
+        <StatsCard
+          title="Total Sessions"
+          value={totalConversations.toLocaleString()}
+          change="All time"
+          icon="💬"
+          delay={0.1}
+          colorClass="text-brand-teal-500 dark:text-brand-teal-400"
+        />
+        <StatsCard
+          title="Active Users"
+          value="—"
+          change="Coming soon"
+          icon="👥"
+          delay={0.2}
+          colorClass="text-gray-400"
+        />
+        <StatsCard
+          title="Revenue"
+          value="$0"
+          change="Coming soon"
+          icon="💰"
+          delay={0.3}
+          colorClass="text-gray-400"
+        />
       </div>
 
-      {/* My Agents */}
-      <div className="card mb-8">
-        <h2 className="heading-2 mb-6">My Agents</h2>
-        <div className="grid md:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="p-4 rounded-xl border border-border-light hover:border-brand-purple-300 transition-colors cursor-pointer"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-purple-400 to-brand-teal-400 flex items-center justify-center text-white text-xl">
-                  🤖
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1">
-                    Python Tutor Pro
-                  </h3>
-                  <p className="small-text text-gray-600 mb-2">
-                    Expert in Python programming and best practices
-                  </p>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span>156 users</span>
-                    <span>•</span>
-                    <span>4.8★</span>
-                    <span>•</span>
-                    <span className="text-brand-teal-600 font-medium">
-                      Active
-                    </span>
-                  </div>
-                </div>
-              </div>
+      {/* My Agents Section */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            My Agents
+          </h2>
+          <Link
+            href="/creator/agents"
+            className="text-sm text-brand-purple-600 dark:text-brand-purple-400 hover:underline"
+          >
+            View all →
+          </Link>
+        </div>
+
+        {error && (
+          <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 p-6 text-center">
+            <p className="text-red-600 dark:text-red-400">
+              Failed to load agents. Please try again.
+            </p>
+          </div>
+        )}
+
+        {isAgentsLoading && <AgentsGridSkeleton />}
+
+        {!isAgentsLoading && !error && agents?.length === 0 && <EmptyAgents />}
+
+        {!isAgentsLoading && !error && agents && agents.length > 0 && (
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {agents.slice(0, 6).map((agent) => (
+              <AgentCard key={agent.id} agent={agent} />
+            ))}
+          </StaggerContainer>
+        )}
+      </div>
+
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <QuickActionCard
+            href="/creator/agents/new"
+            icon="🤖"
+            title="Create Agent"
+            description="Build a new AI assistant"
+            delay={0}
+          />
+          <QuickActionCard
+            href="/creator/documents"
+            icon="📄"
+            title="Upload Documents"
+            description="Add knowledge to your agents"
+            delay={0.1}
+          />
+          <QuickActionCard
+            href="/creator/analytics"
+            icon="📈"
+            title="View Analytics"
+            description="Track performance metrics"
+            delay={0.2}
+          />
+          <QuickActionCard
+            href="/creator/settings"
+            icon="⚙️"
+            title="Settings"
+            description="Manage your profile"
+            delay={0.3}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Agent Card Component
+function AgentCard({ agent }: { agent: Agent }) {
+  return (
+    <StaggerItem className="group cursor-pointer">
+      <Link href={`/creator/agents/${agent.id}/edit`} className="block">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-purple-500 to-brand-teal-500 flex items-center justify-center text-white text-lg font-semibold">
+              {agent.name.charAt(0).toUpperCase()}
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="card">
-        <h2 className="heading-2 mb-6">Recent Activity</h2>
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center gap-3 py-2">
-              <div className="w-2 h-2 rounded-full bg-brand-teal-400"></div>
-              <p className="text-sm text-gray-700">
-                <span className="font-medium">Student #234</span> started a
-                session with{" "}
-                <span className="font-medium">Python Tutor Pro</span>
+            <div>
+              <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-brand-purple-600 dark:group-hover:text-brand-purple-400 transition-colors">
+                {agent.name}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {agent.category}
               </p>
-              <span className="text-xs text-gray-500 ml-auto">5m ago</span>
             </div>
-          ))}
+          </div>
         </div>
+
+        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-4">
+          {agent.tagline || agent.description}
+        </p>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <VisibilityBadge visibility={agent.visibility} />
+          <StatusBadge status={agent.status} />
+          <PricingBadge isFree={agent.isFree} price={agent.pricePerMonth} />
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+          <span>{agent.totalConversations} conversations</span>
+          <span>Updated {new Date(agent.updatedAt).toLocaleDateString()}</span>
+        </div>
+      </Link>
+    </StaggerItem>
+  );
+}
+
+// Quick Action Card
+function QuickActionCard({
+  href,
+  icon,
+  title,
+  description,
+  delay,
+}: {
+  href: string;
+  icon: string;
+  title: string;
+  description: string;
+  delay: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.4 }}
+    >
+      <Link
+        href={href}
+        className="block p-4 rounded-xl border border-border-light dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-brand-purple-300 dark:hover:border-brand-purple-700 hover:shadow-md transition-all group"
+      >
+        <span className="text-2xl mb-2 block">{icon}</span>
+        <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-brand-purple-600 dark:group-hover:text-brand-purple-400 transition-colors">
+          {title}
+        </h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          {description}
+        </p>
+      </Link>
+    </motion.div>
+  );
+}
+
+// Empty State
+function EmptyAgents() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-12 text-center"
+    >
+      <div className="text-6xl mb-4">🤖</div>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        No agents yet
+      </h3>
+      <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+        Create your first AI agent to start building your audience and earning
+        revenue.
+      </p>
+      <Link
+        href="/creator/agents/new"
+        className="btn-primary inline-flex items-center gap-2"
+      >
+        <span>+</span>
+        Create Your First Agent
+      </Link>
+    </motion.div>
+  );
+}
+
+// Loading Skeletons
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-8 animate-pulse">
+      <div>
+        <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-72 mb-2" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-96" />
       </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className="h-32 bg-gray-200 dark:bg-gray-800 rounded-xl"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AgentsGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          className="h-48 bg-gray-200 dark:bg-gray-800 rounded-xl animate-pulse"
+        />
+      ))}
     </div>
   );
 }

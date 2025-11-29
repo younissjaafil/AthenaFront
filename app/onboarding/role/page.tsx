@@ -116,9 +116,10 @@ export default function OnboardingRolePage() {
       // Redirect to student dashboard
       console.log("Redirecting to /student/dashboard");
       router.replace("/student/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error completing student onboarding:", error);
-      alert("Error: " + (error as any).message);
+      console.error("Response data:", error.response?.data);
+      alert("Error: " + (error.response?.data?.message || error.message));
       setIsProcessing(false);
     }
   };
@@ -147,9 +148,10 @@ export default function OnboardingRolePage() {
       // Redirect to creator dashboard
       console.log("Redirecting to /creator/dashboard");
       router.replace("/creator/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating creator profile:", error);
-      alert("Error: " + (error as any).message);
+      console.error("Response data:", error.response?.data);
+      alert("Error: " + (error.response?.data?.message || error.message));
       setIsProcessing(false);
     }
   };
