@@ -43,14 +43,14 @@ export function useCurrentUser() {
       const apiClient = createClientApiClient(getToken);
 
       // 1. Get user info (required)
-      const userResponse = await apiClient.get("/users/me");
+      const userResponse = await apiClient.get("/api/users/me");
       const user = userResponse.data;
 
       // 2. Check if user is a creator (404 = not a creator)
       let isCreator = false;
       let creatorId: string | undefined;
       try {
-        const creatorResponse = await apiClient.get("/creators/me");
+        const creatorResponse = await apiClient.get("/api/creators/me");
         isCreator = true;
         creatorId = creatorResponse.data.id;
       } catch (error: any) {

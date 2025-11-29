@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 /**
@@ -81,23 +82,50 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
   // Show loading state while checking permissions
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-gray-500 dark:text-gray-400">
-          Verifying permissions...
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-500 dark:text-gray-400">
+            Verifying permissions...
+          </p>
         </div>
       </div>
     );
   }
 
-  // Show nothing if user doesn't have access (they'll be redirected)
-  if (!user) return null;
+  // Show message if not signed in
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="text-center">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
+            Please sign in to access this page
+          </p>
+          <Link href="/sign-in" className="text-brand-purple-600 hover:underline">
+            Sign In
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const hasAccess =
     (allowedRoles.includes("admin") && user.isAdmin) ||
     (allowedRoles.includes("creator") && user.isCreator) ||
     (allowedRoles.includes("student") && user.isStudent);
 
-  if (!hasAccess) return null;
+  // Show access denied message briefly before redirect
+  if (!hasAccess) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="text-center">
+          <p className="text-gray-500 dark:text-gray-400">
+            Redirecting to your dashboard...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 }
