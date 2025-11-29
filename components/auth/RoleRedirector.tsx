@@ -101,7 +101,10 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
           <p className="text-gray-500 dark:text-gray-400 mb-4">
             Please sign in to access this page
           </p>
-          <Link href="/sign-in" className="text-brand-purple-600 hover:underline">
+          <Link
+            href="/sign-in"
+            className="text-brand-purple-600 hover:underline"
+          >
             Sign In
           </Link>
         </div>

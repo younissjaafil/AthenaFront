@@ -20,6 +20,14 @@
   },
   "dynamicRoutes": [
     {
+      "page": "/creator/agents/[agentId]/documents",
+      "regex": "^/creator/agents/([^/]+?)/documents(?:/)?$",
+      "routeKeys": {
+        "nxtPagentId": "nxtPagentId"
+      },
+      "namedRegex": "^/creator/agents/(?<nxtPagentId>[^/]+?)/documents(?:/)?$"
+    },
+    {
       "page": "/creator/agents/[agentId]/edit",
       "regex": "^/creator/agents/([^/]+?)/edit(?:/)?$",
       "routeKeys": {

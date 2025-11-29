@@ -282,21 +282,35 @@ function AgentGridCard({
             {agent.averageRating > 0 && (
               <span>⭐ {agent.averageRating.toFixed(1)}</span>
             )}
+            {agent.totalDocuments > 0 && (
+              <span>📄 {agent.totalDocuments} docs</span>
+            )}
           </div>
           <span>{new Date(agent.updatedAt).toLocaleDateString()}</span>
         </div>
       </Link>
 
-      {/* Delete Button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          onDelete();
-        }}
-        className="absolute top-4 right-4 p-2 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-900/50"
-      >
-        🗑️
-      </button>
+      {/* Quick Actions */}
+      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Link
+          href={`/creator/agents/${agent.id}/documents`}
+          onClick={(e) => e.stopPropagation()}
+          className="p-2 rounded-lg bg-brand-purple-50 dark:bg-brand-purple-950/30 text-brand-purple-500 hover:bg-brand-purple-100 dark:hover:bg-brand-purple-900/50"
+          title="Manage Documents"
+        >
+          📚
+        </Link>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            onDelete();
+          }}
+          className="p-2 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50"
+          title="Delete Agent"
+        >
+          🗑️
+        </button>
+      </div>
     </StaggerItem>
   );
 }

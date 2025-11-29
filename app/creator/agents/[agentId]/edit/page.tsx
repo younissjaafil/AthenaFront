@@ -626,6 +626,40 @@ export default function EditAgentPage() {
 
               {formData.ragEnabled && (
                 <>
+                  {/* Documents Link */}
+                  <Link
+                    href={`/creator/agents/${agentId}/documents`}
+                    className="flex items-center justify-between p-4 rounded-lg border border-brand-purple-200 dark:border-brand-purple-800 bg-brand-purple-50 dark:bg-brand-purple-950/30 hover:bg-brand-purple-100 dark:hover:bg-brand-purple-950/50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-brand-purple-100 dark:bg-brand-purple-900/50 flex items-center justify-center">
+                        <span className="text-xl">📚</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          Manage Documents
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {agent.totalDocuments} document
+                          {agent.totalDocuments !== 1 ? "s" : ""} uploaded
+                        </p>
+                      </div>
+                    </div>
+                    <svg
+                      className="w-5 h-5 text-gray-400 group-hover:text-brand-purple-600 transition-colors"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </Link>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Context Size (chunks)
