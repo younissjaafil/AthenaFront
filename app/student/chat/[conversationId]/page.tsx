@@ -32,22 +32,22 @@ function TypingIndicator() {
       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center">
         <Bot className="w-4 h-4 text-white" />
       </div>
-      <div className="px-4 py-3 rounded-2xl bg-slate-800 border border-slate-700">
+      <div className="px-4 py-3 rounded-2xl bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
         <div className="flex items-center gap-1">
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
-            className="w-2 h-2 rounded-full bg-purple-400"
+            className="w-2 h-2 rounded-full bg-purple-500 dark:bg-purple-400"
           />
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }}
-            className="w-2 h-2 rounded-full bg-purple-400"
+            className="w-2 h-2 rounded-full bg-purple-500 dark:bg-purple-400"
           />
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }}
-            className="w-2 h-2 rounded-full bg-purple-400"
+            className="w-2 h-2 rounded-full bg-purple-500 dark:bg-purple-400"
           />
         </div>
       </div>
@@ -100,7 +100,7 @@ function MessageBubble({
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-1.5 mb-2"
           >
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20">
               <FileText className="w-3 h-3" />
               Using {message.metadata?.ragSources?.length} document
               {(message.metadata?.ragSources?.length || 0) > 1 ? "s" : ""}
@@ -113,7 +113,7 @@ function MessageBubble({
           className={`px-4 py-3 rounded-2xl ${
             isUser
               ? "bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-tr-md"
-              : "bg-slate-800 border border-slate-700 text-slate-100 rounded-tl-md"
+              : "bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-slate-100 rounded-tl-md"
           }`}
         >
           <p className="whitespace-pre-wrap leading-relaxed">
@@ -123,7 +123,7 @@ function MessageBubble({
 
         {/* Timestamp */}
         <div
-          className={`flex items-center gap-1.5 mt-1.5 text-xs text-slate-500 ${
+          className={`flex items-center gap-1.5 mt-1.5 text-xs text-gray-500 dark:text-slate-500 ${
             isUser ? "justify-end" : "justify-start"
           }`}
         >
@@ -134,7 +134,7 @@ function MessageBubble({
               minute: "2-digit",
             })}
           </span>
-          {isUser && <CheckCheck className="w-3 h-3 text-cyan-400" />}
+          {isUser && <CheckCheck className="w-3 h-3 text-cyan-500 dark:text-cyan-400" />}
         </div>
       </div>
     </motion.div>
@@ -149,19 +149,19 @@ function WelcomeMessage({ agentName }: { agentName: string }) {
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center justify-center h-full text-center px-4"
     >
-      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600/20 to-cyan-600/20 border border-purple-500/20 flex items-center justify-center mb-6">
-        <Bot className="w-10 h-10 text-purple-400" />
+      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-100 dark:from-purple-600/20 to-cyan-100 dark:to-cyan-600/20 border border-purple-200 dark:border-purple-500/20 flex items-center justify-center mb-6">
+        <Bot className="w-10 h-10 text-purple-500 dark:text-purple-400" />
       </div>
-      <h2 className="text-2xl font-bold text-white mb-2">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
         Chat with {agentName}
       </h2>
-      <p className="text-slate-400 max-w-md mb-8">
+      <p className="text-gray-600 dark:text-slate-400 max-w-md mb-8">
         This AI is powered by specialized knowledge. Ask anything and get
         context-aware answers.
       </p>
-      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20">
-        <Sparkles className="w-4 h-4 text-purple-400" />
-        <span className="text-sm text-purple-400">RAG-Powered Responses</span>
+      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20">
+        <Sparkles className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+        <span className="text-sm text-purple-600 dark:text-purple-400">RAG-Powered Responses</span>
       </div>
     </motion.div>
   );
@@ -217,10 +217,10 @@ export default function ChatPage({
 
   if (isLoading) {
     return (
-      <div className="h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+      <div className="h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-          <p className="text-slate-400">Loading conversation...</p>
+          <Loader2 className="w-8 h-8 text-purple-500 dark:text-purple-400 animate-spin" />
+          <p className="text-gray-600 dark:text-slate-400">Loading conversation...</p>
         </div>
       </div>
     );
@@ -228,18 +228,18 @@ export default function ChatPage({
 
   if (error || !conversation) {
     return (
-      <div className="h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+      <div className="h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">
+          <AlertCircle className="w-12 h-12 text-red-500 dark:text-red-400 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
             Conversation not found
           </h2>
-          <p className="text-slate-400 mb-6">
+          <p className="text-gray-600 dark:text-slate-400 mb-6">
             This conversation doesn&apos;t exist or you don&apos;t have access.
           </p>
           <Link
             href="/student/dashboard"
-            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300"
+            className="inline-flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
@@ -253,25 +253,25 @@ export default function ChatPage({
   const messages = conversation.messages || [];
 
   return (
-    <div className="h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col">
+    <div className="h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col">
       {/* Header */}
-      <header className="flex-shrink-0 border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm">
+      <header className="flex-shrink-0 border-b border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               href="/student/dashboard"
-              className="p-2 rounded-lg hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-slate-400" />
+              <ArrowLeft className="w-5 h-5 text-gray-500 dark:text-slate-400" />
             </Link>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="font-semibold text-white">{agentName}</h1>
-                <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <h1 className="font-semibold text-gray-900 dark:text-white">{agentName}</h1>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
                   <span>Online</span>
                 </div>
               </div>
@@ -279,9 +279,9 @@ export default function ChatPage({
           </div>
 
           {/* Context indicator */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700">
-            <BookOpen className="w-4 h-4 text-purple-400" />
-            <span className="text-sm text-slate-300">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+            <BookOpen className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+            <span className="text-sm text-gray-700 dark:text-slate-300">
               Powered by {agentName}&apos;s Knowledge
             </span>
           </div>
@@ -312,9 +312,9 @@ export default function ChatPage({
       </main>
 
       {/* Input Area */}
-      <footer className="flex-shrink-0 border-t border-slate-800 bg-slate-900/80 backdrop-blur-sm">
+      <footer className="flex-shrink-0 border-t border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="relative flex items-end gap-3 bg-slate-800 rounded-2xl border border-slate-700 focus-within:border-purple-500/50 transition-colors">
+          <div className="relative flex items-end gap-3 bg-gray-100 dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 focus-within:border-purple-500/50 transition-colors">
             <textarea
               ref={inputRef}
               value={inputValue}
@@ -322,7 +322,7 @@ export default function ChatPage({
               onKeyDown={handleKeyDown}
               placeholder={`Message ${agentName}...`}
               rows={1}
-              className="flex-1 bg-transparent text-white placeholder-slate-400 px-4 py-3 resize-none focus:outline-none max-h-32 scrollbar-thin"
+              className="flex-1 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 px-4 py-3 resize-none focus:outline-none max-h-32 scrollbar-thin"
               style={{
                 height: "auto",
                 minHeight: "48px",
@@ -341,7 +341,7 @@ export default function ChatPage({
               )}
             </button>
           </div>
-          <p className="text-center text-xs text-slate-500 mt-3">
+          <p className="text-center text-xs text-gray-500 dark:text-slate-500 mt-3">
             Athena can make mistakes. Verify important information.
           </p>
         </div>
