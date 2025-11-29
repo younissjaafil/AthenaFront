@@ -1,11 +1,5 @@
 // Agent types matching backend entities
 
-export enum AgentVisibility {
-  PUBLIC = "public",
-  PRIVATE = "private",
-  UNLISTED = "unlisted",
-}
-
 export enum AgentStatus {
   DRAFT = "draft",
   ACTIVE = "active",
@@ -23,47 +17,39 @@ export interface Agent {
   id: string;
   creatorId: string;
   name: string;
-  tagline?: string;
-  description: string;
+  description?: string;
   systemPrompt: string;
-  welcomeMessage?: string;
 
   // AI Configuration
   model: AIModel;
   temperature: number;
   maxTokens: number;
-  topP: number;
-  frequencyPenalty: number;
-  presencePenalty: number;
 
   // Categorization
-  category: string;
+  category: string[];
   tags: string[];
 
   // Pricing
   pricePerMessage: number;
-  pricePerMonth: number;
+  pricePerConversation: number;
   isFree: boolean;
 
   // Visibility & Status
-  visibility: AgentVisibility;
+  isPublic: boolean;
   status: AgentStatus;
 
   // Media
-  avatarUrl?: string;
-  coverImageUrl?: string;
+  profileImageUrl?: string;
 
   // RAG Configuration
-  ragEnabled: boolean;
-  ragContextSize: number;
-  ragSimilarityThreshold: number;
+  useRag: boolean;
+  ragMaxResults: number;
+  ragMaxTokens: number;
 
   // Statistics
   totalConversations: number;
   totalMessages: number;
   averageRating: number;
-  totalReviews: number;
-  totalDocuments: number;
 
   // Timestamps
   createdAt: string;
@@ -72,28 +58,22 @@ export interface Agent {
 
 export interface CreateAgentDto {
   name: string;
-  tagline?: string;
-  description: string;
+  description?: string;
   systemPrompt: string;
-  welcomeMessage?: string;
   model?: AIModel;
   temperature?: number;
   maxTokens?: number;
-  topP?: number;
-  frequencyPenalty?: number;
-  presencePenalty?: number;
-  category: string;
+  category?: string[];
   tags?: string[];
   pricePerMessage?: number;
-  pricePerMonth?: number;
+  pricePerConversation?: number;
   isFree?: boolean;
-  visibility?: AgentVisibility;
+  isPublic?: boolean;
   status?: AgentStatus;
-  avatarUrl?: string;
-  coverImageUrl?: string;
-  ragEnabled?: boolean;
-  ragContextSize?: number;
-  ragSimilarityThreshold?: number;
+  profileImageUrl?: string;
+  useRag?: boolean;
+  ragMaxResults?: number;
+  ragMaxTokens?: number;
 }
 
 export interface UpdateAgentDto extends Partial<CreateAgentDto> {}

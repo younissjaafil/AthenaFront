@@ -47,21 +47,11 @@ export function Badge({ className, variant, size, ...props }: BadgeProps) {
 }
 
 // Preset badges for common use cases
-export function VisibilityBadge({ visibility }: { visibility: string }) {
-  const config: Record<
-    string,
-    { label: string; variant: BadgeProps["variant"] }
-  > = {
-    public: { label: "Public", variant: "success" },
-    private: { label: "Private", variant: "default" },
-    unlisted: { label: "Unlisted", variant: "warning" },
-  };
-
-  const { label, variant } = config[visibility] || {
-    label: visibility,
-    variant: "default",
-  };
-  return <Badge variant={variant}>{label}</Badge>;
+export function IsPublicBadge({ isPublic }: { isPublic: boolean }) {
+  if (isPublic) {
+    return <Badge variant="success">Public</Badge>;
+  }
+  return <Badge variant="default">Private</Badge>;
 }
 
 export function StatusBadge({ status }: { status: string }) {

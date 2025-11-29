@@ -6,16 +6,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMyAgents, useDeleteAgent } from "@/hooks/useAgents";
 import { StaggerContainer, StaggerItem } from "@/components/ui/animated-card";
 import {
-  VisibilityBadge,
+  IsPublicBadge,
   StatusBadge,
   PricingBadge,
 } from "@/components/ui/badge";
-import type { Agent, AgentStatus, AgentVisibility } from "@/lib/types/agent";
+import type { Agent, AgentStatus } from "@/lib/types/agent";
 import { AI_MODEL_DISPLAY } from "@/lib/types/agent";
 
 type ViewMode = "grid" | "table";
 type FilterStatus = AgentStatus | "all";
-type FilterVisibility = AgentVisibility | "all";
+type FilterVisibility = boolean | "all";
 
 export default function AgentsPage() {
   const { data: agents, isLoading, error, refetch } = useMyAgents();
@@ -31,7 +31,7 @@ export default function AgentsPage() {
   // Filter agents
   const filteredAgents = agents?.filter((agent) => {
     if (filterStatus !== "all" && agent.status !== filterStatus) return false;
-    if (filterVisibility !== "all" && agent.visibility !== filterVisibility)
+    if (filterVisibility !== "all" && agent.isPublic !== filterVisibility)
       return false;
     if (
       searchQuery &&
@@ -111,16 +111,18 @@ export default function AgentsPage() {
 
           {/* Visibility Filter */}
           <select
-            value={filterVisibility}
-            onChange={(e) =>
-              setFilterVisibility(e.target.value as FilterVisibility)
+            value={
+              filterVisibility === "all" ? "all" : String(filterVisibility)
             }
+            onChange={(e) => {
+              const val = e.target.value;
+              setFilterVisibility(val === "all" ? "all" : val === "true");
+            }}
             className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
           >
             <option value="all">All Visibility</option>
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-            <option value="unlisted">Unlisted</option>
+            <option value="true">Public</option>
+            <option value="false">Private</option>
           </select>
         </div>
 
@@ -252,15 +254,17 @@ function AgentGridCard({
                 {agent.name}
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {agent.category}
+                {Array.isArray(agent.category)
+                  ? agent.category.join(", ")
+                  : agent.category}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Tagline */}
+        {/* Description */}
         <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-4">
-          {agent.tagline || agent.description}
+          {agent.description}
         </p>
 
         {/* Model */}
@@ -270,9 +274,12 @@ function AgentGridCard({
 
         {/* Badges */}
         <div className="flex items-center gap-2 flex-wrap mb-4">
-          <VisibilityBadge visibility={agent.visibility} />
+          <IsPublicBadge isPublic={agent.isPublic} />
           <StatusBadge status={agent.status} />
-          <PricingBadge isFree={agent.isFree} price={agent.pricePerMonth} />
+          <PricingBadge
+            isFree={agent.isFree}
+            price={agent.pricePerConversation}
+          />
         </div>
 
         {/* Stats */}
@@ -281,9 +288,6 @@ function AgentGridCard({
             <span>{agent.totalConversations} chats</span>
             {agent.averageRating > 0 && (
               <span>⭐ {agent.averageRating.toFixed(1)}</span>
-            )}
-            {agent.totalDocuments > 0 && (
-              <span>📄 {agent.totalDocuments} docs</span>
             )}
           </div>
           <span>{new Date(agent.updatedAt).toLocaleDateString()}</span>
@@ -378,7 +382,9 @@ function AgentsTable({
                         {agent.name}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {agent.category}
+                        {Array.isArray(agent.category)
+                          ? agent.category.join(", ")
+                          : agent.category}
                       </p>
                     </div>
                   </Link>
@@ -387,12 +393,12 @@ function AgentsTable({
                   <StatusBadge status={agent.status} />
                 </td>
                 <td className="py-4 px-6">
-                  <VisibilityBadge visibility={agent.visibility} />
+                  <IsPublicBadge isPublic={agent.isPublic} />
                 </td>
                 <td className="py-4 px-6">
                   <PricingBadge
                     isFree={agent.isFree}
-                    price={agent.pricePerMonth}
+                    price={agent.pricePerConversation}
                   />
                 </td>
                 <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-300">

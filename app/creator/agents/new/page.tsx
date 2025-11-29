@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { useCreateAgent } from "@/hooks/useAgents";
 import {
   AIModel,
-  AgentVisibility,
   AgentStatus,
   AGENT_CATEGORIES,
   AI_MODEL_DISPLAY,
@@ -20,20 +19,18 @@ export default function NewAgentPage() {
 
   const [formData, setFormData] = useState<CreateAgentDto>({
     name: "",
-    tagline: "",
     description: "",
     systemPrompt: "",
-    welcomeMessage: "",
     model: AIModel.GPT_35_TURBO,
     temperature: 0.7,
     maxTokens: 2000,
-    category: AGENT_CATEGORIES[0],
+    category: [AGENT_CATEGORIES[0]],
     tags: [],
     isFree: true,
-    pricePerMonth: 0,
-    visibility: AgentVisibility.PRIVATE,
+    pricePerConversation: 0,
+    isPublic: false,
     status: AgentStatus.DRAFT,
-    ragEnabled: false,
+    useRag: true,
   });
 
   const [tagInput, setTagInput] = useState("");
@@ -86,10 +83,10 @@ export default function NewAgentPage() {
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.description.trim())
+    if (!formData.name?.trim()) newErrors.name = "Name is required";
+    if (!formData.description?.trim())
       newErrors.description = "Description is required";
-    if (!formData.systemPrompt.trim())
+    if (!formData.systemPrompt?.trim())
       newErrors.systemPrompt = "System prompt is required";
     if (!formData.category) newErrors.category = "Category is required";
 
@@ -212,21 +209,6 @@ export default function NewAgentPage() {
                 )}
               </div>
 
-              {/* Tagline */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Tagline
-                </label>
-                <input
-                  type="text"
-                  name="tagline"
-                  value={formData.tagline}
-                  onChange={handleChange}
-                  placeholder="A short, catchy description"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
-                />
-              </div>
-
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -345,21 +327,6 @@ export default function NewAgentPage() {
                 )}
               </div>
 
-              {/* Welcome Message */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Welcome Message
-                </label>
-                <textarea
-                  name="welcomeMessage"
-                  value={formData.welcomeMessage}
-                  onChange={handleChange}
-                  rows={3}
-                  placeholder="Hello! I'm your Python tutor. What would you like to learn today?"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500 resize-none"
-                />
-              </div>
-
               {/* Model Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -454,10 +421,10 @@ export default function NewAgentPage() {
                     </span>
                     <input
                       type="number"
-                      name="pricePerMonth"
+                      name="pricePerConversation"
                       min="0"
                       step="0.01"
-                      value={formData.pricePerMonth}
+                      value={formData.pricePerConversation}
                       onChange={handleChange}
                       className="w-full pl-8 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
                     />
@@ -470,38 +437,32 @@ export default function NewAgentPage() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Visibility
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {[
                     {
-                      value: AgentVisibility.PRIVATE,
+                      value: false,
                       label: "Private",
                       icon: "🔒",
                       desc: "Only you",
                     },
                     {
-                      value: AgentVisibility.UNLISTED,
-                      label: "Unlisted",
-                      icon: "🔗",
-                      desc: "Link only",
-                    },
-                    {
-                      value: AgentVisibility.PUBLIC,
+                      value: true,
                       label: "Public",
                       icon: "🌍",
                       desc: "Everyone",
                     },
                   ].map((option) => (
                     <button
-                      key={option.value}
+                      key={String(option.value)}
                       type="button"
                       onClick={() =>
                         setFormData((prev) => ({
                           ...prev,
-                          visibility: option.value,
+                          isPublic: option.value,
                         }))
                       }
                       className={`p-4 rounded-lg border text-center transition-all ${
-                        formData.visibility === option.value
+                        formData.isPublic === option.value
                           ? "border-brand-purple-500 bg-brand-purple-50 dark:bg-brand-purple-900/20"
                           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                       }`}
@@ -559,8 +520,8 @@ export default function NewAgentPage() {
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    name="ragEnabled"
-                    checked={formData.ragEnabled}
+                    name="useRag"
+                    checked={formData.useRag}
                     onChange={handleChange}
                     className="sr-only peer"
                   />
@@ -568,39 +529,38 @@ export default function NewAgentPage() {
                 </label>
               </div>
 
-              {formData.ragEnabled && (
+              {formData.useRag && (
                 <>
-                  {/* RAG Context Size */}
+                  {/* RAG Max Results */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Context Size (chunks)
+                      Max Results (chunks)
                     </label>
                     <input
                       type="number"
-                      name="ragContextSize"
+                      name="ragMaxResults"
                       min="1"
                       max="20"
-                      value={formData.ragContextSize || 5}
+                      value={formData.ragMaxResults || 5}
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
                     />
                   </div>
 
-                  {/* RAG Similarity Threshold */}
+                  {/* RAG Max Tokens */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Similarity Threshold:{" "}
-                      {formData.ragSimilarityThreshold || 0.7}
+                      Max Tokens for Context
                     </label>
                     <input
-                      type="range"
-                      name="ragSimilarityThreshold"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value={formData.ragSimilarityThreshold || 0.7}
+                      type="number"
+                      name="ragMaxTokens"
+                      min="500"
+                      max="8000"
+                      step="100"
+                      value={formData.ragMaxTokens || 3000}
                       onChange={handleChange}
-                      className="w-full"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
                     />
                   </div>
                 </>

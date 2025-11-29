@@ -10,7 +10,7 @@ import {
   StaggerItem,
 } from "@/components/ui/animated-card";
 import {
-  VisibilityBadge,
+  IsPublicBadge,
   StatusBadge,
   PricingBadge,
 } from "@/components/ui/badge";
@@ -183,13 +183,16 @@ function AgentCard({ agent }: { agent: Agent }) {
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-4">
-          {agent.tagline || agent.description}
+          {agent.description}
         </p>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <VisibilityBadge visibility={agent.visibility} />
+          <IsPublicBadge isPublic={agent.isPublic} />
           <StatusBadge status={agent.status} />
-          <PricingBadge isFree={agent.isFree} price={agent.pricePerMonth} />
+          <PricingBadge
+            isFree={agent.isFree}
+            price={agent.pricePerConversation}
+          />
         </div>
 
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">

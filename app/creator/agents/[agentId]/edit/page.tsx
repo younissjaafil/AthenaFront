@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { useAgent, useUpdateAgent, useDeleteAgent } from "@/hooks/useAgents";
 import {
   AIModel,
-  AgentVisibility,
   AgentStatus,
   AGENT_CATEGORIES,
   AI_MODEL_DISPLAY,
@@ -37,22 +36,20 @@ export default function EditAgentPage() {
     if (agent) {
       setFormData({
         name: agent.name,
-        tagline: agent.tagline || "",
-        description: agent.description,
+        description: agent.description || "",
         systemPrompt: agent.systemPrompt,
-        welcomeMessage: agent.welcomeMessage || "",
         model: agent.model,
         temperature: agent.temperature,
         maxTokens: agent.maxTokens,
         category: agent.category,
         tags: agent.tags || [],
         isFree: agent.isFree,
-        pricePerMonth: agent.pricePerMonth,
-        visibility: agent.visibility,
+        pricePerConversation: agent.pricePerConversation,
+        isPublic: agent.isPublic,
         status: agent.status,
-        ragEnabled: agent.ragEnabled,
-        ragContextSize: agent.ragContextSize,
-        ragSimilarityThreshold: agent.ragSimilarityThreshold,
+        useRag: agent.useRag,
+        ragMaxResults: agent.ragMaxResults,
+        ragMaxTokens: agent.ragMaxTokens,
       });
     }
   }, [agent]);
@@ -293,19 +290,6 @@ export default function EditAgentPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Tagline
-                </label>
-                <input
-                  type="text"
-                  name="tagline"
-                  value={formData.tagline || ""}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -415,19 +399,6 @@ export default function EditAgentPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Welcome Message
-                </label>
-                <textarea
-                  name="welcomeMessage"
-                  value={formData.welcomeMessage || ""}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500 resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   AI Model
                 </label>
                 <select
@@ -512,10 +483,10 @@ export default function EditAgentPage() {
                     </span>
                     <input
                       type="number"
-                      name="pricePerMonth"
+                      name="pricePerConversation"
                       min="0"
                       step="0.01"
-                      value={formData.pricePerMonth || 0}
+                      value={formData.pricePerConversation || 0}
                       onChange={handleChange}
                       className="w-full pl-8 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
                     />
@@ -527,39 +498,33 @@ export default function EditAgentPage() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Visibility
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {[
                     {
-                      value: AgentVisibility.PRIVATE,
+                      value: false,
                       label: "Private",
                       icon: "🔒",
                       desc: "Only you",
                     },
                     {
-                      value: AgentVisibility.UNLISTED,
-                      label: "Unlisted",
-                      icon: "🔗",
-                      desc: "Link only",
-                    },
-                    {
-                      value: AgentVisibility.PUBLIC,
+                      value: true,
                       label: "Public",
                       icon: "🌍",
                       desc: "Everyone",
                     },
                   ].map((option) => (
                     <button
-                      key={option.value}
+                      key={String(option.value)}
                       type="button"
                       onClick={() => {
                         setFormData((prev) => ({
                           ...prev,
-                          visibility: option.value,
+                          isPublic: option.value,
                         }));
                         setHasChanges(true);
                       }}
                       className={`p-4 rounded-lg border text-center transition-all ${
-                        formData.visibility === option.value
+                        formData.isPublic === option.value
                           ? "border-brand-purple-500 bg-brand-purple-50 dark:bg-brand-purple-900/20"
                           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                       }`}
@@ -615,8 +580,8 @@ export default function EditAgentPage() {
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    name="ragEnabled"
-                    checked={formData.ragEnabled || false}
+                    name="useRag"
+                    checked={formData.useRag || false}
                     onChange={handleChange}
                     className="sr-only peer"
                   />
@@ -624,7 +589,7 @@ export default function EditAgentPage() {
                 </label>
               </div>
 
-              {formData.ragEnabled && (
+              {formData.useRag && (
                 <>
                   {/* Documents Link */}
                   <Link
@@ -640,8 +605,7 @@ export default function EditAgentPage() {
                           Manage Documents
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {agent.totalDocuments} document
-                          {agent.totalDocuments !== 1 ? "s" : ""} uploaded
+                          View and manage uploaded documents
                         </p>
                       </div>
                     </div>
@@ -662,14 +626,14 @@ export default function EditAgentPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Context Size (chunks)
+                      Max Results (chunks)
                     </label>
                     <input
                       type="number"
-                      name="ragContextSize"
+                      name="ragMaxResults"
                       min="1"
                       max="20"
-                      value={formData.ragContextSize || 5}
+                      value={formData.ragMaxResults || 5}
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
                     />
@@ -677,18 +641,17 @@ export default function EditAgentPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Similarity Threshold:{" "}
-                      {formData.ragSimilarityThreshold || 0.7}
+                      Max Tokens for Context
                     </label>
                     <input
-                      type="range"
-                      name="ragSimilarityThreshold"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value={formData.ragSimilarityThreshold || 0.7}
+                      type="number"
+                      name="ragMaxTokens"
+                      min="500"
+                      max="8000"
+                      step="100"
+                      value={formData.ragMaxTokens || 3000}
                       onChange={handleChange}
-                      className="w-full"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
                     />
                   </div>
                 </>
@@ -719,12 +682,6 @@ export default function EditAgentPage() {
                         : "—"}
                     </p>
                     <p className="text-sm text-gray-500">Rating</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
-                      {agent.totalDocuments}
-                    </p>
-                    <p className="text-sm text-gray-500">Documents</p>
                   </div>
                 </div>
               </div>
