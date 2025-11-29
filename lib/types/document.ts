@@ -1,9 +1,9 @@
 // Document types matching backend entities
 
 export enum DocumentStatus {
-  UPLOADING = "uploading",
+  UPLOADED = "uploaded",
   PROCESSING = "processing",
-  COMPLETED = "completed",
+  PROCESSED = "processed",
   FAILED = "failed",
 }
 
@@ -29,27 +29,16 @@ export interface DocumentMetadata {
 export interface Document {
   id: string;
   agentId: string;
-  userId: string;
   filename: string;
-  originalName: string;
-  type: DocumentType;
-  mimeType: string;
+  originalFilename: string;
+  fileType: string;
   fileSize: number; // in bytes
-  s3Key: string;
-  s3Bucket: string;
   s3Url?: string;
-  status: DocumentStatus;
+  status: string;
   chunkCount: number;
   embeddingCount: number;
-  extractedText?: string;
-  characterCount?: number;
-  wordCount?: number;
-  pageCount?: number;
   errorMessage?: string;
-  retryCount: number;
   metadata?: DocumentMetadata;
-  processingStartedAt?: string;
-  processingCompletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -97,13 +86,13 @@ export const FILE_TYPE_ICONS: Record<string, string> = {
   json: "🔧",
 };
 
-export function getStatusColor(status: DocumentStatus): string {
+export function getStatusColor(status: string): string {
   switch (status) {
-    case DocumentStatus.COMPLETED:
+    case DocumentStatus.PROCESSED:
       return "success";
     case DocumentStatus.PROCESSING:
       return "info";
-    case DocumentStatus.UPLOADING:
+    case DocumentStatus.UPLOADED:
       return "warning";
     case DocumentStatus.FAILED:
       return "danger";

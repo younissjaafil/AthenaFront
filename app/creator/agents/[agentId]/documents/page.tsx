@@ -55,18 +55,18 @@ export default function AgentDocumentsPage() {
 
   // When recent doc finishes processing, stop polling and show toast
   useEffect(() => {
-    if (recentDoc?.status === DocumentStatus.COMPLETED) {
+    if (recentDoc?.status === DocumentStatus.PROCESSED) {
       setRecentUploadId(null);
       refetchDocuments();
       setToast({
-        message: `"${recentDoc.originalName}" processed successfully! ${recentDoc.chunkCount} chunks created.`,
+        message: `"${recentDoc.originalFilename}" processed successfully! ${recentDoc.chunkCount} chunks created.`,
         type: "success",
       });
     } else if (recentDoc?.status === DocumentStatus.FAILED) {
       setRecentUploadId(null);
       refetchDocuments();
       setToast({
-        message: `Failed to process "${recentDoc.originalName}": ${
+        message: `Failed to process "${recentDoc.originalFilename}": ${
           recentDoc.errorMessage || "Unknown error"
         }`,
         type: "error",
@@ -74,7 +74,7 @@ export default function AgentDocumentsPage() {
     }
   }, [
     recentDoc?.status,
-    recentDoc?.originalName,
+    recentDoc?.originalFilename,
     recentDoc?.chunkCount,
     recentDoc?.errorMessage,
     refetchDocuments,

@@ -22,12 +22,12 @@ export function DocumentCard({
   isDeleting,
 }: DocumentCardProps) {
   const statusConfig: Record<
-    DocumentStatus,
+    string,
     { label: string; variant: "success" | "info" | "warning" | "danger" }
   > = {
-    [DocumentStatus.COMPLETED]: { label: "Processed", variant: "success" },
+    [DocumentStatus.PROCESSED]: { label: "Processed", variant: "success" },
     [DocumentStatus.PROCESSING]: { label: "Processing", variant: "info" },
-    [DocumentStatus.UPLOADING]: { label: "Uploading", variant: "warning" },
+    [DocumentStatus.UPLOADED]: { label: "Uploaded", variant: "warning" },
     [DocumentStatus.FAILED]: { label: "Failed", variant: "danger" },
   };
 
@@ -36,7 +36,7 @@ export function DocumentCard({
     variant: "default" as const,
   };
 
-  const icon = FILE_TYPE_ICONS[document.type] || "📄";
+  const icon = FILE_TYPE_ICONS[document.fileType] || "📄";
 
   return (
     <motion.div
@@ -73,7 +73,7 @@ export function DocumentCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-medium text-gray-900 dark:text-white truncate">
-              {document.originalName}
+              {document.originalFilename}
             </h3>
             <Badge variant={variant} size="sm">
               {label}
@@ -82,16 +82,10 @@ export function DocumentCard({
 
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
             <span>{formatFileSize(document.fileSize)}</span>
-            {document.status === DocumentStatus.COMPLETED && (
+            {document.status === DocumentStatus.PROCESSED && (
               <>
                 <span>•</span>
                 <span>{document.chunkCount} chunks</span>
-                {document.pageCount && (
-                  <>
-                    <span>•</span>
-                    <span>{document.pageCount} pages</span>
-                  </>
-                )}
               </>
             )}
             {document.status === DocumentStatus.FAILED &&
@@ -159,15 +153,9 @@ export function DocumentCard({
         )}
       </div>
 
-      {/* Word/Character Count */}
-      {document.status === DocumentStatus.COMPLETED && (
+      {/* Embedding Count */}
+      {document.status === DocumentStatus.PROCESSED && (
         <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
-          {document.wordCount && (
-            <span>{document.wordCount.toLocaleString()} words</span>
-          )}
-          {document.characterCount && (
-            <span>{document.characterCount.toLocaleString()} chars</span>
-          )}
           {document.embeddingCount > 0 && (
             <span className="text-brand-purple-500">
               {document.embeddingCount} embeddings
