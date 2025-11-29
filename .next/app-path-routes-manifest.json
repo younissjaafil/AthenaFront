@@ -1,11 +1,15 @@
 {
   "/_not-found/page": "/_not-found",
   "/design-system/page": "/design-system",
-  "/(public)/page": "/",
-  "/(auth)/sign-up/[[...sign-up]]/page": "/sign-up/[[...sign-up]]",
-  "/creator/dashboard/page": "/creator/dashboard",
-  "/student/dashboard/page": "/student/dashboard",
-  "/admin/dashboard/page": "/admin/dashboard",
+  "/onboarding/role/page": "/onboarding/role",
+  "/admin/page": "/admin",
   "/(public)/explore/page": "/explore",
-  "/(auth)/sign-in/[[...sign-in]]/page": "/sign-in/[[...sign-in]]"
+  "/(auth)/sign-in/[[...sign-in]]/page": "/sign-in/[[...sign-in]]",
+  "/(auth)/sign-up/[[...sign-up]]/page": "/sign-up/[[...sign-up]]",
+  "/admin/dashboard/page": "/admin/dashboard",
+  "/(public)/page": "/",
+  "/student/dashboard/page": "/student/dashboard",
+  "/student/page": "/student",
+  "/creator/page": "/creator",
+  "/creator/dashboard/page": "/creator/dashboard"
 }
