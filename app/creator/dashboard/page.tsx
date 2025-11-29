@@ -18,7 +18,7 @@ import type { Agent } from "@/lib/types/agent";
 
 export default function CreatorDashboard() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
-  const { data: agents, isLoading: isAgentsLoading, error } = useMyAgents();
+  const { data: agents, isLoading: isAgentsLoading } = useMyAgents();
 
   const firstName = user?.firstName || "Creator";
   const totalAgents = agents?.length || 0;
@@ -106,19 +106,13 @@ export default function CreatorDashboard() {
           </Link>
         </div>
 
-        {error && (
-          <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 p-6 text-center">
-            <p className="text-red-600 dark:text-red-400">
-              Failed to load agents. Please try again.
-            </p>
-          </div>
-        )}
-
         {isAgentsLoading && <AgentsGridSkeleton />}
 
-        {!isAgentsLoading && !error && agents?.length === 0 && <EmptyAgents />}
+        {!isAgentsLoading && (!agents || agents.length === 0) && (
+          <EmptyAgents />
+        )}
 
-        {!isAgentsLoading && !error && agents && agents.length > 0 && (
+        {!isAgentsLoading && agents && agents.length > 0 && (
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {agents.slice(0, 6).map((agent) => (
               <AgentCard key={agent.id} agent={agent} />

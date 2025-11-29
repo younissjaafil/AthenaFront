@@ -4,16 +4,16 @@
   "/onboarding/role/page": "/onboarding/role",
   "/admin/dashboard/page": "/admin/dashboard",
   "/(auth)/sign-up/[[...sign-up]]/page": "/sign-up/[[...sign-up]]",
-  "/(auth)/sign-in/[[...sign-in]]/page": "/sign-in/[[...sign-in]]",
   "/(public)/page": "/",
+  "/(auth)/sign-in/[[...sign-in]]/page": "/sign-in/[[...sign-in]]",
   "/(public)/explore/page": "/explore",
   "/admin/page": "/admin",
-  "/creator/agents/[agentId]/edit/page": "/creator/agents/[agentId]/edit",
-  "/creator/agents/new/page": "/creator/agents/new",
   "/creator/agents/[agentId]/documents/page": "/creator/agents/[agentId]/documents",
+  "/creator/agents/[agentId]/edit/page": "/creator/agents/[agentId]/edit",
+  "/creator/agents/page": "/creator/agents",
+  "/creator/agents/new/page": "/creator/agents/new",
   "/creator/dashboard/page": "/creator/dashboard",
   "/creator/page": "/creator",
-  "/creator/agents/page": "/creator/agents",
-  "/student/dashboard/page": "/student/dashboard",
-  "/student/page": "/student"
+  "/student/page": "/student",
+  "/student/dashboard/page": "/student/dashboard"
 }
