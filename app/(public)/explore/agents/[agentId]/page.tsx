@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { use } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth, useUser } from "@clerk/nextjs";
@@ -24,25 +24,26 @@ import Link from "next/link";
 export default function AgentDetailPage({
   params,
 }: {
-  params: { agentId: string };
+  params: Promise<{ agentId: string }>;
 }) {
+  const { agentId } = use(params);
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const { data: agents, isLoading } = usePublicAgents();
   const findOrCreateConversation = useFindOrCreateConversation();
 
-  const agent = agents?.find((a) => a.id === params.agentId);
+  const agent = agents?.find((a) => a.id === agentId);
 
   const handleStartChat = async () => {
     if (!isSignedIn) {
-      router.push(`/sign-in?redirect_url=/explore/agents/${params.agentId}`);
+      router.push(`/sign-in?redirect_url=/explore/agents/${agentId}`);
       return;
     }
 
     try {
       const conversation = await findOrCreateConversation.mutateAsync({
-        agentId: params.agentId,
+        agentId: agentId,
       });
       router.push(`/student/chat/${conversation.id}`);
     } catch (error) {

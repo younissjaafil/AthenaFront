@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useConversation, useSendMessage } from "@/hooks/useConversations";
@@ -170,8 +170,9 @@ function WelcomeMessage({ agentName }: { agentName: string }) {
 export default function ChatPage({
   params,
 }: {
-  params: { conversationId: string };
+  params: Promise<{ conversationId: string }>;
 }) {
+  const { conversationId } = use(params);
   const router = useRouter();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -181,8 +182,8 @@ export default function ChatPage({
     data: conversation,
     isLoading,
     error,
-  } = useConversation(params.conversationId);
-  const sendMessage = useSendMessage(params.conversationId);
+  } = useConversation(conversationId);
+  const sendMessage = useSendMessage(conversationId);
 
   // Auto-scroll to bottom
   useEffect(() => {

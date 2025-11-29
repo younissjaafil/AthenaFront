@@ -36,6 +36,14 @@
       "namedRegex": "^/creator/agents/(?<nxtPagentId>[^/]+?)/edit(?:/)?$"
     },
     {
+      "page": "/explore/agents/[agentId]",
+      "regex": "^/explore/agents/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPagentId": "nxtPagentId"
+      },
+      "namedRegex": "^/explore/agents/(?<nxtPagentId>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/sign-in/[[...sign-in]]",
       "regex": "^/sign\\-in(?:/(.+?))?(?:/)?$",
       "routeKeys": {
@@ -50,6 +58,14 @@
         "nxtPsignup": "nxtPsign-up"
       },
       "namedRegex": "^/sign\\-up(?:/(?<nxtPsignup>.+?))?(?:/)?$"
+    },
+    {
+      "page": "/student/chat/[conversationId]",
+      "regex": "^/student/chat/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPconversationId": "nxtPconversationId"
+      },
+      "namedRegex": "^/student/chat/(?<nxtPconversationId>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -112,6 +128,12 @@
       "regex": "^/explore(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/explore(?:/)?$"
+    },
+    {
+      "page": "/explore/agents",
+      "regex": "^/explore/agents(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/explore/agents(?:/)?$"
     },
     {
       "page": "/onboarding/role",
