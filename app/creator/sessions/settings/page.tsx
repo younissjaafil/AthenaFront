@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AnimatedCard } from "@/components/ui/animated-card";
-import { AvailabilityEditor, DateOverrideEditor } from "@/components/sessions";
+import { DateOverrideEditor } from "@/components/sessions";
 import {
-  useMyAvailability,
-  useSetAvailability,
   useMySessionSettings,
   useUpdateSessionSettings,
   useMyDateOverrides,
@@ -18,19 +16,17 @@ import {
   Loader2,
   Clock,
   DollarSign,
-  Calendar,
   Settings,
   Check,
   CalendarDays,
 } from "lucide-react";
 import Link from "next/link";
-import type { TimeSlot, DateOverride } from "@/lib/types/session";
+import type { DateOverride } from "@/lib/types/session";
 
 export default function SessionSettingsPage() {
-  // Availability state
-  const [slots, setSlots] = useState<TimeSlot[]>([]);
+  // Date overrides state
   const [dateOverrides, setDateOverrides] = useState<DateOverride[]>([]);
-  const [hasAvailabilityChanges, setHasAvailabilityChanges] = useState(false);
+  const [hasDateChanges, setHasDateChanges] = useState(false);
 
   // Settings state
   const [sessionDurations, setSessionDurations] = useState<number[]>([30, 60]);
@@ -46,29 +42,13 @@ export default function SessionSettingsPage() {
   const [hasSettingsChanges, setHasSettingsChanges] = useState(false);
 
   // Queries
-  const { data: availability, isLoading: loadingAvailability } =
-    useMyAvailability();
   const { data: settings, isLoading: loadingSettings } = useMySessionSettings();
-  const { data: savedOverrides } = useMyDateOverrides();
+  const { data: savedOverrides, isLoading: loadingOverrides } =
+    useMyDateOverrides();
 
   // Mutations
-  const setAvailability = useSetAvailability();
   const updateSettings = useUpdateSessionSettings();
   const setOverrides = useSetDateOverrides();
-
-  // Initialize from fetched data
-  useEffect(() => {
-    if (availability) {
-      setSlots(
-        availability.map((a) => ({
-          dayOfWeek: a.dayOfWeek,
-          startTime: a.startTime,
-          endTime: a.endTime,
-          isActive: a.isActive,
-        }))
-      );
-    }
-  }, [availability]);
 
   useEffect(() => {
     if (settings) {
@@ -97,24 +77,12 @@ export default function SessionSettingsPage() {
     }
   }, [savedOverrides]);
 
-  const handleSlotsChange = (newSlots: TimeSlot[]) => {
-    setSlots(newSlots);
-    setHasAvailabilityChanges(true);
-  };
-
-  const handleSaveAvailability = async () => {
+  const handleSaveDates = async () => {
     try {
-      // Save weekly availability
-      await setAvailability.mutateAsync({ slots });
-
-      // Save date overrides
-      if (dateOverrides.length > 0) {
-        await setOverrides.mutateAsync(dateOverrides);
-      }
-
-      setHasAvailabilityChanges(false);
+      await setOverrides.mutateAsync(dateOverrides);
+      setHasDateChanges(false);
     } catch (error) {
-      console.error("Failed to save availability:", error);
+      console.error("Failed to save dates:", error);
     }
   };
 
@@ -161,7 +129,7 @@ export default function SessionSettingsPage() {
     setHasSettingsChanges(true);
   };
 
-  const isLoading = loadingAvailability || loadingSettings;
+  const isLoading = loadingSettings || loadingOverrides;
 
   return (
     <div className="p-4 md:p-6 lg:p-8 pt-16 lg:pt-8 max-w-4xl mx-auto">
@@ -180,7 +148,7 @@ export default function SessionSettingsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2"
         >
-          Availability & Settings
+          Session Settings
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
@@ -188,7 +156,7 @@ export default function SessionSettingsPage() {
           transition={{ delay: 0.1 }}
           className="text-gray-600 dark:text-gray-400"
         >
-          Configure your availability and session preferences
+          Configure your availability, pricing, and booking preferences
         </motion.p>
       </div>
 
@@ -198,58 +166,44 @@ export default function SessionSettingsPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {/* Availability Section */}
+          {/* Available Dates Calendar */}
           <section>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-purple-500" />
+                <CalendarDays className="w-5 h-5 text-purple-500" />
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Weekly Availability
+                  Available Dates
                 </h2>
               </div>
-              {hasAvailabilityChanges && (
+              {hasDateChanges && (
                 <button
-                  onClick={handleSaveAvailability}
-                  disabled={setAvailability.isPending}
+                  onClick={handleSaveDates}
+                  disabled={setOverrides.isPending}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
                 >
-                  {setAvailability.isPending ? (
+                  {setOverrides.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Save className="w-4 h-4" />
                   )}
-                  Save Availability
+                  Save Dates
                 </button>
               )}
             </div>
-
-            <AvailabilityEditor
-              slots={slots}
-              onChange={handleSlotsChange}
-              isLoading={setAvailability.isPending}
-            />
-
-            {/* Date-Specific Overrides */}
-            <div className="mt-6">
-              <div className="flex items-center gap-2 mb-4">
-                <CalendarDays className="w-5 h-5 text-purple-500" />
-                <h3 className="text-md font-semibold text-gray-900 dark:text-white">
-                  Special Dates
-                </h3>
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Add one-time availability or block specific dates (e.g.,
-                &quot;Available Friday Dec 5th 3pm-6pm only&quot;)
-              </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Click on dates in the calendar to add your available times. Each
+              date can have different hours.
+            </p>
+            <AnimatedCard className="p-4">
               <DateOverrideEditor
                 overrides={dateOverrides}
                 onChange={(newOverrides) => {
                   setDateOverrides(newOverrides);
-                  setHasAvailabilityChanges(true);
+                  setHasDateChanges(true);
                 }}
-                isLoading={setAvailability.isPending}
+                isLoading={setOverrides.isPending}
               />
-            </div>
+            </AnimatedCard>
           </section>
 
           {/* Session Settings Section */}
@@ -347,7 +301,7 @@ export default function SessionSettingsPage() {
                 </p>
               </AnimatedCard>
 
-              {/* Other Settings */}
+              {/* Booking Rules */}
               <AnimatedCard className="p-4">
                 <h3 className="font-medium text-gray-900 dark:text-white mb-4">
                   Booking Rules
@@ -371,7 +325,9 @@ export default function SessionSettingsPage() {
                       <option value="Europe/London">London (GMT+0)</option>
                       <option value="Europe/Paris">Paris (GMT+1)</option>
                       <option value="America/New_York">New York (GMT-5)</option>
-                      <option value="America/Los_Angeles">Los Angeles (GMT-8)</option>
+                      <option value="America/Los_Angeles">
+                        Los Angeles (GMT-8)
+                      </option>
                       <option value="Asia/Dubai">Dubai (GMT+4)</option>
                       <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
                       <option value="Australia/Sydney">Sydney (GMT+11)</option>
