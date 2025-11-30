@@ -16,6 +16,7 @@ import type {
 } from "@/lib/types/session";
 
 const API_URL = process.env.NEXT_PUBLIC_ATHENA_CORE_URL;
+const API_BASE = `${API_URL}/api`;
 
 // Query keys
 export const sessionKeys = {
@@ -49,7 +50,7 @@ export function useMySessions() {
   return useQuery({
     queryKey: sessionKeys.mySessions,
     queryFn: async () => {
-      const response = await apiClient.get<Session[]>("/sessions/me");
+      const response = await apiClient.get<Session[]>("/api/sessions/me");
       return response.data;
     },
   });
@@ -63,7 +64,7 @@ export function useUpcomingSessions() {
   return useQuery({
     queryKey: sessionKeys.upcoming,
     queryFn: async () => {
-      const response = await apiClient.get<Session[]>("/sessions/upcoming");
+      const response = await apiClient.get<Session[]>("/api/sessions/upcoming");
       return response.data;
     },
   });
@@ -78,7 +79,7 @@ export function useCreatorSessions(creatorId: string) {
     queryKey: sessionKeys.creatorSessions(creatorId),
     queryFn: async () => {
       const response = await apiClient.get<Session[]>(
-        `/sessions/creator/${creatorId}`
+        `/api/sessions/creator/${creatorId}`
       );
       return response.data;
     },
@@ -94,7 +95,9 @@ export function useSession(sessionId: string) {
   return useQuery({
     queryKey: sessionKeys.detail(sessionId),
     queryFn: async () => {
-      const response = await apiClient.get<Session>(`/sessions/${sessionId}`);
+      const response = await apiClient.get<Session>(
+        `/api/sessions/${sessionId}`
+      );
       return response.data;
     },
     enabled: !!sessionId,
@@ -109,7 +112,10 @@ export function useBookSession() {
 
   return useMutation({
     mutationFn: async (data: BookSessionDto) => {
-      const response = await apiClient.post<Session>("/sessions/book", data);
+      const response = await apiClient.post<Session>(
+        "/api/sessions/book",
+        data
+      );
       return response.data;
     },
     onSuccess: () => {
@@ -128,7 +134,7 @@ export function useUpdateSessionStatus(sessionId: string) {
   return useMutation({
     mutationFn: async (data: UpdateSessionStatusDto) => {
       const response = await apiClient.patch<Session>(
-        `/sessions/${sessionId}/status`,
+        `/api/sessions/${sessionId}/status`,
         data
       );
       return response.data;
@@ -152,7 +158,7 @@ export function useConfirmSession(sessionId: string) {
   return useMutation({
     mutationFn: async () => {
       const response = await apiClient.patch<Session>(
-        `/sessions/${sessionId}/status`,
+        `/api/sessions/${sessionId}/status`,
         { status: "confirmed" }
       );
       return response.data;
@@ -175,7 +181,7 @@ export function useStartSession(sessionId: string) {
   return useMutation({
     mutationFn: async () => {
       const response = await apiClient.patch<Session>(
-        `/sessions/${sessionId}/start`
+        `/api/sessions/${sessionId}/start`
       );
       return response.data;
     },
@@ -196,7 +202,7 @@ export function useCompleteSession(sessionId: string) {
   return useMutation({
     mutationFn: async () => {
       const response = await apiClient.patch<Session>(
-        `/sessions/${sessionId}/complete`
+        `/api/sessions/${sessionId}/complete`
       );
       return response.data;
     },
@@ -218,7 +224,7 @@ export function useCancelSession(sessionId: string) {
   return useMutation({
     mutationFn: async (reason?: string) => {
       const response = await apiClient.patch<Session>(
-        `/sessions/${sessionId}/cancel`,
+        `/api/sessions/${sessionId}/cancel`,
         null,
         { params: { reason } }
       );
@@ -245,7 +251,7 @@ export function useMyAvailability() {
     queryKey: sessionKeys.myAvailability,
     queryFn: async () => {
       const response = await apiClient.get<AvailabilitySlot[]>(
-        "/availability/me"
+        "/api/availability/me"
       );
       return response.data;
     },
@@ -258,7 +264,7 @@ export function useCreatorAvailability(creatorId: string) {
     queryKey: sessionKeys.availability(creatorId),
     queryFn: async () => {
       const response = await axios.get<AvailabilitySlot[]>(
-        `${API_URL}/availability/creator/${creatorId}`
+        `${API_BASE}/availability/creator/${creatorId}`
       );
       return response.data;
     },
@@ -275,7 +281,7 @@ export function useSetAvailability() {
   return useMutation({
     mutationFn: async (data: SetAvailabilityDto) => {
       const response = await apiClient.post<AvailabilitySlot[]>(
-        "/availability",
+        "/api/availability",
         data
       );
       return response.data;
@@ -307,7 +313,7 @@ export function useAvailableSlots(
         ...(duration && { duration: duration.toString() }),
       });
       const response = await axios.get<AvailableSlotsForDate[]>(
-        `${API_URL}/availability/slots/${creatorId}?${params}`
+        `${API_BASE}/availability/slots/${creatorId}?${params}`
       );
       return response.data;
     },
@@ -326,7 +332,7 @@ export function useMySessionSettings() {
     queryKey: sessionKeys.mySettings,
     queryFn: async () => {
       const response = await apiClient.get<SessionSettings>(
-        "/availability/settings"
+        "/api/availability/settings"
       );
       return response.data;
     },
@@ -339,7 +345,7 @@ export function useCreatorSessionSettings(creatorId: string) {
     queryKey: sessionKeys.settings(creatorId),
     queryFn: async () => {
       const response = await axios.get<SessionSettings>(
-        `${API_URL}/availability/settings/${creatorId}`
+        `${API_BASE}/availability/settings/${creatorId}`
       );
       return response.data;
     },
@@ -356,7 +362,7 @@ export function useUpdateSessionSettings() {
   return useMutation({
     mutationFn: async (data: UpdateSessionSettingsDto) => {
       const response = await apiClient.patch<SessionSettings>(
-        "/availability/settings",
+        "/api/availability/settings",
         data
       );
       return response.data;
