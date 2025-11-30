@@ -39,6 +39,7 @@ export default function SessionSettingsPage() {
   const [minimumNoticeHours, setMinimumNoticeHours] = useState(24);
   const [maxAdvanceBookingDays, setMaxAdvanceBookingDays] = useState(30);
   const [autoConfirm, setAutoConfirm] = useState(false);
+  const [timezone, setTimezone] = useState("Asia/Beirut");
   const [pricePerDuration, setPricePerDuration] = useState<
     Record<string, number>
   >({});
@@ -77,6 +78,7 @@ export default function SessionSettingsPage() {
       setMinimumNoticeHours(settings.minimumNoticeHours);
       setMaxAdvanceBookingDays(settings.maxAdvanceBookingDays);
       setAutoConfirm(settings.autoConfirm);
+      setTimezone(settings.timezone || "Asia/Beirut");
       setPricePerDuration(settings.pricePerDuration || {});
     }
   }, [settings]);
@@ -125,6 +127,7 @@ export default function SessionSettingsPage() {
         minimumNoticeHours,
         maxAdvanceBookingDays,
         autoConfirm,
+        timezone,
         pricePerDuration:
           Object.keys(pricePerDuration).length > 0
             ? pricePerDuration
@@ -351,6 +354,31 @@ export default function SessionSettingsPage() {
                 </h3>
 
                 <div className="space-y-4">
+                  {/* Timezone */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Your Timezone
+                    </label>
+                    <select
+                      value={timezone}
+                      onChange={(e) => {
+                        setTimezone(e.target.value);
+                        setHasSettingsChanges(true);
+                      }}
+                      className="mt-1 w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
+                    >
+                      <option value="Asia/Beirut">Lebanon (GMT+2)</option>
+                      <option value="Europe/London">London (GMT+0)</option>
+                      <option value="Europe/Paris">Paris (GMT+1)</option>
+                      <option value="America/New_York">New York (GMT-5)</option>
+                      <option value="America/Los_Angeles">Los Angeles (GMT-8)</option>
+                      <option value="Asia/Dubai">Dubai (GMT+4)</option>
+                      <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
+                      <option value="Australia/Sydney">Sydney (GMT+11)</option>
+                      <option value="UTC">UTC (GMT+0)</option>
+                    </select>
+                  </div>
+
                   {/* Buffer Time */}
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
