@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 const statusConfig: Record<
-  string,
+  TransactionStatus,
   { label: string; color: string; icon: typeof CheckCircle2 }
 > = {
   [TransactionStatus.SUCCESS]: {
@@ -45,16 +45,6 @@ const statusConfig: Record<
     color: "text-blue-500 bg-blue-50 dark:bg-blue-500/10",
     icon: RotateCcw,
   },
-  // Fallback for any unknown status
-  default: {
-    label: "Unknown",
-    color: "text-gray-500 bg-gray-50 dark:bg-gray-500/10",
-    icon: Clock,
-  },
-};
-
-const getStatusConfig = (status: string) => {
-  return statusConfig[status] || statusConfig.default;
 };
 
 export default function PaymentHistoryPage() {
@@ -76,7 +66,7 @@ export default function PaymentHistoryPage() {
   const totalSpent =
     transactions
       ?.filter((t) => t.status === TransactionStatus.SUCCESS)
-      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0) || 0;
+      .reduce((sum, t) => sum + t.amount, 0) || 0;
 
   if (isLoading) {
     return (
@@ -278,8 +268,8 @@ export default function PaymentHistoryPage() {
         {filteredTransactions && filteredTransactions.length > 0 ? (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredTransactions.map((transaction) => {
-              const config = getStatusConfig(transaction.status);
-              const StatusIcon = config.icon;
+              const config = statusConfig[transaction.status];
+              const StatusIcon = config?.icon || Clock;
 
               return (
                 <div
@@ -289,7 +279,9 @@ export default function PaymentHistoryPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div
-                        className={`w-10 h-10 rounded-lg ${config.color} flex items-center justify-center`}
+                        className={`w-10 h-10 rounded-lg ${
+                          config?.color || "text-gray-500 bg-gray-100"
+                        } flex items-center justify-center`}
                       >
                         <StatusIcon className="w-5 h-5" />
                       </div>
@@ -311,15 +303,17 @@ export default function PaymentHistoryPage() {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-gray-900 dark:text-white">
-                        ${Number(transaction.amount || 0).toFixed(2)}{" "}
+                        ${(transaction.amount || 0).toFixed(2)}{" "}
                         <span className="text-sm font-normal text-gray-500">
                           {transaction.currency || "USD"}
                         </span>
                       </p>
                       <span
-                        className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${config.color}`}
+                        className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                          config?.color || "text-gray-500 bg-gray-100"
+                        }`}
                       >
-                        {config.label}
+                        {config?.label || "Unknown"}
                       </span>
                     </div>
                   </div>

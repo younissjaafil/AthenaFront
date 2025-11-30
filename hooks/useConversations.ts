@@ -128,3 +128,20 @@ export function useArchiveConversation() {
     },
   });
 }
+
+// Delete conversation
+export function useDeleteConversation() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (conversationId: string) => {
+      await apiClient.delete(`/api/conversations/${conversationId}`);
+      return conversationId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: conversationKeys.all });
+    },
+  });
+}
