@@ -123,7 +123,9 @@ export default function BookSessionPage() {
       adjustedDate = d.toISOString().split("T")[0];
     }
 
-    const scheduledAt = `${adjustedDate}T${adjustedHours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00.000Z`;
+    const scheduledAt = `${adjustedDate}T${adjustedHours
+      .toString()
+      .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00.000Z`;
 
     try {
       await bookSession.mutateAsync({

@@ -212,13 +212,6 @@ export function useCreateSessionPayment() {
     },
   });
 }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: paymentKeys.transactions });
-      queryClient.invalidateQueries({ queryKey: paymentKeys.entitlements });
-    },
-  });
-}
 
 // Hook to check and return combined access info
 export function useAgentAccessInfo(agentId: string, isFree: boolean) {
