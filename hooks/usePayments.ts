@@ -186,6 +186,40 @@ export function useSyncAllPending() {
   });
 }
 
+// Create payment for session
+export function useCreateSessionPayment() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      sessionId,
+      data,
+    }: {
+      sessionId: string;
+      data: CreatePaymentDto;
+    }) => {
+      const response = await apiClient.post<Transaction>(
+        `/api/payments/session/${sessionId}`,
+        data
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: paymentKeys.transactions });
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+    },
+  });
+}
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: paymentKeys.transactions });
+      queryClient.invalidateQueries({ queryKey: paymentKeys.entitlements });
+    },
+  });
+}
+
 // Hook to check and return combined access info
 export function useAgentAccessInfo(agentId: string, isFree: boolean) {
   const { isSignedIn } = useAuth();

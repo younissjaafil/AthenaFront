@@ -7,6 +7,9 @@ export type SessionStatus =
   | "cancelled"
   | "no_show";
 
+// Payment Status
+export type PaymentStatus = "not_required" | "pending" | "paid" | "refunded";
+
 // Video Provider
 export type VideoProvider = "jitsi" | "daily";
 
@@ -50,6 +53,9 @@ export interface Session {
   currency?: string;
   studentNotes?: string;
   creatorNotes?: string;
+  paymentStatus: PaymentStatus;
+  paymentId?: string;
+  canAccessMeeting: boolean;
 }
 
 // Book Session DTO
@@ -176,6 +182,11 @@ export function formatDuration(minutes: number): string {
 
 // Helper to check if session can be joined
 export function canJoinSession(session: Session): boolean {
+  // Must have meeting access (payment complete or free session)
+  if (!session.canAccessMeeting) {
+    return false;
+  }
+
   if (session.status !== "confirmed" && session.status !== "in_progress") {
     return false;
   }
@@ -189,4 +200,11 @@ export function canJoinSession(session: Session): boolean {
   // Can join 5 minutes before start until session ends
   const joinWindow = new Date(scheduledAt.getTime() - 5 * 60000);
   return now >= joinWindow && now <= sessionEnd;
+}
+
+// Helper to check if session needs payment
+export function sessionNeedsPayment(session: Session): boolean {
+  return (
+    session.status === "confirmed" && session.paymentStatus === "pending"
+  );
 }

@@ -13,6 +13,7 @@ import {
   useCompleteSession,
 } from "@/hooks/useSessions";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useCreateSessionPayment } from "@/hooks/usePayments";
 import {
   ArrowLeft,
   Calendar,
@@ -23,9 +24,15 @@ import {
   Loader2,
   ExternalLink,
   X,
+  CreditCard,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
-import { formatDuration, canJoinSession } from "@/lib/types/session";
+import {
+  formatDuration,
+  canJoinSession,
+  sessionNeedsPayment,
+} from "@/lib/types/session";
 
 export default function SessionDetailPage() {
   const params = useParams();
@@ -33,15 +40,18 @@ export default function SessionDetailPage() {
   const sessionId = params.id as string;
 
   const [showVideo, setShowVideo] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const { data: user } = useCurrentUser();
-  const { data: session, isLoading, error } = useSession(sessionId);
+  const { data: session, isLoading, error, refetch } = useSession(sessionId);
 
   const cancelSession = useCancelSession(sessionId);
   const startSession = useStartSession(sessionId);
   const completeSession = useCompleteSession(sessionId);
+  const createPayment = useCreateSessionPayment();
 
   const canJoin = session ? canJoinSession(session) : false;
+  const needsPayment = session ? sessionNeedsPayment(session) : false;
   const isCreator = session?.creatorId === user?.creatorId;
   const isStudent = session?.userId === user?.id;
 
@@ -74,6 +84,33 @@ export default function SessionDetailPage() {
   const handleJoinExternal = () => {
     if (session?.videoRoomUrl) {
       window.open(session.videoRoomUrl, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handlePayment = async () => {
+    if (!session?.price || !session?.currency) {
+      console.error("Session has no price information");
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    try {
+      const result = await createPayment.mutateAsync({
+        sessionId: session.id,
+        data: {
+          amount: session.price,
+          currency: session.currency as "LBP" | "USD" | "AED",
+          invoice: `Session with ${session.creatorName || "creator"}`,
+        },
+      });
+
+      // Redirect to payment URL
+      if (result.collectUrl) {
+        window.location.href = result.collectUrl;
+      }
+    } catch (error) {
+      console.error("Failed to create payment:", error);
+      setIsProcessingPayment(false);
     }
   };
 
@@ -180,7 +217,7 @@ export default function SessionDetailPage() {
             <SessionStatusBadge status={session.status} size="lg" />
           </div>
 
-          {/* Join Button */}
+          {/* Join Button - only show if paid or free */}
           {canJoin && session.videoRoomUrl && (
             <button
               onClick={() => setShowVideo(true)}
@@ -188,6 +225,22 @@ export default function SessionDetailPage() {
             >
               <Video className="w-5 h-5" />
               Join Session
+            </button>
+          )}
+
+          {/* Payment Required Button */}
+          {needsPayment && isStudent && (
+            <button
+              onClick={handlePayment}
+              disabled={isProcessingPayment}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {isProcessingPayment ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <CreditCard className="w-5 h-5" />
+              )}
+              Pay {session.price} {session.currency} to Access
             </button>
           )}
         </div>
@@ -325,15 +378,55 @@ export default function SessionDetailPage() {
             </div>
           </AnimatedCard>
 
-          {/* Price */}
+          {/* Price & Payment Status */}
           {session.price && session.price > 0 && (
             <AnimatedCard className="p-6" delay={0.2}>
               <h2 className="font-semibold text-gray-900 dark:text-white mb-2">
                 Payment
               </h2>
-              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                ${session.price} {session.currency || "USD"}
+              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-3">
+                {session.price} {session.currency || "USD"}
               </p>
+
+              {/* Payment Status Badge */}
+              {session.paymentStatus === "paid" && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg">
+                  <CreditCard className="w-4 h-4" />
+                  <span className="text-sm font-medium">Payment Complete</span>
+                </div>
+              )}
+
+              {session.paymentStatus === "pending" && isStudent && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-lg">
+                    <Lock className="w-4 h-4" />
+                    <span className="text-sm font-medium">
+                      Payment Required
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Pay to unlock the meeting link
+                  </p>
+                  <button
+                    onClick={handlePayment}
+                    disabled={isProcessingPayment}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                  >
+                    {isProcessingPayment ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CreditCard className="w-4 h-4" />
+                    )}
+                    Pay Now
+                  </button>
+                </div>
+              )}
+
+              {session.paymentStatus === "not_required" && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg">
+                  <span className="text-sm">Free Session</span>
+                </div>
+              )}
             </AnimatedCard>
           )}
         </div>
