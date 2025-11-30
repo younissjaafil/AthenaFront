@@ -39,6 +39,7 @@ export interface Session {
   userId: string;
   creatorId: string;
   creatorName?: string;
+  studentName?: string;
   scheduledAt: string;
   durationMinutes: number;
   status: SessionStatus;

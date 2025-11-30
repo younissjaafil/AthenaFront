@@ -114,7 +114,11 @@ export default function SessionDetailPage() {
       {showVideo && session.videoRoomUrl && (
         <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
           <div className="p-4 flex items-center justify-between bg-gray-900">
-            <h2 className="text-white font-semibold">{session.title}</h2>
+            <h2 className="text-white font-semibold">
+              {session.creatorName
+                ? `Session with ${session.creatorName}`
+                : "Session"}
+            </h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleJoinExternal}
@@ -169,7 +173,9 @@ export default function SessionDetailPage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2"
             >
-              {session.title}
+              {session.creatorName
+                ? `Session with ${session.creatorName}`
+                : "Session"}
             </motion.h1>
             <SessionStatusBadge status={session.status} size="lg" />
           </div>

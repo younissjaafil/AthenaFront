@@ -54,7 +54,11 @@ export function SessionCard({
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-              {session.title}
+              {variant === "student" && session.creatorName
+                ? `Session with ${session.creatorName}`
+                : variant === "creator" && session.studentName
+                ? `Session with ${session.studentName}`
+                : "Session"}
             </h3>
             {variant === "student" && session.creatorName && (
               <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-1">
