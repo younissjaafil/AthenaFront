@@ -95,8 +95,10 @@ export function CalendarBooking({
 
   const isPast = (date: Date) => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
+    // Compare using local date keys to avoid timezone issues
+    const dateKey = formatDateKey(date);
+    const todayKey = formatDateKey(today);
+    return dateKey < todayKey;
   };
 
   const slotsForSelectedDate = selectedDate
