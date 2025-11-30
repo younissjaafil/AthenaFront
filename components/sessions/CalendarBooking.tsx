@@ -152,12 +152,13 @@ export function CalendarBooking({
                 disabled={!hasSlots || dayIsPast || isLoading}
                 className={cn(
                   "aspect-square flex flex-col items-center justify-center rounded-lg text-sm transition-all",
-                  !isCurrentMonth && "text-gray-300 dark:text-gray-700",
+                  !isCurrentMonth &&
+                    !hasSlots &&
+                    "text-gray-300 dark:text-gray-700",
                   isCurrentMonth &&
                     !hasSlots &&
                     "text-gray-400 dark:text-gray-600",
-                  isCurrentMonth &&
-                    hasSlots &&
+                  hasSlots &&
                     !isSelected &&
                     "text-gray-900 dark:text-white hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer",
                   isSelected && "bg-purple-600 text-white hover:bg-purple-700",
