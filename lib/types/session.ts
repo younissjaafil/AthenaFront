@@ -100,6 +100,14 @@ export interface AvailabilitySlot {
   isActive: boolean;
 }
 
+// Date-specific availability override (for one-time availability or blocks)
+export interface DateOverride {
+  date: string; // YYYY-MM-DD format
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean; // true = available, false = blocked
+}
+
 // Available Slots Response
 export interface AvailableSlotsForDate {
   date: string;

@@ -372,3 +372,43 @@ export function useUpdateSessionSettings() {
     },
   });
 }
+
+// ===== DATE OVERRIDE HOOKS =====
+
+// Get my date overrides (creator)
+export function useMyDateOverrides() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+
+  return useQuery({
+    queryKey: ["date-overrides", "my"],
+    queryFn: async () => {
+      const response = await apiClient.get<
+        { id: string; date: string; startTime: string | null; endTime: string | null; isAvailable: boolean }[]
+      >("/api/availability/overrides");
+      return response.data;
+    },
+  });
+}
+
+// Set date overrides
+export function useSetDateOverrides() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (
+      overrides: { date: string; startTime?: string; endTime?: string; isAvailable: boolean }[]
+    ) => {
+      const response = await apiClient.post("/api/availability/overrides", {
+        overrides,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["date-overrides", "my"] });
+      queryClient.invalidateQueries({ queryKey: ["availability"] });
+    },
+  });
+}

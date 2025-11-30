@@ -13,21 +13,12 @@ interface AvailabilityEditorProps {
   isLoading?: boolean;
 }
 
-const DEFAULT_TIME_OPTIONS = [
-  "08:00",
-  "09:00",
-  "10:00",
-  "11:00",
-  "12:00",
-  "13:00",
-  "14:00",
-  "15:00",
-  "16:00",
-  "17:00",
-  "18:00",
-  "19:00",
-  "20:00",
-];
+// Generate all 24-hour time slots in 30-minute intervals
+const DEFAULT_TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const hours = Math.floor(i / 2);
+  const minutes = i % 2 === 0 ? "00" : "30";
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
+});
 
 export function AvailabilityEditor({
   slots,
@@ -44,14 +35,22 @@ export function AvailabilityEditor({
     const lastSlot = daySlots[daySlots.length - 1];
 
     // Default new slot: either after last slot or 9am-5pm
+    let startTime = "09:00";
+    let endTime = "17:00";
+
+    if (lastSlot) {
+      const lastEndHour = parseInt(lastSlot.endTime.split(":")[0]);
+      const lastEndMin = lastSlot.endTime.split(":")[1];
+      startTime = lastSlot.endTime;
+      // Add 2 hours, wrap around midnight if needed
+      const newEndHour = (lastEndHour + 2) % 24;
+      endTime = `${newEndHour.toString().padStart(2, "0")}:${lastEndMin}`;
+    }
+
     const newSlot: TimeSlot = {
       dayOfWeek: day,
-      startTime: lastSlot ? lastSlot.endTime : "09:00",
-      endTime: lastSlot
-        ? `${Math.min(parseInt(lastSlot.endTime.split(":")[0]) + 2, 20)
-            .toString()
-            .padStart(2, "0")}:00`
-        : "17:00",
+      startTime,
+      endTime,
       isActive: true,
     };
 

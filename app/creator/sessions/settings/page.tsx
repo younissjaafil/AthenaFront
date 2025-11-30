@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AnimatedCard } from "@/components/ui/animated-card";
-import { AvailabilityEditor } from "@/components/sessions";
+import { AvailabilityEditor, DateOverrideEditor } from "@/components/sessions";
 import {
   useMyAvailability,
   useSetAvailability,
   useMySessionSettings,
   useUpdateSessionSettings,
+  useMyDateOverrides,
+  useSetDateOverrides,
 } from "@/hooks/useSessions";
 import {
   ArrowLeft,
@@ -19,13 +21,15 @@ import {
   Calendar,
   Settings,
   Check,
+  CalendarDays,
 } from "lucide-react";
 import Link from "next/link";
-import type { TimeSlot } from "@/lib/types/session";
+import type { TimeSlot, DateOverride } from "@/lib/types/session";
 
 export default function SessionSettingsPage() {
   // Availability state
   const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const [dateOverrides, setDateOverrides] = useState<DateOverride[]>([]);
   const [hasAvailabilityChanges, setHasAvailabilityChanges] = useState(false);
 
   // Settings state
@@ -44,10 +48,12 @@ export default function SessionSettingsPage() {
   const { data: availability, isLoading: loadingAvailability } =
     useMyAvailability();
   const { data: settings, isLoading: loadingSettings } = useMySessionSettings();
+  const { data: savedOverrides } = useMyDateOverrides();
 
   // Mutations
   const setAvailability = useSetAvailability();
   const updateSettings = useUpdateSessionSettings();
+  const setOverrides = useSetDateOverrides();
 
   // Initialize from fetched data
   useEffect(() => {
@@ -75,6 +81,20 @@ export default function SessionSettingsPage() {
     }
   }, [settings]);
 
+  // Load saved date overrides
+  useEffect(() => {
+    if (savedOverrides) {
+      setDateOverrides(
+        savedOverrides.map((o) => ({
+          date: o.date,
+          startTime: o.startTime || "09:00",
+          endTime: o.endTime || "17:00",
+          isAvailable: o.isAvailable,
+        }))
+      );
+    }
+  }, [savedOverrides]);
+
   const handleSlotsChange = (newSlots: TimeSlot[]) => {
     setSlots(newSlots);
     setHasAvailabilityChanges(true);
@@ -82,7 +102,14 @@ export default function SessionSettingsPage() {
 
   const handleSaveAvailability = async () => {
     try {
+      // Save weekly availability
       await setAvailability.mutateAsync({ slots });
+      
+      // Save date overrides
+      if (dateOverrides.length > 0) {
+        await setOverrides.mutateAsync(dateOverrides);
+      }
+      
       setHasAvailabilityChanges(false);
     } catch (error) {
       console.error("Failed to save availability:", error);
@@ -198,6 +225,28 @@ export default function SessionSettingsPage() {
               onChange={handleSlotsChange}
               isLoading={setAvailability.isPending}
             />
+
+            {/* Date-Specific Overrides */}
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarDays className="w-5 h-5 text-purple-500" />
+                <h3 className="text-md font-semibold text-gray-900 dark:text-white">
+                  Special Dates
+                </h3>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Add one-time availability or block specific dates (e.g.,
+                &quot;Available Friday Dec 5th 3pm-6pm only&quot;)
+              </p>
+              <DateOverrideEditor
+                overrides={dateOverrides}
+                onChange={(newOverrides) => {
+                  setDateOverrides(newOverrides);
+                  setHasAvailabilityChanges(true);
+                }}
+                isLoading={setAvailability.isPending}
+              />
+            </div>
           </section>
 
           {/* Session Settings Section */}
