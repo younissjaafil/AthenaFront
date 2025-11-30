@@ -9,7 +9,7 @@ function CreatorCard({ creator }: { creator: Creator }) {
   const fullName =
     creator.user?.firstName && creator.user?.lastName
       ? `${creator.user.firstName} ${creator.user.lastName}`
-      : creator.user?.email || "Creator";
+      : creator.title || creator.user?.email || "Creator";
 
   return (
     <Link href={`/explore/${creator.id}`}>
@@ -29,7 +29,7 @@ function CreatorCard({ creator }: { creator: Creator }) {
           </div>
           <div className="flex-1">
             <h3 className="heading-3 mb-1">{fullName}</h3>
-            <p className="text-sm text-brand-purple-400 capitalize">{creator.expertiseLevel} level</p>
+            <p className="text-sm text-brand-purple-400">{creator.title}</p>
           </div>
         </div>
 

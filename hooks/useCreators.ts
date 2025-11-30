@@ -10,6 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_ATHENA_CORE_URL;
 export interface Creator {
   id: string;
   userId: string;
+  title: string;
   bio?: string;
   tagline?: string;
   specialties: string[];
