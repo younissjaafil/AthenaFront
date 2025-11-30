@@ -14,6 +14,7 @@ import {
 } from "@/hooks/useSessions";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCreateSessionPayment } from "@/hooks/usePayments";
+import { PaymentCurrency } from "@/lib/types/payment";
 import {
   ArrowLeft,
   Calendar,
@@ -99,7 +100,7 @@ export default function SessionDetailPage() {
         sessionId: session.id,
         data: {
           amount: session.price,
-          currency: session.currency as "LBP" | "USD" | "AED",
+          currency: session.currency as PaymentCurrency,
           invoice: `Session with ${session.creatorName || "creator"}`,
         },
       });
