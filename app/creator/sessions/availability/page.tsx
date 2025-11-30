@@ -5,12 +5,61 @@ import { ArrowLeft, Calendar, Clock, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { AvailabilityManager, DateOverrideEditor } from "@/components/sessions";
 import { AnimatedCard } from "@/components/ui/animated-card";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useAuth } from "@clerk/nextjs";
+import { createClientApiClient } from "@/lib/api-client";
+import type { DateOverride } from "@/lib/types/session";
 
 type Tab = "weekly" | "overrides";
 
 export default function CreatorAvailabilityPage() {
   const [activeTab, setActiveTab] = useState<Tab>("weekly");
+  const [overrides, setOverrides] = useState<DateOverride[]>([]);
+  const [isLoadingOverrides, setIsLoadingOverrides] = useState(false);
+  const { data: currentUser } = useCurrentUser();
+  const { getToken } = useAuth();
+
+  // Fetch existing overrides
+  useEffect(() => {
+    async function fetchOverrides() {
+      if (!currentUser?.id) return;
+
+      setIsLoadingOverrides(true);
+      try {
+        const apiClient = createClientApiClient(getToken);
+        const response = await apiClient.get(
+          `/api/creators/${currentUser.id}/date-overrides`
+        );
+        setOverrides(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch date overrides:", error);
+      } finally {
+        setIsLoadingOverrides(false);
+      }
+    }
+
+    fetchOverrides();
+  }, [currentUser?.id, getToken]);
+
+  // Handle overrides change (save to server)
+  const handleOverridesChange = useCallback(
+    async (newOverrides: DateOverride[]) => {
+      if (!currentUser?.id) return;
+
+      setOverrides(newOverrides);
+
+      try {
+        const apiClient = createClientApiClient(getToken);
+        await apiClient.put(`/api/creators/${currentUser.id}/date-overrides`, {
+          overrides: newOverrides,
+        });
+      } catch (error) {
+        console.error("Failed to save date overrides:", error);
+      }
+    },
+    [currentUser?.id, getToken]
+  );
 
   return (
     <div className="p-4 md:p-6 lg:p-8 pt-16 lg:pt-8 max-w-4xl mx-auto">
@@ -79,7 +128,11 @@ export default function CreatorAvailabilityPage() {
                 </p>
               </div>
             </div>
-            <DateOverrideEditor />
+            <DateOverrideEditor
+              overrides={overrides}
+              onChange={handleOverridesChange}
+              isLoading={isLoadingOverrides}
+            />
           </AnimatedCard>
         </div>
       )}
