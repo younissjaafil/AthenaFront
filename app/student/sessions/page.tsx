@@ -55,8 +55,8 @@ export default function StudentSessionsPage() {
       const query = searchQuery.toLowerCase();
       sessions = sessions.filter(
         (s) =>
-          s.title.toLowerCase().includes(query) ||
-          s.creatorName?.toLowerCase().includes(query)
+          s.creatorName?.toLowerCase().includes(query) ||
+          s.studentNotes?.toLowerCase().includes(query)
       );
     }
 
