@@ -38,7 +38,7 @@ export default function CreatorBookingPage() {
     creatorId,
     dateRange.startDate,
     dateRange.endDate,
-    60
+    settings?.defaultDuration || 15  // Use smallest duration to see more slots
   );
 
   // Debug logging
