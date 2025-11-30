@@ -318,6 +318,8 @@ export function useAvailableSlots(
       return response.data;
     },
     enabled: !!creatorId && !!startDate && !!endDate,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: true,
   });
 }
 
