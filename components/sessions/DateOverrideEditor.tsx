@@ -181,10 +181,21 @@ export function DateOverrideEditor({
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-1">
           {calendarDays.map(({ date, isCurrentMonth }, i) => {
-            const dateStr = date.toISOString().split("T")[0];
-            const today = new Date().toISOString().split("T")[0];
-            const isToday = dateStr === today;
-            const isPast = dateStr < today;
+            // Use local date format instead of UTC
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            const dateStr = `${year}-${month}-${day}`;
+
+            const todayDate = new Date();
+            const todayStr = `${todayDate.getFullYear()}-${String(
+              todayDate.getMonth() + 1
+            ).padStart(2, "0")}-${String(todayDate.getDate()).padStart(
+              2,
+              "0"
+            )}`;
+            const isToday = dateStr === todayStr;
+            const isPast = dateStr < todayStr;
             const hasOverride = overrideMap.has(dateStr);
             const dateOverrides = overrideMap.get(dateStr) || [];
             const hasAvailable = dateOverrides.some((o) => o.isAvailable);
