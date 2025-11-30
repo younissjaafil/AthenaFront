@@ -17,6 +17,7 @@ export const paymentKeys = {
   entitlements: ["payments", "entitlements"] as const,
   agentAccess: (agentId: string) => ["payments", "access", agentId] as const,
   transactionStatus: (id: string) => ["payments", "transaction", id] as const,
+  creatorRevenue: ["payments", "creator", "revenue"] as const,
 };
 
 // Get user's transactions history
@@ -46,6 +47,29 @@ export function useEntitlements() {
       const response = await apiClient.get<Entitlement[]>(
         "/api/payments/entitlements"
       );
+      return response.data;
+    },
+  });
+}
+
+// Get creator's revenue stats
+export function useCreatorRevenue() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+
+  return useQuery({
+    queryKey: paymentKeys.creatorRevenue,
+    queryFn: async () => {
+      const response = await apiClient.get<{
+        totalRevenue: number;
+        transactionCount: number;
+        revenueByAgent: {
+          agentId: string;
+          agentName?: string;
+          revenue: number;
+          count: number;
+        }[];
+      }>("/api/payments/creator/revenue");
       return response.data;
     },
   });

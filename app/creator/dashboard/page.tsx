@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useMyAgents } from "@/hooks/useAgents";
+import { useCreatorRevenue } from "@/hooks/usePayments";
 import {
   StatsCard,
   StaggerContainer,
@@ -19,12 +20,16 @@ import type { Agent } from "@/lib/types/agent";
 export default function CreatorDashboard() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: agents, isLoading: isAgentsLoading } = useMyAgents();
+  const { data: revenueData } = useCreatorRevenue();
 
   const firstName = user?.firstName || "Creator";
   const totalAgents = agents?.length || 0;
   const activeAgents = agents?.filter((a) => a.status === "active").length || 0;
   const totalConversations =
     agents?.reduce((sum, a) => sum + (a.totalConversations || 0), 0) || 0;
+
+  const totalRevenue = revenueData?.totalRevenue || 0;
+  const transactionCount = revenueData?.transactionCount || 0;
 
   // Show loading skeleton
   if (isUserLoading) {
@@ -84,11 +89,17 @@ export default function CreatorDashboard() {
         />
         <StatsCard
           title="Revenue"
-          value="$0"
-          change="Coming soon"
+          value={`$${totalRevenue.toFixed(2)}`}
+          change={
+            transactionCount > 0 ? `${transactionCount} sales` : "No sales yet"
+          }
           icon="💰"
           delay={0.3}
-          colorClass="text-gray-400"
+          colorClass={
+            totalRevenue > 0
+              ? "text-emerald-500 dark:text-emerald-400"
+              : "text-gray-400"
+          }
         />
       </div>
 

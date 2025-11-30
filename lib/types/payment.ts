@@ -31,13 +31,13 @@ export interface Transaction {
   id: string;
   userId: string;
   agentId?: string;
-  externalId: number;
-  type: TransactionType;
+  externalId: string | number;
+  type?: TransactionType;
   amount: number;
-  currency: PaymentCurrency;
+  currency: PaymentCurrency | string;
   status: TransactionStatus;
-  invoice: string;
-  collectUrl: string;
+  invoice?: string;
+  collectUrl?: string;
   payerPhoneNumber?: string;
   metadata?: {
     successRedirectUrl?: string;
