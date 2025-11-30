@@ -82,12 +82,53 @@ export default function BookSessionPage() {
   const handleBook = async () => {
     if (!selectedDate || !selectedTime || !agent?.creatorId) return;
 
-    const scheduledAt = new Date(`${selectedDate}T${selectedTime}:00`);
+    // Find the timezone from the available slots for this date
+    const slotData = availableSlots?.find((s) => s.date === selectedDate);
+    const creatorTimezone = slotData?.timezone || settings?.timezone || "UTC";
+
+    // Create the datetime string with the creator's timezone
+    // The slot time (e.g., "02:00") is in the creator's timezone
+    // We need to send it as an ISO string that the backend understands
+    const dateTimeStr = `${selectedDate}T${selectedTime}:00`;
+
+    // Get the offset for the creator's timezone
+    const tempDate = new Date(dateTimeStr + "Z"); // Treat as UTC first
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: creatorTimezone,
+      hour: "numeric",
+      hour12: false,
+    });
+
+    // Calculate offset by checking what hour noon UTC shows as in the target timezone
+    const testDate = new Date(`${selectedDate}T12:00:00Z`);
+    const localHour = parseInt(formatter.format(testDate));
+    const offsetHours = localHour - 12;
+
+    // Adjust the time to get UTC
+    const [hours, minutes] = selectedTime.split(":").map(Number);
+    const utcHours = hours - offsetHours;
+
+    // Handle day wraparound
+    let adjustedDate = selectedDate;
+    let adjustedHours = utcHours;
+    if (utcHours < 0) {
+      adjustedHours = utcHours + 24;
+      const d = new Date(selectedDate);
+      d.setDate(d.getDate() - 1);
+      adjustedDate = d.toISOString().split("T")[0];
+    } else if (utcHours >= 24) {
+      adjustedHours = utcHours - 24;
+      const d = new Date(selectedDate);
+      d.setDate(d.getDate() + 1);
+      adjustedDate = d.toISOString().split("T")[0];
+    }
+
+    const scheduledAt = `${adjustedDate}T${adjustedHours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00.000Z`;
 
     try {
       await bookSession.mutateAsync({
         creatorId: agent.creatorId,
-        scheduledAt: scheduledAt.toISOString(),
+        scheduledAt,
         durationMinutes: selectedDuration,
         studentNotes: notes || undefined,
         price: settings?.pricePerDuration?.[selectedDuration.toString()],

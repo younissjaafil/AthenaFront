@@ -111,6 +111,7 @@ export interface DateOverride {
 export interface AvailableSlotsForDate {
   date: string;
   slots: string[];
+  timezone?: string; // Creator's timezone
 }
 
 // Session Settings
@@ -204,7 +205,5 @@ export function canJoinSession(session: Session): boolean {
 
 // Helper to check if session needs payment
 export function sessionNeedsPayment(session: Session): boolean {
-  return (
-    session.status === "confirmed" && session.paymentStatus === "pending"
-  );
+  return session.status === "confirmed" && session.paymentStatus === "pending";
 }
