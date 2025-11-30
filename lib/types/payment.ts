@@ -50,14 +50,15 @@ export interface Transaction {
 
 export interface Entitlement {
   id: string;
-  userId: string;
+  userId?: string;
   agentId: string;
+  agentName?: string; // From backend
   transactionId?: string;
   expiresAt?: string;
-  isActive: boolean;
+  isActive?: boolean;
   createdAt: string;
-  updatedAt: string;
-  // Populated from join
+  updatedAt?: string;
+  // Populated from join (optional)
   agent?: {
     id: string;
     name: string;

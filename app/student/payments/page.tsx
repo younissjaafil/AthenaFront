@@ -185,7 +185,9 @@ export default function PaymentHistoryPage() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">
-                      {entitlement.agent?.name || "Agent"}
+                      {entitlement.agentName ||
+                        entitlement.agent?.name ||
+                        "Agent"}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       Unlocked{" "}
@@ -267,7 +269,7 @@ export default function PaymentHistoryPage() {
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredTransactions.map((transaction) => {
               const config = statusConfig[transaction.status];
-              const StatusIcon = config.icon;
+              const StatusIcon = config?.icon || Clock;
 
               return (
                 <div
@@ -277,13 +279,15 @@ export default function PaymentHistoryPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div
-                        className={`w-10 h-10 rounded-lg ${config.color} flex items-center justify-center`}
+                        className={`w-10 h-10 rounded-lg ${
+                          config?.color || "text-gray-500 bg-gray-100"
+                        } flex items-center justify-center`}
                       >
                         <StatusIcon className="w-5 h-5" />
                       </div>
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">
-                          {transaction.invoice}
+                          {transaction.invoice || "Payment"}
                         </p>
                         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                           <Calendar className="w-3 h-3" />
@@ -299,15 +303,17 @@ export default function PaymentHistoryPage() {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-gray-900 dark:text-white">
-                        ${transaction.amount.toFixed(2)}{" "}
+                        ${(transaction.amount || 0).toFixed(2)}{" "}
                         <span className="text-sm font-normal text-gray-500">
-                          {transaction.currency}
+                          {transaction.currency || "USD"}
                         </span>
                       </p>
                       <span
-                        className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${config.color}`}
+                        className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                          config?.color || "text-gray-500 bg-gray-100"
+                        }`}
                       >
-                        {config.label}
+                        {config?.label || "Unknown"}
                       </span>
                     </div>
                   </div>
