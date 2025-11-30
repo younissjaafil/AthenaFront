@@ -23,6 +23,7 @@ function PaymentCallbackContent() {
 
   const status = searchParams.get("status") || searchParams.get("payment");
   const agentId = searchParams.get("agentId");
+  const sessionId = searchParams.get("sessionId");
   const transactionId = searchParams.get("transactionId");
 
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +55,11 @@ function PaymentCallbackContent() {
         queryKey: paymentKeys.agentAccess(agentId),
       });
     }
+    // Invalidate session queries if this was a session payment
+    if (sessionId) {
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      queryClient.invalidateQueries({ queryKey: ["sessions", sessionId] });
+    }
 
     // Show success/failure for a moment
     const timer = setTimeout(() => {
@@ -61,7 +67,7 @@ function PaymentCallbackContent() {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [queryClient, agentId, syncAllPending]);
+  }, [queryClient, agentId, sessionId, syncAllPending]);
 
   const isSuccess = status === "success";
 
@@ -114,7 +120,9 @@ function PaymentCallbackContent() {
             </h1>
             <p className="text-white/80">
               {isSuccess
-                ? "Your access has been unlocked"
+                ? sessionId
+                  ? "Your session has been confirmed"
+                  : "Your access has been unlocked"
                 : "Something went wrong with your payment"}
             </p>
           </div>
@@ -128,16 +136,29 @@ function PaymentCallbackContent() {
                     <Sparkles className="w-5 h-5 text-emerald-500" />
                     <div>
                       <p className="font-medium text-emerald-700 dark:text-emerald-400">
-                        Premium access granted
+                        {sessionId
+                          ? "Session payment complete"
+                          : "Premium access granted"}
                       </p>
                       <p className="text-sm text-emerald-600 dark:text-emerald-500">
-                        You can now chat with this agent
+                        {sessionId
+                          ? "You can now access the meeting link"
+                          : "You can now chat with this agent"}
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
+                  {sessionId && (
+                    <Link
+                      href={`/student/sessions/${sessionId}`}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-medium transition-all"
+                    >
+                      <MessageSquare className="w-5 h-5" />
+                      View Session Details
+                    </Link>
+                  )}
                   {agentId && (
                     <Link
                       href={`/explore/agents/${agentId}`}
@@ -168,6 +189,14 @@ function PaymentCallbackContent() {
                 </div>
 
                 <div className="space-y-3">
+                  {sessionId && (
+                    <Link
+                      href={`/student/sessions/${sessionId}`}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
+                    >
+                      Try Again
+                    </Link>
+                  )}
                   {agentId && (
                     <Link
                       href={`/explore/agents/${agentId}`}
@@ -178,10 +207,10 @@ function PaymentCallbackContent() {
                   )}
 
                   <Link
-                    href="/explore/agents"
+                    href={sessionId ? "/student/sessions" : "/explore/agents"}
                     className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-900 dark:text-white font-medium transition-colors"
                   >
-                    Browse Other Agents
+                    {sessionId ? "View All Sessions" : "Browse Other Agents"}
                   </Link>
                 </div>
               </>
