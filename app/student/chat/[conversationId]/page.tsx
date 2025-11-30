@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useConversation, useSendMessage } from "@/hooks/useConversations";
+import { useAgentAccessInfo } from "@/hooks/usePayments";
+import { PaywallModal } from "@/components/payments";
 import { Message, MessageRole } from "@/lib/types/conversation";
 import {
   Send,
@@ -17,6 +19,8 @@ import {
   AlertCircle,
   FileText,
   Loader2,
+  Lock,
+  Crown,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -134,7 +138,9 @@ function MessageBubble({
               minute: "2-digit",
             })}
           </span>
-          {isUser && <CheckCheck className="w-3 h-3 text-cyan-500 dark:text-cyan-400" />}
+          {isUser && (
+            <CheckCheck className="w-3 h-3 text-cyan-500 dark:text-cyan-400" />
+          )}
         </div>
       </div>
     </motion.div>
@@ -161,8 +167,45 @@ function WelcomeMessage({ agentName }: { agentName: string }) {
       </p>
       <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20">
         <Sparkles className="w-4 h-4 text-purple-500 dark:text-purple-400" />
-        <span className="text-sm text-purple-600 dark:text-purple-400">RAG-Powered Responses</span>
+        <span className="text-sm text-purple-600 dark:text-purple-400">
+          RAG-Powered Responses
+        </span>
       </div>
+    </motion.div>
+  );
+}
+
+// Paywall message component for blocked chat
+function PaywallMessage({
+  agentName,
+  onUnlock,
+}: {
+  agentName: string;
+  onUnlock: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center justify-center h-full text-center px-4"
+    >
+      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-100 dark:from-amber-600/20 to-orange-100 dark:to-orange-600/20 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center mb-6">
+        <Lock className="w-10 h-10 text-amber-500 dark:text-amber-400" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        Premium Agent
+      </h2>
+      <p className="text-gray-600 dark:text-slate-400 max-w-md mb-6">
+        {agentName} is a premium agent. Unlock access to start chatting and get
+        expert-level insights.
+      </p>
+      <button
+        onClick={onUnlock}
+        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-semibold transition-all shadow-lg shadow-purple-500/20"
+      >
+        <Crown className="w-5 h-5" />
+        Unlock Access
+      </button>
     </motion.div>
   );
 }
@@ -175,6 +218,7 @@ export default function ChatPage({
   const { conversationId } = use(params);
   const router = useRouter();
   const [inputValue, setInputValue] = useState("");
+  const [showPaywall, setShowPaywall] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -184,6 +228,18 @@ export default function ChatPage({
     error,
   } = useConversation(conversationId);
   const sendMessage = useSendMessage(conversationId);
+
+  // Check entitlement for the agent in this conversation
+  // The useAgentAccessInfo hook will make API call to check access server-side
+  const agentId = conversation?.agentId || "";
+  const {
+    hasAccess,
+    isLoading: checkingAccess,
+    needsPayment,
+  } = useAgentAccessInfo(
+    agentId,
+    false // Assume not free, let server determine access
+  );
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -215,12 +271,14 @@ export default function ChatPage({
     }
   };
 
-  if (isLoading) {
+  if (isLoading || checkingAccess) {
     return (
       <div className="h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 text-purple-500 dark:text-purple-400 animate-spin" />
-          <p className="text-gray-600 dark:text-slate-400">Loading conversation...</p>
+          <p className="text-gray-600 dark:text-slate-400">
+            {checkingAccess ? "Checking access..." : "Loading conversation..."}
+          </p>
         </div>
       </div>
     );
@@ -269,7 +327,9 @@ export default function ChatPage({
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="font-semibold text-gray-900 dark:text-white">{agentName}</h1>
+                <h1 className="font-semibold text-gray-900 dark:text-white">
+                  {agentName}
+                </h1>
                 <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
                   <span>Online</span>
@@ -291,7 +351,12 @@ export default function ChatPage({
       {/* Messages Area */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          {messages.length === 0 ? (
+          {needsPayment ? (
+            <PaywallMessage
+              agentName={agentName}
+              onUnlock={() => setShowPaywall(true)}
+            />
+          ) : messages.length === 0 ? (
             <WelcomeMessage agentName={agentName} />
           ) : (
             <>
@@ -314,38 +379,64 @@ export default function ChatPage({
       {/* Input Area */}
       <footer className="flex-shrink-0 border-t border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="relative flex items-end gap-3 bg-gray-100 dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 focus-within:border-purple-500/50 transition-colors">
-            <textarea
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={`Message ${agentName}...`}
-              rows={1}
-              className="flex-1 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 px-4 py-3 resize-none focus:outline-none max-h-32 scrollbar-thin"
-              style={{
-                height: "auto",
-                minHeight: "48px",
-              }}
-              disabled={sendMessage.isPending}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!inputValue.trim() || sendMessage.isPending}
-              className="m-2 p-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {sendMessage.isPending ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </button>
-          </div>
-          <p className="text-center text-xs text-gray-500 dark:text-slate-500 mt-3">
-            Athena can make mistakes. Verify important information.
-          </p>
+          {needsPayment ? (
+            <div className="text-center py-2">
+              <p className="text-gray-500 dark:text-slate-400 text-sm">
+                Unlock this agent to start chatting
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="relative flex items-end gap-3 bg-gray-100 dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 focus-within:border-purple-500/50 transition-colors">
+                <textarea
+                  ref={inputRef}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={`Message ${agentName}...`}
+                  rows={1}
+                  className="flex-1 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 px-4 py-3 resize-none focus:outline-none max-h-32 scrollbar-thin"
+                  style={{
+                    height: "auto",
+                    minHeight: "48px",
+                  }}
+                  disabled={sendMessage.isPending}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={!inputValue.trim() || sendMessage.isPending}
+                  className="m-2 p-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {sendMessage.isPending ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Send className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+              <p className="text-center text-xs text-gray-500 dark:text-slate-500 mt-3">
+                Athena can make mistakes. Verify important information.
+              </p>
+            </>
+          )}
         </div>
       </footer>
+
+      {/* Paywall Modal */}
+      {conversation?.agent && (
+        <PaywallModal
+          isOpen={showPaywall}
+          onClose={() => setShowPaywall(false)}
+          agent={{
+            id: conversation.agentId,
+            name: conversation.agent.name,
+            description: conversation.agent.tagline,
+            pricePerMessage: 0,
+            pricePerConversation: 5, // Default, will be fetched from API
+            profileImageUrl: conversation.agent.profileImageUrl,
+          }}
+        />
+      )}
     </div>
   );
 }

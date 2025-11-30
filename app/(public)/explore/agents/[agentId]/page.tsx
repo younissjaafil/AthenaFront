@@ -1,11 +1,13 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { usePublicAgents } from "@/hooks/useAgents";
 import { useFindOrCreateConversation } from "@/hooks/useConversations";
+import { useAgentAccessInfo } from "@/hooks/usePayments";
+import { PaywallModal } from "@/components/payments";
 import {
   Bot,
   Star,
@@ -18,6 +20,7 @@ import {
   BookOpen,
   Zap,
   Play,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -32,12 +35,26 @@ export default function AgentDetailPage({
   const { user } = useUser();
   const { data: agents, isLoading } = usePublicAgents();
   const findOrCreateConversation = useFindOrCreateConversation();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const agent = agents?.find((a) => a.id === agentId);
+
+  // Check entitlement for paid agents
+  const {
+    hasAccess,
+    isLoading: checkingAccess,
+    needsPayment,
+  } = useAgentAccessInfo(agentId, agent?.isFree ?? true);
 
   const handleStartChat = async () => {
     if (!isSignedIn) {
       router.push(`/sign-in?redirect_url=/explore/agents/${agentId}`);
+      return;
+    }
+
+    // Check if user needs to pay first
+    if (!agent?.isFree && needsPayment) {
+      setShowPaywall(true);
       return;
     }
 
@@ -309,13 +326,20 @@ export default function AgentDetailPage({
                 <div className="p-6">
                   <button
                     onClick={handleStartChat}
-                    disabled={findOrCreateConversation.isPending}
+                    disabled={
+                      findOrCreateConversation.isPending || checkingAccess
+                    }
                     className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-semibold text-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/20"
                   >
-                    {findOrCreateConversation.isPending ? (
+                    {findOrCreateConversation.isPending || checkingAccess ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Starting...
+                        {checkingAccess ? "Checking access..." : "Starting..."}
+                      </>
+                    ) : !agent.isFree && needsPayment ? (
+                      <>
+                        <Lock className="w-5 h-5" />
+                        Unlock Access
                       </>
                     ) : (
                       <>
@@ -328,6 +352,13 @@ export default function AgentDetailPage({
                   {!isSignedIn && (
                     <p className="text-center text-slate-400 text-sm mt-3">
                       Sign in required to start chatting
+                    </p>
+                  )}
+
+                  {isSignedIn && !agent.isFree && hasAccess && (
+                    <p className="text-center text-emerald-400 text-sm mt-3 flex items-center justify-center gap-1">
+                      <CheckCircle2 className="w-4 h-4" />
+                      You have access to this agent
                     </p>
                   )}
 
@@ -360,6 +391,15 @@ export default function AgentDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Paywall Modal */}
+      {agent && (
+        <PaywallModal
+          isOpen={showPaywall}
+          onClose={() => setShowPaywall(false)}
+          agent={agent}
+        />
+      )}
     </div>
   );
 }

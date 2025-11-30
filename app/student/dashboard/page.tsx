@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useConversations } from "@/hooks/useConversations";
 import { usePublicAgents } from "@/hooks/useAgents";
+import { useEntitlements } from "@/hooks/usePayments";
 import { ConversationStatus } from "@/lib/types/conversation";
 import {
   MessageSquare,
@@ -15,12 +16,15 @@ import {
   Plus,
   History,
   BookOpen,
+  CreditCard,
+  Crown,
 } from "lucide-react";
 
 export default function StudentDashboard() {
   const { data: conversations, isLoading: conversationsLoading } =
     useConversations(ConversationStatus.ACTIVE);
   const { data: agents, isLoading: agentsLoading } = usePublicAgents();
+  const { data: entitlements } = useEntitlements();
 
   // Get recent conversations (last 5)
   const recentConversations = conversations?.slice(0, 5) || [];
@@ -87,6 +91,41 @@ export default function StudentDashboard() {
             </p>
           </div>
         </motion.div>
+
+        {/* Premium Access Banner - show if user has unlocked agents */}
+        {entitlements && entitlements.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-6"
+          >
+            <Link href="/student/payments">
+              <div className="bg-gradient-to-r from-purple-600/10 to-cyan-600/10 dark:from-purple-600/20 dark:to-cyan-600/20 rounded-xl border border-purple-200 dark:border-purple-500/30 p-4 hover:border-purple-300 dark:hover:border-purple-500/50 transition-all group">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center">
+                      <Crown className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        {entitlements.length} Premium Agent
+                        {entitlements.length > 1 ? "s" : ""} Unlocked
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-slate-400">
+                        View your payment history and active subscriptions
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 group-hover:text-purple-500 dark:group-hover:text-purple-300">
+                    <CreditCard className="w-5 h-5" />
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Recent Conversations */}
