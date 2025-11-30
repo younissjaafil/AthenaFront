@@ -236,6 +236,8 @@ export default function ChatPage({
     hasAccess,
     isLoading: checkingAccess,
     needsPayment,
+    pricePerMessage,
+    pricePerConversation,
   } = useAgentAccessInfo(
     agentId,
     false // Assume not free, let server determine access
@@ -431,8 +433,8 @@ export default function ChatPage({
             id: conversation.agentId,
             name: conversation.agent.name,
             description: conversation.agent.tagline,
-            pricePerMessage: 0,
-            pricePerConversation: 5, // Default, will be fetched from API
+            pricePerMessage: pricePerMessage || 0,
+            pricePerConversation: pricePerConversation || 0,
             profileImageUrl: conversation.agent.profileImageUrl,
           }}
         />

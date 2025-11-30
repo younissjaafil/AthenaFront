@@ -43,8 +43,13 @@ export function PaywallModal({ isOpen, onClose, agent }: PaywallModalProps) {
   const router = useRouter();
   const createPayment = useCreatePayment();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const price = agent.pricePerConversation || agent.pricePerMessage;
+  // Determine price - prioritize pricePerConversation for one-time access
+  const price =
+    agent.pricePerConversation > 0
+      ? agent.pricePerConversation
+      : agent.pricePerMessage;
   const pricingType =
     agent.pricePerConversation > 0 ? "conversation" : "message";
 
@@ -56,28 +61,34 @@ export function PaywallModal({ isOpen, onClose, agent }: PaywallModalProps) {
 
   const handleUnlock = async () => {
     setIsProcessing(true);
+    setError(null);
+
     try {
       const result = await createPayment.mutateAsync({
         agentId: agent.id,
         data: {
           amount: price,
           currency: PaymentCurrency.USD,
-          invoice: `Access to ${agent.name}`,
-          successRedirectUrl: `${window.location.origin}/student/chat?agentId=${agent.id}&payment=success`,
-          failureRedirectUrl: `${window.location.origin}/explore/agents/${agent.id}?payment=failed`,
+          invoice: `Unlock access to ${agent.name}`,
+          successRedirectUrl: `${window.location.origin}/student/payments/callback?status=success&agentId=${agent.id}`,
+          failureRedirectUrl: `${window.location.origin}/student/payments/callback?status=failed&agentId=${agent.id}`,
         },
       });
 
-      // If there's a collect URL (for external payment), redirect
+      // Whish returns collectUrl - redirect user to payment page
       if (result.collectUrl) {
         window.location.href = result.collectUrl;
       } else {
-        // Payment was instant/successful, close modal and refresh
-        onClose();
-        router.refresh();
+        // No collect URL means something unexpected
+        setError("Unable to initiate payment. Please try again.");
+        setIsProcessing(false);
       }
-    } catch (error) {
-      console.error("Payment failed:", error);
+    } catch (err: any) {
+      console.error("Payment failed:", err);
+      setError(
+        err?.response?.data?.message ||
+          "Payment initiation failed. Please try again."
+      );
       setIsProcessing(false);
     }
   };
@@ -210,6 +221,14 @@ export function PaywallModal({ isOpen, onClose, agent }: PaywallModalProps) {
 
               {/* CTA */}
               <div className="px-6 py-6 bg-gray-50 dark:bg-slate-800/50">
+                {error && (
+                  <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      {error}
+                    </p>
+                  </div>
+                )}
+
                 <button
                   onClick={handleUnlock}
                   disabled={isProcessing}
@@ -218,19 +237,23 @@ export function PaywallModal({ isOpen, onClose, agent }: PaywallModalProps) {
                   {isProcessing ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Processing...
+                      Redirecting to payment...
                     </>
                   ) : (
                     <>
                       <CreditCard className="w-5 h-5" />
-                      Unlock for ${price.toFixed(2)}
+                      Pay ${price.toFixed(2)} with Whish
                     </>
                   )}
                 </button>
 
-                <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-500 dark:text-slate-400">
+                <p className="text-center text-xs text-gray-500 dark:text-slate-400 mt-3">
+                  You&apos;ll receive an OTP on your phone to confirm payment
+                </p>
+
+                <div className="flex items-center justify-center gap-2 mt-3 text-xs text-gray-500 dark:text-slate-400">
                   <Shield className="w-3 h-3" />
-                  <span>Secure payment powered by Athena</span>
+                  <span>Secure payment powered by Whish</span>
                 </div>
               </div>
             </div>
@@ -254,7 +277,10 @@ export function PaywallCard({
   };
   onUnlock: () => void;
 }) {
-  const price = agent.pricePerConversation || agent.pricePerMessage;
+  const price =
+    agent.pricePerConversation > 0
+      ? agent.pricePerConversation
+      : agent.pricePerMessage;
   const pricingType =
     agent.pricePerConversation > 0 ? "conversation" : "message";
 
