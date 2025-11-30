@@ -193,7 +193,7 @@ export default function StudentSessionsPage() {
 
         {/* Book New Session */}
         <Link
-          href="/public/explore"
+          href="/explore"
           className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-teal-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
         >
           <Plus className="w-4 h-4" />
@@ -224,7 +224,7 @@ export default function StudentSessionsPage() {
               : "No sessions match your search criteria."}
           </p>
           <Link
-            href="/public/explore"
+            href="/explore"
             className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
           >
             <Plus className="w-4 h-4" />

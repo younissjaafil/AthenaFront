@@ -126,7 +126,7 @@ export default function BookSessionPage() {
             The agent you&apos;re looking for doesn&apos;t exist.
           </p>
           <Link
-            href="/public/explore"
+            href="/explore"
             className="text-purple-600 hover:underline"
           >
             Back to Explore
@@ -141,7 +141,7 @@ export default function BookSessionPage() {
       {/* Header */}
       <div className="mb-8">
         <Link
-          href="/public/explore"
+          href="/explore"
           className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
