@@ -183,7 +183,9 @@ export default function CreatorSessionDetailPage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2"
             >
-              {session.studentName ? `Session with ${session.studentName}` : "Session"}
+              {session.studentName
+                ? `Session with ${session.studentName}`
+                : "Session"}
             </motion.h1>
             <SessionStatusBadge status={session.status} size="lg" />
           </div>
@@ -285,18 +287,6 @@ export default function CreatorSessionDetailPage() {
             </div>
           </AnimatedCard>
 
-          {/* Description */}
-          {session.description && (
-            <AnimatedCard className="p-6" delay={0.1}>
-              <h2 className="font-semibold text-gray-900 dark:text-white mb-3">
-                Description
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
-                {session.description}
-              </p>
-            </AnimatedCard>
-          )}
-
           {/* Student Notes */}
           {session.studentNotes && (
             <AnimatedCard className="p-6" delay={0.2}>
@@ -390,20 +380,6 @@ export default function CreatorSessionDetailPage() {
               </p>
             </AnimatedCard>
           )}
-
-          {/* Timestamps */}
-          <AnimatedCard
-            className="p-6 text-sm text-gray-500 dark:text-gray-400"
-            delay={0.3}
-          >
-            <p>Booked: {new Date(session.createdAt).toLocaleString()}</p>
-            {session.startedAt && (
-              <p>Started: {new Date(session.startedAt).toLocaleString()}</p>
-            )}
-            {session.endedAt && (
-              <p>Ended: {new Date(session.endedAt).toLocaleString()}</p>
-            )}
-          </AnimatedCard>
         </div>
       </div>
     </div>

@@ -86,13 +86,6 @@ export function SessionCard({
           </span>
         </div>
 
-        {/* Description */}
-        {session.description && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-            {session.description}
-          </p>
-        )}
-
         {/* Price */}
         {session.price && session.price > 0 && (
           <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
