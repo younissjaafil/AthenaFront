@@ -38,7 +38,7 @@ export default function CreatorBookingPage() {
     creatorId,
     dateRange.startDate,
     dateRange.endDate,
-    settings?.defaultDuration || 15  // Use smallest duration to see more slots
+    settings?.defaultDuration || 15 // Use smallest duration to see more slots
   );
 
   // Debug logging
@@ -65,7 +65,6 @@ export default function CreatorBookingPage() {
     try {
       await bookSession.mutateAsync({
         creatorId,
-        title: `Session with ${fullName}`,
         scheduledAt: `${date}T${time}:00.000Z`,
         durationMinutes: duration,
       });

@@ -39,8 +39,6 @@ export interface Session {
   userId: string;
   creatorId: string;
   creatorName?: string;
-  title: string;
-  description?: string;
   scheduledAt: string;
   durationMinutes: number;
   status: SessionStatus;
@@ -51,17 +49,11 @@ export interface Session {
   currency?: string;
   studentNotes?: string;
   creatorNotes?: string;
-  startedAt?: string;
-  endedAt?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Book Session DTO
 export interface BookSessionDto {
   creatorId: string;
-  title: string;
-  description?: string;
   scheduledAt: string;
   durationMinutes: number;
   videoProvider?: VideoProvider;
