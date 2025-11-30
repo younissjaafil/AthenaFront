@@ -36,12 +36,36 @@
       "namedRegex": "^/creator/agents/(?<nxtPagentId>[^/]+?)/edit(?:/)?$"
     },
     {
+      "page": "/creator/agents/[agentId]/pricing",
+      "regex": "^/creator/agents/([^/]+?)/pricing(?:/)?$",
+      "routeKeys": {
+        "nxtPagentId": "nxtPagentId"
+      },
+      "namedRegex": "^/creator/agents/(?<nxtPagentId>[^/]+?)/pricing(?:/)?$"
+    },
+    {
+      "page": "/creator/sessions/[id]",
+      "regex": "^/creator/sessions/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/creator/sessions/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/explore/agents/[agentId]",
       "regex": "^/explore/agents/([^/]+?)(?:/)?$",
       "routeKeys": {
         "nxtPagentId": "nxtPagentId"
       },
       "namedRegex": "^/explore/agents/(?<nxtPagentId>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/explore/[creatorId]",
+      "regex": "^/explore/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPcreatorId": "nxtPcreatorId"
+      },
+      "namedRegex": "^/explore/(?<nxtPcreatorId>[^/]+?)(?:/)?$"
     },
     {
       "page": "/sign-in/[[...sign-in]]",
@@ -66,6 +90,22 @@
         "nxtPconversationId": "nxtPconversationId"
       },
       "namedRegex": "^/student/chat/(?<nxtPconversationId>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/student/sessions/book/[agentId]",
+      "regex": "^/student/sessions/book/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPagentId": "nxtPagentId"
+      },
+      "namedRegex": "^/student/sessions/book/(?<nxtPagentId>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/student/sessions/[id]",
+      "regex": "^/student/sessions/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/student/sessions/(?<nxtPid>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -118,6 +158,24 @@
       "namedRegex": "^/creator/dashboard(?:/)?$"
     },
     {
+      "page": "/creator/sessions",
+      "regex": "^/creator/sessions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/creator/sessions(?:/)?$"
+    },
+    {
+      "page": "/creator/sessions/availability",
+      "regex": "^/creator/sessions/availability(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/creator/sessions/availability(?:/)?$"
+    },
+    {
+      "page": "/creator/sessions/settings",
+      "regex": "^/creator/sessions/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/creator/sessions/settings(?:/)?$"
+    },
+    {
       "page": "/design-system",
       "regex": "^/design\\-system(?:/)?$",
       "routeKeys": {},
@@ -148,10 +206,34 @@
       "namedRegex": "^/student(?:/)?$"
     },
     {
+      "page": "/student/chats",
+      "regex": "^/student/chats(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/student/chats(?:/)?$"
+    },
+    {
       "page": "/student/dashboard",
       "regex": "^/student/dashboard(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/student/dashboard(?:/)?$"
+    },
+    {
+      "page": "/student/payments",
+      "regex": "^/student/payments(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/student/payments(?:/)?$"
+    },
+    {
+      "page": "/student/payments/callback",
+      "regex": "^/student/payments/callback(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/student/payments/callback(?:/)?$"
+    },
+    {
+      "page": "/student/sessions",
+      "regex": "^/student/sessions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/student/sessions(?:/)?$"
     }
   ],
   "dataRoutes": [],
