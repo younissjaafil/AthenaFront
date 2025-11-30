@@ -32,7 +32,6 @@ export default function BookSessionPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number>(60);
-  const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [step, setStep] = useState<"select" | "confirm">("select");
 
@@ -88,7 +87,6 @@ export default function BookSessionPage() {
     try {
       await bookSession.mutateAsync({
         creatorId: agent.creatorId,
-        title: title || `Session with ${agent.name}`,
         scheduledAt: scheduledAt.toISOString(),
         durationMinutes: selectedDuration,
         studentNotes: notes || undefined,
@@ -125,10 +123,7 @@ export default function BookSessionPage() {
           <p className="text-gray-500 mb-4">
             The agent you&apos;re looking for doesn&apos;t exist.
           </p>
-          <Link
-            href="/explore"
-            className="text-purple-600 hover:underline"
-          >
+          <Link href="/explore" className="text-purple-600 hover:underline">
             Back to Explore
           </Link>
         </AnimatedCard>
@@ -277,22 +272,8 @@ export default function BookSessionPage() {
             </div>
           </AnimatedCard>
 
-          {/* Session Title */}
-          <AnimatedCard className="p-6" delay={0.1}>
-            <label className="block font-medium text-gray-900 dark:text-white mb-2">
-              Session Title (optional)
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={`Session with ${agent.name}`}
-              className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </AnimatedCard>
-
           {/* Notes */}
-          <AnimatedCard className="p-6" delay={0.2}>
+          <AnimatedCard className="p-6" delay={0.1}>
             <label className="block font-medium text-gray-900 dark:text-white mb-2">
               Notes for the Creator (optional)
             </label>
