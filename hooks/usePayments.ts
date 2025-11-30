@@ -141,6 +141,27 @@ export function useSyncTransaction() {
   });
 }
 
+// Sync ALL pending transactions with payment gateway
+export function useSyncAllPending() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.post<{
+        synced: number;
+        updated: number;
+      }>(`/api/payments/sync-all-pending`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: paymentKeys.transactions });
+      queryClient.invalidateQueries({ queryKey: paymentKeys.entitlements });
+    },
+  });
+}
+
 // Hook to check and return combined access info
 export function useAgentAccessInfo(agentId: string, isFree: boolean) {
   const { isSignedIn } = useAuth();

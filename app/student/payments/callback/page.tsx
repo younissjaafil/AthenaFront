@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
-import { paymentKeys } from "@/hooks/usePayments";
+import { paymentKeys, useSyncAllPending } from "@/hooks/usePayments";
 import {
   CheckCircle2,
   XCircle,
@@ -19,14 +19,33 @@ function PaymentCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const syncAllPending = useSyncAllPending();
 
   const status = searchParams.get("status") || searchParams.get("payment");
   const agentId = searchParams.get("agentId");
   const transactionId = searchParams.get("transactionId");
 
   const [isLoading, setIsLoading] = useState(true);
+  const [syncStatus, setSyncStatus] = useState<"syncing" | "done" | "error">(
+    "syncing"
+  );
 
   useEffect(() => {
+    // Sync all pending payments with Whish API
+    // This ensures entitlements are granted even if callback failed
+    const syncPayments = async () => {
+      try {
+        setSyncStatus("syncing");
+        await syncAllPending.mutateAsync();
+        setSyncStatus("done");
+      } catch (error) {
+        console.error("Failed to sync payments:", error);
+        setSyncStatus("error");
+      }
+    };
+
+    syncPayments();
+
     // Invalidate payment-related queries to refresh entitlements
     queryClient.invalidateQueries({ queryKey: paymentKeys.entitlements });
     queryClient.invalidateQueries({ queryKey: paymentKeys.transactions });
@@ -39,10 +58,10 @@ function PaymentCallbackContent() {
     // Show success/failure for a moment
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, 2000);
 
     return () => clearTimeout(timer);
-  }, [queryClient, agentId]);
+  }, [queryClient, agentId, syncAllPending]);
 
   const isSuccess = status === "success";
 
@@ -52,7 +71,9 @@ function PaymentCallbackContent() {
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
           <p className="text-gray-600 dark:text-slate-400">
-            Processing payment...
+            {syncStatus === "syncing"
+              ? "Verifying payment..."
+              : "Processing payment..."}
           </p>
         </div>
       </div>
