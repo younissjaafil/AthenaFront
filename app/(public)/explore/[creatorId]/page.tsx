@@ -41,6 +41,15 @@ export default function CreatorBookingPage() {
     60
   );
 
+  // Debug logging
+  console.log("Booking page debug:", {
+    creatorId,
+    dateRange,
+    slots,
+    slotsLoading,
+    settings,
+  });
+
   const bookSession = useBookSession();
 
   const fullName =
@@ -48,7 +57,11 @@ export default function CreatorBookingPage() {
       ? `${creator.user.firstName} ${creator.user.lastName}`
       : creator?.title || creator?.user?.email || "Creator";
 
-  const handleBookSession = async (date: string, time: string, duration: number) => {
+  const handleBookSession = async (
+    date: string,
+    time: string,
+    duration: number
+  ) => {
     try {
       await bookSession.mutateAsync({
         creatorId,
