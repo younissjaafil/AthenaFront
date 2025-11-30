@@ -76,7 +76,7 @@ export default function PaymentHistoryPage() {
   const totalSpent =
     transactions
       ?.filter((t) => t.status === TransactionStatus.SUCCESS)
-      .reduce((sum, t) => sum + t.amount, 0) || 0;
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0) || 0;
 
   if (isLoading) {
     return (
@@ -311,7 +311,7 @@ export default function PaymentHistoryPage() {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-gray-900 dark:text-white">
-                        ${(transaction.amount || 0).toFixed(2)}{" "}
+                        ${Number(transaction.amount || 0).toFixed(2)}{" "}
                         <span className="text-sm font-normal text-gray-500">
                           {transaction.currency || "USD"}
                         </span>
