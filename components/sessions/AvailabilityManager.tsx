@@ -2,22 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { AnimatedCard } from "@/components/ui/animated-card";
-import { 
-  Calendar, 
-  Clock, 
-  Plus, 
-  Trash2, 
-  Save, 
+import {
+  Calendar,
+  Clock,
+  Plus,
+  Trash2,
+  Save,
   Loader2,
   ChevronDown,
-  ChevronUp 
+  ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { 
-  useMyAvailability, 
-  useSetAvailability 
-} from "@/hooks/useSessions";
-import type { AvailabilitySlot } from "@/lib/types/session";
+import { useMyAvailability, useSetAvailability } from "@/hooks/useSessions";
+import type { TimeSlot } from "@/lib/types/session";
 
 const DAYS = [
   { value: 0, label: "Sunday", short: "Sun" },
@@ -52,12 +49,12 @@ interface DayAvailability {
 export function AvailabilityManager() {
   const { data: existingAvailability, isLoading } = useMyAvailability();
   const setAvailability = useSetAvailability();
-  
+
   const [useStandardHours, setUseStandardHours] = useState(true);
   const [standardStart, setStandardStart] = useState("09:00");
   const [standardEnd, setStandardEnd] = useState("17:00");
   const [expandedDays, setExpandedDays] = useState<number[]>([]);
-  
+
   const [days, setDays] = useState<DayAvailability[]>(
     DAYS.map((d) => ({
       dayOfWeek: d.value,
@@ -82,7 +79,7 @@ export function AvailabilityManager() {
         };
       });
       setDays(newDays);
-      
+
       // Check if all enabled days have the same hours
       const enabledDays = newDays.filter((d) => d.enabled);
       if (enabledDays.length > 0) {
@@ -104,8 +101,8 @@ export function AvailabilityManager() {
     setDays((prev) =>
       prev.map((d) =>
         d.dayOfWeek === dayOfWeek
-          ? { 
-              ...d, 
+          ? {
+              ...d,
               enabled: !d.enabled,
               startTime: useStandardHours ? standardStart : d.startTime,
               endTime: useStandardHours ? standardEnd : d.endTime,
@@ -136,7 +133,7 @@ export function AvailabilityManager() {
   };
 
   const handleSave = async () => {
-    const slots: AvailabilitySlot[] = days
+    const slots: TimeSlot[] = days
       .filter((d) => d.enabled)
       .map((d) => ({
         dayOfWeek: d.dayOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6,
@@ -166,7 +163,7 @@ export function AvailabilityManager() {
             Weekly Availability
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Select the days and times you're available for sessions
+            Select the days and times you&apos;re available for sessions
           </p>
         </div>
         <button
@@ -201,7 +198,9 @@ export function AvailabilityManager() {
             onClick={() => setUseStandardHours(!useStandardHours)}
             className={cn(
               "relative w-12 h-6 rounded-full transition-colors",
-              useStandardHours ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
+              useStandardHours
+                ? "bg-purple-600"
+                : "bg-gray-300 dark:bg-gray-600"
             )}
           >
             <span
@@ -323,16 +322,32 @@ export function AvailabilityManager() {
                     <>
                       {useStandardHours ? (
                         <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {TIME_OPTIONS.find((t) => t.value === standardStart)?.label} -{" "}
-                          {TIME_OPTIONS.find((t) => t.value === standardEnd)?.label}
+                          {
+                            TIME_OPTIONS.find((t) => t.value === standardStart)
+                              ?.label
+                          }{" "}
+                          -{" "}
+                          {
+                            TIME_OPTIONS.find((t) => t.value === standardEnd)
+                              ?.label
+                          }
                         </span>
                       ) : (
                         <button
                           onClick={() => toggleExpanded(day.value)}
                           className="flex items-center gap-1 text-sm text-purple-600 hover:text-purple-700"
                         >
-                          {TIME_OPTIONS.find((t) => t.value === dayData.startTime)?.label} -{" "}
-                          {TIME_OPTIONS.find((t) => t.value === dayData.endTime)?.label}
+                          {
+                            TIME_OPTIONS.find(
+                              (t) => t.value === dayData.startTime
+                            )?.label
+                          }{" "}
+                          -{" "}
+                          {
+                            TIME_OPTIONS.find(
+                              (t) => t.value === dayData.endTime
+                            )?.label
+                          }
                           {isExpanded ? (
                             <ChevronUp className="w-4 h-4" />
                           ) : (

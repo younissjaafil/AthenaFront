@@ -85,7 +85,10 @@ export default function CreatorAvailabilityPage() {
       )}
 
       {/* Help Card */}
-      <AnimatedCard className="p-4 mt-8 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" delay={0.2}>
+      <AnimatedCard
+        className="p-4 mt-8 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+        delay={0.2}
+      >
         <div className="flex items-start gap-3">
           <Clock className="w-5 h-5 text-blue-500 mt-0.5" />
           <div className="text-sm">
@@ -93,8 +96,14 @@ export default function CreatorAvailabilityPage() {
               How availability works
             </p>
             <ul className="text-blue-700 dark:text-blue-300 space-y-1">
-              <li>• <strong>Weekly Schedule:</strong> Set your regular recurring availability (e.g., every Monday 9 AM - 5 PM)</li>
-              <li>• <strong>Date Overrides:</strong> Add one-time availability for specific dates or block days when you&apos;re unavailable</li>
+              <li>
+                • <strong>Weekly Schedule:</strong> Set your regular recurring
+                availability (e.g., every Monday 9 AM - 5 PM)
+              </li>
+              <li>
+                • <strong>Date Overrides:</strong> Add one-time availability for
+                specific dates or block days when you&apos;re unavailable
+              </li>
               <li>• Date overrides take priority over your weekly schedule</li>
             </ul>
           </div>
