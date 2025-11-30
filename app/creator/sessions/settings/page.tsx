@@ -104,12 +104,12 @@ export default function SessionSettingsPage() {
     try {
       // Save weekly availability
       await setAvailability.mutateAsync({ slots });
-      
+
       // Save date overrides
       if (dateOverrides.length > 0) {
         await setOverrides.mutateAsync(dateOverrides);
       }
-      
+
       setHasAvailabilityChanges(false);
     } catch (error) {
       console.error("Failed to save availability:", error);

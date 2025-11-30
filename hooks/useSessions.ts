@@ -384,7 +384,13 @@ export function useMyDateOverrides() {
     queryKey: ["date-overrides", "my"],
     queryFn: async () => {
       const response = await apiClient.get<
-        { id: string; date: string; startTime: string | null; endTime: string | null; isAvailable: boolean }[]
+        {
+          id: string;
+          date: string;
+          startTime: string | null;
+          endTime: string | null;
+          isAvailable: boolean;
+        }[]
       >("/api/availability/overrides");
       return response.data;
     },
@@ -399,7 +405,12 @@ export function useSetDateOverrides() {
 
   return useMutation({
     mutationFn: async (
-      overrides: { date: string; startTime?: string; endTime?: string; isAvailable: boolean }[]
+      overrides: {
+        date: string;
+        startTime?: string;
+        endTime?: string;
+        isAvailable: boolean;
+      }[]
     ) => {
       const response = await apiClient.post("/api/availability/overrides", {
         overrides,
