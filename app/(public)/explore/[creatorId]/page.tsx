@@ -11,6 +11,7 @@ import {
 } from "@/hooks/useSessions";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function CreatorBookingPage() {
   const params = useParams();
@@ -62,9 +63,10 @@ export default function CreatorBookingPage() {
     try {
       await bookSession.mutateAsync({
         creatorId,
+        title: `Session with ${fullName}`,
         scheduledAt: `${selectedDate}T${selectedTime}:00.000Z`,
         durationMinutes: selectedDuration,
-        notes: notes || undefined,
+        studentNotes: notes || undefined,
       });
 
       router.push("/student/chats?tab=sessions&booked=true");
@@ -109,12 +111,13 @@ export default function CreatorBookingPage() {
       {/* Creator Header */}
       <div className="card p-6 mb-8">
         <div className="flex items-start gap-6">
-          <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-brand-purple-400 to-brand-teal-400 flex items-center justify-center text-white text-3xl font-bold overflow-hidden">
+          <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-brand-purple-400 to-brand-teal-400 flex items-center justify-center text-white text-3xl font-bold overflow-hidden relative">
             {creator.user?.profileImageUrl ? (
-              <img
+              <Image
                 src={creator.user.profileImageUrl}
                 alt={fullName}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               fullName.charAt(0).toUpperCase()

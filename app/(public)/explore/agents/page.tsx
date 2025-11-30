@@ -6,6 +6,7 @@ import { usePublicAgents, useFreeAgents } from "@/hooks/useAgents";
 import { PublicAgent } from "@/lib/types/conversation";
 import { AGENT_CATEGORIES } from "@/lib/types/agent";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Star,
   MessageSquare,
@@ -43,10 +44,11 @@ function AgentCard({ agent, index }: { agent: PublicAgent; index: number }) {
           {/* Header with image */}
           <div className="relative h-32 bg-gradient-to-br from-purple-600/20 to-cyan-600/20">
             {agent.profileImageUrl ? (
-              <img
+              <Image
                 src={agent.profileImageUrl}
                 alt={agent.name}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

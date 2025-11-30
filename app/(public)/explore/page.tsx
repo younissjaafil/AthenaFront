@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useVerifiedCreators, Creator } from "@/hooks/useCreators";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 
 function CreatorCard({ creator }: { creator: Creator }) {
   const fullName =
@@ -16,12 +17,13 @@ function CreatorCard({ creator }: { creator: Creator }) {
       <div className="card-hover p-6 cursor-pointer transition-all hover:scale-[1.02]">
         {/* Avatar */}
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-brand-purple-400 to-brand-teal-400 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
+          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-brand-purple-400 to-brand-teal-400 flex items-center justify-center text-white text-2xl font-bold overflow-hidden relative">
             {creator.user?.profileImageUrl ? (
-              <img
+              <Image
                 src={creator.user.profileImageUrl}
                 alt={fullName}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               fullName.charAt(0).toUpperCase()
