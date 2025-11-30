@@ -9,7 +9,7 @@ function CreatorCard({ creator }: { creator: Creator }) {
   const fullName =
     creator.user?.firstName && creator.user?.lastName
       ? `${creator.user.firstName} ${creator.user.lastName}`
-      : creator.title;
+      : creator.user?.email || "Creator";
 
   return (
     <Link href={`/explore/${creator.id}`}>
@@ -29,7 +29,7 @@ function CreatorCard({ creator }: { creator: Creator }) {
           </div>
           <div className="flex-1">
             <h3 className="heading-3 mb-1">{fullName}</h3>
-            <p className="text-sm text-brand-purple-400">{creator.title}</p>
+            <p className="text-sm text-brand-purple-400 capitalize">{creator.expertiseLevel} level</p>
           </div>
         </div>
 
@@ -54,16 +54,16 @@ function CreatorCard({ creator }: { creator: Creator }) {
 
         {/* Stats */}
         <div className="flex items-center gap-4 text-xs text-gray-400">
-          {creator.averageRating && (
+          {creator.averageRating > 0 && (
             <span className="flex items-center gap-1">
               <span className="text-yellow-400">★</span>
               {creator.averageRating.toFixed(1)}
             </span>
           )}
           <span>{creator.totalSessions} sessions</span>
-          {creator.sessionRate && (
+          {creator.hourlyRate > 0 && (
             <span className="text-brand-teal-400 font-medium">
-              ${creator.sessionRate}/session
+              ${creator.hourlyRate}/hr
             </span>
           )}
         </div>

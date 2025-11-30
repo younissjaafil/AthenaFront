@@ -54,7 +54,7 @@ export default function CreatorBookingPage() {
   const fullName =
     creator?.user?.firstName && creator?.user?.lastName
       ? `${creator.user.firstName} ${creator.user.lastName}`
-      : creator?.title || "Creator";
+      : creator?.user?.email || "Creator";
 
   const handleBooking = async () => {
     if (!selectedDate || !selectedTime) return;
@@ -122,7 +122,7 @@ export default function CreatorBookingPage() {
           </div>
           <div className="flex-1">
             <h1 className="heading-2 mb-1">{fullName}</h1>
-            <p className="text-brand-purple-400 mb-2">{creator.title}</p>
+            <p className="text-brand-purple-400 mb-2 capitalize">{creator.expertiseLevel} level</p>
             {creator.tagline && (
               <p className="text-gray-400 mb-4">{creator.tagline}</p>
             )}
@@ -140,12 +140,12 @@ export default function CreatorBookingPage() {
           </div>
 
           <div className="text-right">
-            {creator.sessionRate && (
+            {creator.hourlyRate > 0 && (
               <div className="text-2xl font-bold text-brand-teal-400">
-                ${creator.sessionRate}
+                ${creator.hourlyRate}
               </div>
             )}
-            <div className="text-gray-400 text-sm">per session</div>
+            <div className="text-gray-400 text-sm">per hour</div>
           </div>
         </div>
       </div>
