@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 const socialNav = [
-  { name: "Home", href: "/home", icon: Home },
+  { name: "Home", href: "/", icon: Home },
   { name: "Notifications", href: "/notifications", icon: Bell },
   { name: "Messages", href: "/messages", icon: MessageSquare },
   { name: "Collections", href: "/collections", icon: Bookmark },
