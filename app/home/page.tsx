@@ -6,188 +6,237 @@ import {
   Home,
   Bell,
   MessageSquare,
+  Bookmark,
   Users,
-  Compass,
-  Sparkles,
+  User,
+  MoreHorizontal,
+  Plus,
+  Search,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  X,
+  ImageIcon,
+  AlignLeft,
+  ArrowUpRight,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { useHomeFeed, useDiscoverFeed, Post } from "@/hooks/useFeed";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { CreatePostForm, PostCard, SuggestedCreators } from "@/components/feed";
+import { PostCard } from "@/components/feed";
 import { SmartRouter } from "@/components/auth";
+import { useVerifiedCreators } from "@/hooks/useCreators";
 
 const navItems = [
   { href: "/home", label: "Home", icon: Home },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/messages", label: "Messages", icon: MessageSquare },
+  { href: "/collections", label: "Collections", icon: Bookmark },
   { href: "/subscriptions", label: "Subscriptions", icon: Users },
-  { href: "/explore", label: "Explore", icon: Compass },
+  { href: "/profile", label: "My profile", icon: User },
+  { href: "#", label: "More", icon: MoreHorizontal },
 ];
 
 export default function HomePage() {
-  const { isSignedIn } = useAuth();
   const { data: currentUser } = useCurrentUser();
   const pathname = usePathname();
-  const [feedType, setFeedType] = useState<"following" | "discover">(
-    "following"
-  );
+  const [feedFilter, setFeedFilter] = useState<"all" | "subscribed">("all");
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: homeFeedData, isLoading: homeLoading } = useHomeFeed(page, 20);
   const { data: discoverFeedData, isLoading: discoverLoading } =
     useDiscoverFeed(page, 20);
 
-  const feedData = feedType === "following" ? homeFeedData : discoverFeedData;
-  const isLoading = feedType === "following" ? homeLoading : discoverLoading;
+  const feedData =
+    feedFilter === "subscribed" ? homeFeedData : discoverFeedData;
+  const isLoading = feedFilter === "subscribed" ? homeLoading : discoverLoading;
 
   const posts: Post[] = feedData?.posts || [];
   const hasMore = feedData?.hasMore || false;
 
-  const isCreator = currentUser?.isCreator === true;
-
   return (
     <SmartRouter>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-6 py-6">
-            {/* Left Sidebar - Navigation */}
-            <aside className="hidden lg:block w-64 flex-shrink-0">
-              <div className="sticky top-20">
-                <nav className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                  <ul className="space-y-1">
-                    {navItems.map((item) => {
-                      const isActive = pathname === item.href;
-                      return (
-                        <li key={item.href}>
-                          <Link
-                            href={item.href}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                              isActive
-                                ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
-                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                            }`}
-                          >
-                            <item.icon className="w-5 h-5" />
-                            <span className="font-medium">{item.label}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </nav>
-
-                {/* Quick Actions for Creators */}
-                {isCreator && (
-                  <div className="mt-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-                      Creator Tools
-                    </h3>
-                    <div className="space-y-2">
-                      <Link href="/creator/dashboard">
-                        <button className="w-full flex items-center justify-start px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Dashboard
-                        </button>
-                      </Link>
-                      <Link href="/creator/sessions">
-                        <button className="w-full flex items-center justify-start px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                          <Users className="w-4 h-4 mr-2" />
-                          Sessions
-                        </button>
-                      </Link>
-                    </div>
+      <div className="min-h-screen bg-white dark:bg-gray-950">
+        <div className="flex">
+          {/* Left Sidebar - Fixed */}
+          <aside className="hidden lg:flex flex-col w-60 h-screen sticky top-0 border-r border-gray-200 dark:border-gray-800">
+            {/* User Avatar */}
+            <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+              <div className="flex items-center gap-3">
+                {currentUser?.profileImageUrl ? (
+                  <Image
+                    src={currentUser.profileImageUrl}
+                    alt="Profile"
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-semibold">
+                    {currentUser?.firstName?.[0] || "U"}
                   </div>
                 )}
               </div>
-            </aside>
+            </div>
 
-            {/* Main Feed */}
-            <main className="flex-1 min-w-0 max-w-2xl">
-              {/* Feed Type Toggle */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setFeedType("following")}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                        feedType === "following"
-                          ? "bg-purple-600 text-white"
-                          : "border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      }`}
-                    >
-                      Following
-                    </button>
-                    <button
-                      onClick={() => setFeedType("discover")}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center ${
-                        feedType === "discover"
-                          ? "bg-purple-600 text-white"
-                          : "border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      }`}
-                    >
-                      <Compass className="w-4 h-4 mr-2" />
-                      Discover
-                    </button>
+            {/* Navigation */}
+            <nav className="flex-1 py-2">
+              <ul className="space-y-1">
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`flex items-center gap-4 px-6 py-3 text-[15px] transition-colors ${
+                          isActive
+                            ? "text-gray-900 dark:text-white font-semibold"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                        }`}
+                      >
+                        <item.icon
+                          className="w-5 h-5"
+                          strokeWidth={isActive ? 2.5 : 2}
+                        />
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+
+            {/* New Post Button */}
+            <div className="p-4">
+              <Link href="/creator/post/new">
+                <button className="w-full flex items-center justify-center gap-2 py-3 bg-[#00AFF0] hover:bg-[#009AD6] text-white font-semibold rounded-full transition-colors">
+                  <Plus className="w-5 h-5" />
+                  NEW POST
+                </button>
+              </Link>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <main className="flex-1 min-w-0">
+            {/* Header */}
+            <header className="sticky top-0 z-10 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+              <div className="flex items-center justify-between px-4 h-14">
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  HOME
+                </h1>
+                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                  <MoreHorizontal className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+            </header>
+
+            <div className="max-w-2xl mx-auto">
+              {/* Compose Box */}
+              <div className="border-b border-gray-200 dark:border-gray-800 p-4">
+                <div className="flex items-start gap-3">
+                  {currentUser?.profileImageUrl ? (
+                    <Image
+                      src={currentUser.profileImageUrl}
+                      alt="Profile"
+                      width={40}
+                      height={40}
+                      className="rounded-full object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      {currentUser?.firstName?.[0] || "U"}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      placeholder="Compose new post..."
+                      className="w-full bg-transparent text-gray-500 dark:text-gray-400 placeholder-gray-400 outline-none py-2"
+                    />
+                    <div className="flex items-center gap-4 mt-2 text-gray-400">
+                      <button className="hover:text-[#00AFF0] transition-colors">
+                        <ImageIcon className="w-5 h-5" />
+                      </button>
+                      <button className="hover:text-[#00AFF0] transition-colors">
+                        <AlignLeft className="w-5 h-5" />
+                      </button>
+                      <button className="hover:text-[#00AFF0] transition-colors">
+                        <ArrowUpRight className="w-5 h-5" />
+                      </button>
+                      <button className="hover:text-[#00AFF0] transition-colors text-sm font-medium">
+                        Aa
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Create Post Form (only for creators) */}
-              {isCreator && (
-                <div className="mb-4">
-                  <CreatePostForm />
-                </div>
-              )}
+              {/* Feed Filter Tabs */}
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                <button
+                  onClick={() => setFeedFilter("all")}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                    feedFilter === "all"
+                      ? "bg-[#00AFF0] text-white"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setFeedFilter("subscribed")}
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </div>
 
               {/* Posts Feed */}
-              <div className="space-y-4">
+              <div>
                 {isLoading ? (
                   // Loading skeletons
                   Array.from({ length: 3 }).map((_, i) => (
                     <div
                       key={i}
-                      className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 animate-pulse"
+                      className="border-b border-gray-200 dark:border-gray-800 p-4 animate-pulse"
                     >
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full" />
-                        <div className="space-y-2">
-                          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
-                          <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-full" />
+                        <div className="space-y-2 flex-1">
+                          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-800 rounded" />
+                          <div className="h-3 w-24 bg-gray-200 dark:bg-gray-800 rounded" />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
                       </div>
-                      <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mt-4" />
+                      <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded-lg mt-4" />
                     </div>
                   ))
                 ) : posts.length === 0 ? (
                   // Empty state
-                  <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
-                    <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Compass className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                  <div className="p-8 text-center">
+                    <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Home className="w-10 h-10 text-gray-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      {feedType === "following"
-                        ? "No posts from creators you follow"
-                        : "No posts to discover yet"}
+                      Your feed is empty
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      {feedType === "following"
-                        ? "Follow some creators to see their posts here"
-                        : "Be the first to post something!"}
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">
+                      Subscribe to creators to see their posts here
                     </p>
-                    {feedType === "following" && (
-                      <Link href="/explore">
-                        <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center mx-auto">
-                          <Compass className="w-4 h-4 mr-2" />
-                          Explore Creators
-                        </button>
-                      </Link>
-                    )}
+                    <Link href="/explore">
+                      <button className="px-6 py-2.5 bg-[#00AFF0] hover:bg-[#009AD6] text-white font-semibold rounded-full transition-colors">
+                        Explore Creators
+                      </button>
+                    </Link>
                   </div>
                 ) : (
                   // Posts list
@@ -198,6 +247,7 @@ export default function HomePage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
+                        className="border-b border-gray-200 dark:border-gray-800"
                       >
                         <PostCard post={post} />
                       </motion.div>
@@ -207,74 +257,207 @@ export default function HomePage() {
 
                 {/* Load More */}
                 {hasMore && (
-                  <div className="text-center py-4">
+                  <div className="text-center py-6">
                     <button
                       onClick={() => setPage((p) => p + 1)}
-                      className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      className="px-6 py-2 text-[#00AFF0] font-medium hover:underline"
                     >
                       Load More
                     </button>
                   </div>
                 )}
               </div>
-            </main>
+            </div>
+          </main>
 
-            {/* Right Sidebar - Suggestions */}
-            <aside className="hidden xl:block w-80 flex-shrink-0">
-              <div className="sticky top-20 space-y-4">
-                <SuggestedCreators />
+          {/* Right Sidebar */}
+          <aside className="hidden xl:block w-80 h-screen sticky top-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto">
+            {/* Search */}
+            <div className="p-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search posts"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full text-sm outline-none focus:ring-2 focus:ring-[#00AFF0] transition-shadow"
+                />
+              </div>
+            </div>
 
-                {/* Trending Topics */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                    Trending Topics
-                  </h3>
-                  <div className="space-y-3">
-                    {[
-                      "AI Development",
-                      "Web3",
-                      "Machine Learning",
-                      "Design",
-                    ].map((topic) => (
-                      <Link
-                        key={topic}
-                        href={`/explore?topic=${encodeURIComponent(topic)}`}
-                        className="block p-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                      >
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          #{topic.replace(/\s+/g, "")}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {Math.floor(Math.random() * 100) + 10} posts
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Footer Links */}
-                <div className="text-xs text-gray-500 dark:text-gray-400 px-2">
-                  <div className="flex flex-wrap gap-x-2 gap-y-1">
-                    <Link href="/about" className="hover:underline">
-                      About
-                    </Link>
-                    <Link href="/help" className="hover:underline">
-                      Help
-                    </Link>
-                    <Link href="/privacy" className="hover:underline">
-                      Privacy
-                    </Link>
-                    <Link href="/terms" className="hover:underline">
-                      Terms
-                    </Link>
-                  </div>
-                  <p className="mt-2">© 2024 Athena</p>
+            {/* Suggestions */}
+            <div className="px-4 pb-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Suggestions
+                </h3>
+                <div className="flex items-center gap-1">
+                  <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                    <X className="w-4 h-4 text-gray-400" />
+                  </button>
+                  <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                    <RefreshCw className="w-4 h-4 text-gray-400" />
+                  </button>
+                  <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                    <ChevronLeft className="w-4 h-4 text-gray-400" />
+                  </button>
+                  <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
                 </div>
               </div>
-            </aside>
-          </div>
+
+              {/* Creator Suggestion Cards */}
+              <SuggestedCreatorsCards />
+
+              {/* Pagination Dots */}
+              <div className="flex items-center justify-center gap-1 mt-4">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      i === 0 ? "bg-[#00AFF0]" : "bg-gray-300 dark:bg-gray-700"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Footer Links */}
+            <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-800">
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <Link href="/privacy" className="hover:underline">
+                  Privacy
+                </Link>
+                <span>·</span>
+                <Link href="/cookies" className="hover:underline">
+                  Cookie Notice
+                </Link>
+                <span>·</span>
+                <Link href="/terms" className="hover:underline">
+                  Terms of Service
+                </Link>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </SmartRouter>
+  );
+}
+
+// OnlyFans-style suggestion cards with cover photo
+function SuggestedCreatorsCards() {
+  const { data: creators, isLoading } = useVerifiedCreators();
+
+  // Take first 3 creators for suggestions
+  const suggestedCreators = creators?.slice(0, 3) || [];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-24 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (suggestedCreators.length === 0) {
+    return (
+      <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+        No suggestions available
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {suggestedCreators.map((creator) => (
+        <Link
+          key={creator.id}
+          href={`/u/${creator.user?.email?.split("@")[0] || creator.id}`}
+          className="block relative rounded-lg overflow-hidden group"
+        >
+          {/* Cover Image - Gradient background */}
+          <div
+            className="h-24 relative"
+            style={{
+              background: `linear-gradient(135deg, 
+                hsl(${Math.random() * 60 + 200}, 70%, 50%), 
+                hsl(${Math.random() * 60 + 280}, 70%, 40%))`,
+            }}
+          >
+            {/* Free Badge */}
+            <span className="absolute top-2 left-2 px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded">
+              Free
+            </span>
+            {/* Verified Badge */}
+            {creator.status === "verified" && (
+              <span className="absolute top-2 right-2 w-5 h-5 bg-[#00AFF0] rounded-full flex items-center justify-center">
+                <svg
+                  className="w-3 h-3 text-white"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                >
+                  <path
+                    d="M5 13l4 4L19 7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            )}
+          </div>
+
+          {/* Avatar & Info Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
+            <div className="flex items-end gap-2">
+              {/* Avatar */}
+              {creator.user?.profileImageUrl ? (
+                <Image
+                  src={creator.user.profileImageUrl}
+                  alt={creator.user.firstName || "Creator"}
+                  width={44}
+                  height={44}
+                  className="rounded-full border-2 border-white object-cover"
+                />
+              ) : (
+                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-amber-400 to-pink-500 border-2 border-white flex items-center justify-center text-white font-bold">
+                  {creator.user?.firstName?.[0] || creator.title?.[0] || "C"}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm truncate flex items-center gap-1">
+                  {creator.user?.firstName || creator.title}
+                  {creator.status === "verified" && (
+                    <svg
+                      className="w-3.5 h-3.5 text-[#00AFF0]"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                    </svg>
+                  )}
+                </p>
+                <p className="text-gray-300 text-xs truncate">
+                  @
+                  {creator.user?.email?.split("@")[0] || creator.id.slice(0, 8)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Hover Overlay */}
+          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Link>
+      ))}
+    </div>
   );
 }
