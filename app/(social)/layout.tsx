@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useCurrentUser, useEnableCreatorPower } from "@/hooks/useCurrentUser";
 import {
   Home,
   Bell,
@@ -40,8 +40,21 @@ export default function SocialLayout({
   const { data: currentUser } = useCurrentUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const enableCreatorPower = useEnableCreatorPower();
 
   const isCreator = currentUser?.isCreator || currentUser?.isAdmin;
+
+  const handleBecomeCreator = async () => {
+    try {
+      await enableCreatorPower.mutateAsync({
+        title: "Creator",
+        bio: "New creator on Athena",
+        expertiseLevel: "beginner",
+      });
+    } catch (error) {
+      console.error("Failed to become creator:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -94,22 +107,34 @@ export default function SocialLayout({
           {/* User Info - Desktop */}
           <div className="hidden lg:block p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex flex-col gap-2">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {currentUser?.firstName || currentUser?.username || "User"}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  @{currentUser?.username || "user"}
-                </p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {currentUser?.firstName || currentUser?.username || "User"}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    @{currentUser?.username || "user"}
+                  </p>
+                </div>
+                {isCreator && (
+                  <span className="px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/50 border border-green-300 dark:border-green-700 rounded-full">
+                    Creator
+                  </span>
+                )}
               </div>
               {!isCreator && (
-                <Link
-                  href="/creator/onboarding"
-                  className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg transition-all"
+                <button
+                  onClick={handleBecomeCreator}
+                  disabled={enableCreatorPower.isPending}
+                  className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Become Creator</span>
-                </Link>
+                  <span>
+                    {enableCreatorPower.isPending
+                      ? "Activating..."
+                      : "Become Creator"}
+                  </span>
+                </button>
               )}
             </div>
           </div>
