@@ -3,6 +3,18 @@
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_ATHENA_CORE_URL;
+
+/**
+ * Pre-configured API client for use in hooks.
+ * Note: For authenticated requests, use createClientApiClient with getToken.
+ */
+export const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 /**
  * Client-side API client that uses Clerk's useAuth hook.
  * Use this in client components.

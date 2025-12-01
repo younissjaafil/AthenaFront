@@ -10,6 +10,7 @@ import type {
   CreateTestimonialDto,
   UpdateTestimonialDto,
   TestimonialsStats,
+  CreatorStats,
 } from "@/lib/types/profile";
 
 // ==================== PROFILE HOOKS ====================
@@ -318,5 +319,163 @@ export function usePromoteToCreator() {
       queryClient.invalidateQueries({ queryKey: ["creators"] });
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
+  });
+}
+
+// ==================== CREATOR FOLLOW HOOKS ====================
+
+/**
+ * Follow a creator
+ */
+export function useFollowCreator() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (creatorId: string): Promise<void> => {
+      await apiClient.post(`/creators/${creatorId}/follow`);
+    },
+    onSuccess: (_, creatorId) => {
+      queryClient.invalidateQueries({ queryKey: ["creators", creatorId] });
+      queryClient.invalidateQueries({ queryKey: ["creatorStats", creatorId] });
+      queryClient.invalidateQueries({
+        queryKey: ["isFollowingCreator", creatorId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["myFollowingCreators"] });
+      queryClient.invalidateQueries({ queryKey: ["topCreators"] });
+    },
+  });
+}
+
+/**
+ * Unfollow a creator
+ */
+export function useUnfollowCreator() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (creatorId: string): Promise<void> => {
+      await apiClient.delete(`/creators/${creatorId}/follow`);
+    },
+    onSuccess: (_, creatorId) => {
+      queryClient.invalidateQueries({ queryKey: ["creators", creatorId] });
+      queryClient.invalidateQueries({ queryKey: ["creatorStats", creatorId] });
+      queryClient.invalidateQueries({
+        queryKey: ["isFollowingCreator", creatorId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["myFollowingCreators"] });
+      queryClient.invalidateQueries({ queryKey: ["topCreators"] });
+    },
+  });
+}
+
+/**
+ * Get stats for a creator (followers, rank, earnings, etc)
+ */
+export function useCreatorStats(creatorId: string) {
+  return useQuery({
+    queryKey: ["creatorStats", creatorId],
+    queryFn: async (): Promise<CreatorStats> => {
+      const res = await apiClient.get(`/creators/${creatorId}/stats`);
+      return res.data;
+    },
+    enabled: !!creatorId,
+  });
+}
+
+/**
+ * Check if current user is following a creator
+ */
+export function useIsFollowingCreator(creatorId: string) {
+  return useQuery({
+    queryKey: ["isFollowingCreator", creatorId],
+    queryFn: async (): Promise<{ isFollowing: boolean }> => {
+      const res = await apiClient.get(`/creators/${creatorId}/is-following`);
+      return res.data;
+    },
+    enabled: !!creatorId,
+  });
+}
+
+/**
+ * Get list of creators that current user is following
+ */
+export function useMyFollowingCreators(page: number = 1, limit: number = 20) {
+  return useQuery({
+    queryKey: ["myFollowingCreators", page, limit],
+    queryFn: async (): Promise<{
+      creators: any[]; // TODO: Import Creator type from useCreators
+      total: number;
+    }> => {
+      const res = await apiClient.get(`/creators/me/following`, {
+        params: { page, limit },
+      });
+      return res.data;
+    },
+  });
+}
+
+/**
+ * Get current user's creator stats (only if user is a creator)
+ */
+export function useMyCreatorStats() {
+  return useQuery({
+    queryKey: ["myCreatorStats"],
+    queryFn: async (): Promise<CreatorStats> => {
+      const res = await apiClient.get(`/creators/me/stats`);
+      return res.data;
+    },
+  });
+}
+
+/**
+ * Get top-ranked creators
+ */
+export function useTopCreators(limit: number = 10) {
+  return useQuery({
+    queryKey: ["topCreators", limit],
+    queryFn: async (): Promise<any[]> => {
+      // TODO: Import Creator type from useCreators
+      const res = await apiClient.get(`/creators/top/ranked`, {
+        params: { limit },
+      });
+      return res.data;
+    },
+  });
+}
+
+/**
+ * Get followers count for a creator
+ */
+export function useCreatorFollowersCount(creatorId: string) {
+  return useQuery({
+    queryKey: ["creatorFollowersCount", creatorId],
+    queryFn: async (): Promise<{ count: number }> => {
+      const res = await apiClient.get(`/creators/${creatorId}/followers-count`);
+      return res.data;
+    },
+    enabled: !!creatorId,
+  });
+}
+
+/**
+ * Get list of followers for a creator
+ */
+export function useCreatorFollowers(
+  creatorId: string,
+  page: number = 1,
+  limit: number = 20
+) {
+  return useQuery({
+    queryKey: ["creatorFollowers", creatorId, page, limit],
+    queryFn: async (): Promise<{
+      followers: any[]; // TODO: Import User type
+      total: number;
+    }> => {
+      const res = await apiClient.get(`/creators/${creatorId}/followers`, {
+        params: { page, limit },
+      });
+      return res.data;
+    },
+    enabled: !!creatorId,
   });
 }

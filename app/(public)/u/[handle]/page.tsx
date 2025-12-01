@@ -7,6 +7,10 @@ import {
   useProfile,
   useFollowUser,
   useUnfollowUser,
+  useFollowCreator,
+  useUnfollowCreator,
+  useIsFollowingCreator,
+  useCreatorStats,
   useTestimonials,
   useTestimonialStats,
 } from "@/hooks/useProfile";
@@ -27,6 +31,8 @@ import {
   Video,
   Loader2,
   Check,
+  Trophy,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -46,18 +52,38 @@ export default function ProfilePage() {
   );
   const { data: stats } = useTestimonialStats(profile?.creatorId || "");
 
+  // Creator-specific hooks
+  const { data: creatorStats } = useCreatorStats(profile?.creatorId || "");
+  const { data: isFollowingData } = useIsFollowingCreator(
+    profile?.creatorId || ""
+  );
+
   const followUser = useFollowUser();
   const unfollowUser = useUnfollowUser();
+  const followCreator = useFollowCreator();
+  const unfollowCreator = useUnfollowCreator();
 
   const isOwnProfile = currentUser?.id === profile?.userId;
   const isCreator = !!profile?.creatorId;
+  const isFollowingCreator = isFollowingData?.isFollowing || false;
 
   const handleFollowToggle = async () => {
     if (!profile) return;
-    if (profile.isFollowing) {
-      await unfollowUser.mutateAsync(profile.userId);
+
+    if (isCreator && profile.creatorId) {
+      // Use creator follow system for creators
+      if (isFollowingCreator) {
+        await unfollowCreator.mutateAsync(profile.creatorId);
+      } else {
+        await followCreator.mutateAsync(profile.creatorId);
+      }
     } else {
-      await followUser.mutateAsync(profile.userId);
+      // Use user follow system for non-creators
+      if (profile.isFollowing) {
+        await unfollowUser.mutateAsync(profile.userId);
+      } else {
+        await followUser.mutateAsync(profile.userId);
+      }
     }
   };
 
@@ -81,6 +107,13 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  const isFollowing = isCreator ? isFollowingCreator : profile.isFollowing;
+  const isFollowPending =
+    followUser.isPending ||
+    unfollowUser.isPending ||
+    followCreator.isPending ||
+    unfollowCreator.isPending;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -130,6 +163,14 @@ export default function ProfilePage() {
                         <Check className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                       </div>
                     )}
+                    {isCreator && creatorStats && creatorStats.rankPosition && (
+                      <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-full">
+                        <Trophy className="w-3 h-3 text-yellow-600 dark:text-yellow-400" />
+                        <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-300">
+                          #{creatorStats.rankPosition}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <p className="text-gray-600 dark:text-gray-400 mb-2">
                     @{handle}
@@ -145,16 +186,16 @@ export default function ProfilePage() {
                 {!isOwnProfile && currentUser && (
                   <button
                     onClick={handleFollowToggle}
-                    disabled={followUser.isPending || unfollowUser.isPending}
+                    disabled={isFollowPending}
                     className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                      profile.isFollowing
+                      isFollowing
                         ? "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                         : "bg-purple-600 text-white hover:bg-purple-700"
                     }`}
                   >
-                    {followUser.isPending || unfollowUser.isPending ? (
+                    {isFollowPending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : profile.isFollowing ? (
+                    ) : isFollowing ? (
                       "Following"
                     ) : (
                       "Follow"
@@ -167,7 +208,9 @@ export default function ProfilePage() {
               <div className="flex gap-6 mb-4">
                 <div>
                   <span className="font-bold text-gray-900 dark:text-white">
-                    {profile.followerCount}
+                    {isCreator && creatorStats
+                      ? creatorStats.followersCount
+                      : profile.followerCount}
                   </span>
                   <span className="text-gray-600 dark:text-gray-400 ml-1">
                     Followers
@@ -185,20 +228,30 @@ export default function ProfilePage() {
                   <>
                     <div>
                       <span className="font-bold text-gray-900 dark:text-white">
-                        {profile.agentCount || 0}
-                      </span>
-                      <span className="text-gray-600 dark:text-gray-400 ml-1">
-                        Agents
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-gray-900 dark:text-white">
-                        {profile.sessionCount || 0}
+                        {creatorStats?.totalSessions ||
+                          profile.sessionCount ||
+                          0}
                       </span>
                       <span className="text-gray-600 dark:text-gray-400 ml-1">
                         Sessions
                       </span>
                     </div>
+                    <div>
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {creatorStats?.completedSessions || 0}
+                      </span>
+                      <span className="text-gray-600 dark:text-gray-400 ml-1">
+                        Completed
+                      </span>
+                    </div>
+                    {creatorStats && creatorStats.averageRating > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <span className="font-bold text-gray-900 dark:text-white">
+                          {creatorStats.averageRating.toFixed(1)}
+                        </span>
+                      </div>
+                    )}
                   </>
                 )}
               </div>

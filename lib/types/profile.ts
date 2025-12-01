@@ -28,6 +28,24 @@ export interface UserProfile {
   averageRating?: number;
 }
 
+export interface CreatorStats {
+  id?: string;
+  creatorId: string;
+  followersCount: number;
+  subscribersCount: number;
+  totalEarnings: number;
+  totalSessions: number;
+  completedSessions: number;
+  totalConversations: number;
+  totalAgents: number;
+  totalDocuments: number;
+  averageRating: number;
+  totalReviews: number;
+  rankScore: number;
+  rankPosition: number;
+  updatedAt?: Date | string;
+}
+
 export interface CreateProfileDto {
   handle: string;
   displayName?: string;

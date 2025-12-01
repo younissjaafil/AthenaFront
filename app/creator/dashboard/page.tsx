@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useMyAgents } from "@/hooks/useAgents";
 import { useCreatorRevenue } from "@/hooks/usePayments";
+import { useMyCreatorStats } from "@/hooks/useProfile";
 import {
   StatsCard,
   StaggerContainer,
@@ -21,6 +22,7 @@ export default function CreatorDashboard() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: agents, isLoading: isAgentsLoading } = useMyAgents();
   const { data: revenueData } = useCreatorRevenue();
+  const { data: creatorStats } = useMyCreatorStats();
 
   const firstName = user?.firstName || "Creator";
   const totalAgents = agents?.length || 0;
@@ -30,6 +32,11 @@ export default function CreatorDashboard() {
 
   const totalRevenue = revenueData?.totalRevenue || 0;
   const transactionCount = revenueData?.transactionCount || 0;
+
+  // Creator stats
+  const followersCount = creatorStats?.followersCount || 0;
+  const rankPosition = creatorStats?.rankPosition;
+  const rankScore = creatorStats?.rankScore || 0;
 
   // Show loading skeleton
   if (isUserLoading) {
@@ -65,27 +72,37 @@ export default function CreatorDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
+          title="Followers"
+          value={followersCount.toLocaleString()}
+          change={
+            rankPosition
+              ? `Rank #${rankPosition}`
+              : rankScore > 0
+              ? `Score: ${rankScore.toFixed(0)}`
+              : "Start building"
+          }
+          icon="👥"
+          delay={0}
+          colorClass={
+            followersCount > 0
+              ? "text-brand-purple-500 dark:text-brand-purple-400"
+              : "text-gray-400"
+          }
+        />
+        <StatsCard
           title="Total Agents"
           value={totalAgents}
           change={totalAgents > 0 ? `${activeAgents} active` : undefined}
           icon="🤖"
-          delay={0}
+          delay={0.1}
         />
         <StatsCard
           title="Total Sessions"
           value={totalConversations.toLocaleString()}
           change="All time"
           icon="💬"
-          delay={0.1}
-          colorClass="text-brand-teal-500 dark:text-brand-teal-400"
-        />
-        <StatsCard
-          title="Active Users"
-          value="—"
-          change="Coming soon"
-          icon="👥"
           delay={0.2}
-          colorClass="text-gray-400"
+          colorClass="text-brand-teal-500 dark:text-brand-teal-400"
         />
         <StatsCard
           title="Revenue"
