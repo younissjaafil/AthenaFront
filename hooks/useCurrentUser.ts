@@ -30,7 +30,6 @@ export interface CurrentUser {
   isAdmin: boolean;
 
   // Status
-  hasCompletedOnboarding: boolean;
   isActive: boolean;
 
   // Creator profile ID (if isCreator)
@@ -80,7 +79,6 @@ export function useCurrentUser() {
         roles,
         isCreator,
         isAdmin,
-        hasCompletedOnboarding: user.hasCompletedOnboarding || false,
         isActive: user.isActive !== false,
         creatorId,
       };

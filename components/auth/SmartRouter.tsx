@@ -11,13 +11,11 @@ interface SmartRouterProps {
 }
 
 /**
- * SmartRouter handles intelligent routing based on user onboarding state.
+ * SmartRouter handles intelligent routing based on user state.
  *
  * Flow:
- * 1. New user -> /explore
- * 2. Creator (not yet completed onboarding) -> /creator/onboarding
- * 3. Creator working -> /creator/dashboard
- * 4. Default -> /explore
+ * 1. Creator on home page -> /creator/dashboard
+ * 2. Default -> allow access
  */
 export function SmartRouter({ children }: SmartRouterProps) {
   const router = useRouter();
@@ -42,15 +40,7 @@ export function SmartRouter({ children }: SmartRouterProps) {
     // Also skip for public profile pages
     if (pathname.startsWith("/u/")) return;
 
-    // 1. Creator who hasn't completed onboarding - needs creator onboarding
-    if (user.isCreator && !user.hasCompletedOnboarding) {
-      if (!pathname.startsWith("/creator/onboarding")) {
-        router.replace("/creator/onboarding");
-      }
-      return;
-    }
-
-    // 2. Creator on home page - redirect to creator dashboard
+    // Creator on home page - redirect to creator dashboard
     if (user.isCreator && pathname === "/") {
       router.replace("/creator/dashboard");
       return;
