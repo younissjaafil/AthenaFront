@@ -86,9 +86,16 @@ export default function ProfilePage() {
 
         {/* Name & Username */}
         <div className="mt-3">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            {currentUser?.firstName} {currentUser?.lastName}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              {currentUser?.firstName} {currentUser?.lastName}
+            </h1>
+            {isCreator && (
+              <span className="px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/50 border border-green-300 dark:border-green-700 rounded-full">
+                Creator
+              </span>
+            )}
+          </div>
           <p className="text-gray-500 dark:text-gray-400">
             @{currentUser?.username || "user"}
           </p>

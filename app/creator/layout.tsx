@@ -139,14 +139,14 @@ export default function CreatorLayout({
                   C
                 </span>
               </div>
-              <div className="flex-1 min-w-0">
+              {/* <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                   Creator
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   creator@athena.ai
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </aside>

@@ -104,6 +104,17 @@ export default function SocialLayout({
             </button>
           </div>
 
+          {/* Desktop Header */}
+          <div className="hidden lg:flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+            <Link
+              href="/"
+              className="text-xl font-bold text-brand-purple-600 dark:text-brand-purple-400"
+            >
+              Athena
+            </Link>
+            <ThemeToggle />
+          </div>
+
           {/* User Info - Desktop */}
           <div className="hidden lg:block p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex flex-col gap-2">
@@ -181,9 +192,6 @@ export default function SocialLayout({
             {/* Expanded More Options */}
             {showMore && (
               <div className="mt-2 mx-4 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl space-y-1">
-                <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 pb-3">
-                  <ThemeToggle />
-                </div>
                 <Link
                   href="/student/dashboard"
                   onClick={() => setSidebarOpen(false)}

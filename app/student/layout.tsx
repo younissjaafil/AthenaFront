@@ -113,14 +113,14 @@ export default function StudentLayout({
                 S
               </span>
             </div>
-            <div className="flex-1 min-w-0">
+            {/* <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                 Student
               </p>
               <p className="text-xs text-gray-500 dark:text-slate-500 truncate">
                 student@athena.ai
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </aside>
