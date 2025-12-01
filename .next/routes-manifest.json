@@ -52,22 +52,6 @@
       "namedRegex": "^/creator/sessions/(?<nxtPid>[^/]+?)(?:/)?$"
     },
     {
-      "page": "/explore/agents/[agentId]",
-      "regex": "^/explore/agents/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPagentId": "nxtPagentId"
-      },
-      "namedRegex": "^/explore/agents/(?<nxtPagentId>[^/]+?)(?:/)?$"
-    },
-    {
-      "page": "/explore/[creatorId]",
-      "regex": "^/explore/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPcreatorId": "nxtPcreatorId"
-      },
-      "namedRegex": "^/explore/(?<nxtPcreatorId>[^/]+?)(?:/)?$"
-    },
-    {
       "page": "/sign-in/[[...sign-in]]",
       "regex": "^/sign\\-in(?:/(.+?))?(?:/)?$",
       "routeKeys": {
@@ -108,12 +92,12 @@
       "namedRegex": "^/student/sessions/(?<nxtPid>[^/]+?)(?:/)?$"
     },
     {
-      "page": "/u/[handle]",
-      "regex": "^/u/([^/]+?)(?:/)?$",
+      "page": "/[username]",
+      "regex": "^/([^/]+?)(?:/)?$",
       "routeKeys": {
-        "nxtPhandle": "nxtPhandle"
+        "nxtPusername": "nxtPusername"
       },
-      "namedRegex": "^/u/(?<nxtPhandle>[^/]+?)(?:/)?$"
+      "namedRegex": "^/(?<nxtPusername>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -200,18 +184,6 @@
       "regex": "^/explore(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/explore(?:/)?$"
-    },
-    {
-      "page": "/explore/agents",
-      "regex": "^/explore/agents(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/explore/agents(?:/)?$"
-    },
-    {
-      "page": "/home",
-      "regex": "^/home(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/home(?:/)?$"
     },
     {
       "page": "/messages",

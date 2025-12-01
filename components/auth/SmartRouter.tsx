@@ -14,12 +14,10 @@ interface SmartRouterProps {
  * SmartRouter handles intelligent routing based on user onboarding state.
  *
  * Flow:
- * 1. New user (no intent selected) -> /onboarding/intent
- * 2. Learner (no discovery completed) -> /explore
- * 3. Creator intent (not yet creator) -> /creator/onboarding
- * 4. Creator working -> /creator/dashboard
- * 5. Has follows -> /home
- * 6. Default -> /explore
+ * 1. New user -> /explore
+ * 2. Creator (not yet completed onboarding) -> /creator/onboarding
+ * 3. Creator working -> /creator/dashboard
+ * 4. Default -> /explore
  */
 export function SmartRouter({ children }: SmartRouterProps) {
   const router = useRouter();
@@ -44,40 +42,16 @@ export function SmartRouter({ children }: SmartRouterProps) {
     // Also skip for public profile pages
     if (pathname.startsWith("/u/")) return;
 
-    // 1. New user - needs to select intent
-    if (user.needsIntentSelection) {
-      if (pathname !== "/onboarding/intent") {
-        router.replace("/onboarding/intent");
-      }
-      return;
-    }
-
-    // 2. Creator intent but not yet a creator - needs creator onboarding
-    if (user.needsCreatorOnboarding) {
+    // 1. Creator who hasn't completed onboarding - needs creator onboarding
+    if (user.isCreator && !user.hasCompletedOnboarding) {
       if (!pathname.startsWith("/creator/onboarding")) {
         router.replace("/creator/onboarding");
       }
       return;
     }
 
-    // 3. Learner who hasn't completed discovery - send to explore
-    if (user.needsDiscovery) {
-      // Allow /explore but redirect from /home
-      if (pathname === "/home") {
-        router.replace("/explore");
-      }
-      return;
-    }
-
-    // 4. If user is on a "cold" page and has data, suggest proper destination
-    // (Don't force redirect, just allow access)
-
-    // 5. Creator accessing home should be fine, but check last activity
-    if (
-      user.isCreator &&
-      pathname === "/" &&
-      user.lastActivityContext === "creator-dashboard"
-    ) {
+    // 2. Creator on home page - redirect to creator dashboard
+    if (user.isCreator && pathname === "/") {
       router.replace("/creator/dashboard");
       return;
     }
