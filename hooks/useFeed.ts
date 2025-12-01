@@ -45,6 +45,11 @@ export interface PostCreator {
     lastName?: string;
     profileImageUrl?: string;
   };
+  profile?: {
+    handle: string;
+    displayName?: string;
+    avatarUrl?: string;
+  };
 }
 
 export interface Post {

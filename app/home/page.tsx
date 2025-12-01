@@ -380,7 +380,7 @@ function SuggestedCreatorsCards() {
       {suggestedCreators.map((creator) => (
         <Link
           key={creator.id}
-          href={`/u/${creator.user?.email?.split("@")[0] || creator.id}`}
+          href={`/u/${creator.profile?.handle || creator.id}`}
           className="block relative rounded-lg overflow-hidden group"
         >
           {/* Cover Image - Gradient background */}
@@ -447,8 +447,7 @@ function SuggestedCreatorsCards() {
                   )}
                 </p>
                 <p className="text-gray-300 text-xs truncate">
-                  @
-                  {creator.user?.email?.split("@")[0] || creator.id.slice(0, 8)}
+                  @{creator.profile?.handle || creator.id.slice(0, 8)}
                 </p>
               </div>
             </div>

@@ -34,6 +34,12 @@ export interface Creator {
     lastName?: string;
     profileImageUrl?: string;
   };
+  profile?: {
+    handle: string;
+    displayName?: string;
+    avatarUrl?: string;
+    bannerUrl?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }

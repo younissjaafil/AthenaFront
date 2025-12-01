@@ -99,7 +99,7 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
       {/* Header */}
       <div className="p-4 flex items-start justify-between">
         <Link
-          href={`/u/${post.creator.userId}`}
+          href={`/u/${post.creator.profile?.handle || post.creator.userId}`}
           className="flex items-center gap-3"
         >
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
