@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { createClientApiClient } from "@/lib/api-client";
 import axios from "axios";
@@ -214,5 +214,61 @@ export function useCreatorSessionSettings(creatorId: string) {
       return response.data;
     },
     enabled: !!creatorId,
+  });
+}
+
+// Become a creator (create creator profile)
+export function useBecomeCreator() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      title: string;
+      bio?: string;
+      tagline?: string;
+      specialties?: string[];
+      categories?: string[];
+      expertiseLevel?: string;
+      hourlyRate?: number;
+    }) => {
+      const response = await apiClient.post<Creator>("/api/creators", data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: creatorKeys.me });
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    },
+  });
+}
+
+// Update my creator profile
+export function useUpdateCreatorProfile() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      title?: string;
+      bio?: string;
+      tagline?: string;
+      specialties?: string[];
+      categories?: string[];
+      expertiseLevel?: string;
+      hourlyRate?: number;
+      websiteUrl?: string;
+      linkedinUrl?: string;
+      twitterUrl?: string;
+      githubUrl?: string;
+      isAvailable?: boolean;
+    }) => {
+      const response = await apiClient.patch<Creator>("/api/creators/me", data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: creatorKeys.me });
+    },
   });
 }

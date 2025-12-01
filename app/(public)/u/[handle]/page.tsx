@@ -22,6 +22,7 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AnimatedCard } from "@/components/ui/animated-card";
 import { AgentsTab, DocumentsTab, SessionsTab } from "@/components/profile";
+import { PostsTab } from "@/components/feed";
 import {
   User,
   MapPin,
@@ -40,15 +41,16 @@ import {
   Trophy,
   TrendingUp,
   Bot,
+  Newspaper,
 } from "lucide-react";
 import Link from "next/link";
 
-type TabType = "agents" | "documents" | "sessions";
+type TabType = "posts" | "agents" | "documents" | "sessions";
 
 export default function ProfilePage() {
   const params = useParams();
   const handle = params.handle as string;
-  const [activeTab, setActiveTab] = useState<TabType>("agents");
+  const [activeTab, setActiveTab] = useState<TabType>("posts");
 
   const { data: currentUser } = useCurrentUser();
   const { data: profile, isLoading } = useProfile(handle);
@@ -344,41 +346,47 @@ export default function ProfilePage() {
           <>
             {/* Tabs */}
             <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit mb-6">
-              {(["agents", "documents", "sessions"] as TabType[]).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
-                    activeTab === tab
-                      ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                  }`}
-                >
-                  {tab === "agents" && <Bot className="w-4 h-4" />}
-                  {tab === "documents" && <FileText className="w-4 h-4" />}
-                  {tab === "sessions" && <Video className="w-4 h-4" />}
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  {/* Badge showing count */}
-                  {tab === "agents" &&
-                    creatorAgents &&
-                    creatorAgents.length > 0 && (
-                      <span className="ml-1 px-1.5 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full">
-                        {creatorAgents.length}
-                      </span>
-                    )}
-                  {tab === "documents" &&
-                    creatorDocuments &&
-                    creatorDocuments.length > 0 && (
-                      <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
-                        {creatorDocuments.length}
-                      </span>
-                    )}
-                </button>
-              ))}
+              {(["posts", "agents", "documents", "sessions"] as TabType[]).map(
+                (tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                      activeTab === tab
+                        ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    }`}
+                  >
+                    {tab === "posts" && <Newspaper className="w-4 h-4" />}
+                    {tab === "agents" && <Bot className="w-4 h-4" />}
+                    {tab === "documents" && <FileText className="w-4 h-4" />}
+                    {tab === "sessions" && <Video className="w-4 h-4" />}
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    {/* Badge showing count */}
+                    {tab === "agents" &&
+                      creatorAgents &&
+                      creatorAgents.length > 0 && (
+                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full">
+                          {creatorAgents.length}
+                        </span>
+                      )}
+                    {tab === "documents" &&
+                      creatorDocuments &&
+                      creatorDocuments.length > 0 && (
+                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+                          {creatorDocuments.length}
+                        </span>
+                      )}
+                  </button>
+                )
+              )}
             </div>
 
             {/* Tab Content */}
             <div className="mb-8">
+              {activeTab === "posts" && (
+                <PostsTab creatorId={profile.creatorId!} />
+              )}
               {activeTab === "agents" && (
                 <AnimatedCard className="p-6">
                   <AgentsTab
