@@ -21,8 +21,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"posts" | "media" | "likes">(
     "posts"
   );
-  const isCreator =
-    currentUser?.role === "creator" || currentUser?.role === "admin";
+  const isCreator = currentUser?.isCreator || currentUser?.isAdmin;
 
   if (isLoading) {
     return (

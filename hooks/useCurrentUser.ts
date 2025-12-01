@@ -5,54 +5,41 @@ import { useAuth } from "@clerk/nextjs";
 import { createClientApiClient } from "@/lib/api-client";
 
 /**
- * User role and profile information from AthenaCore backend
+ * User roles - stored as array in backend
+ * Everyone has 'user', creators add 'creator', admins add 'admin'
+ */
+export type UserRole = "user" | "creator" | "admin";
+
+/**
+ * User information from AthenaCore backend
  */
 export interface CurrentUser {
   // User info from /users/me
   id: string;
-  clerkUserId: string;
   email: string;
   username?: string;
   firstName?: string;
   lastName?: string;
   profileImageUrl?: string;
 
-  // Role from backend
-  role: "student" | "creator" | "admin";
+  // Roles array from backend
+  roles: UserRole[];
 
-  // Role flags (derived from backend responses)
-  isAdmin: boolean;
+  // Computed role flags
   isCreator: boolean;
-  isStudent: boolean;
+  isAdmin: boolean;
 
-  // Onboarding/Intent flags
+  // Status
   hasCompletedOnboarding: boolean;
-  isLearner: boolean;
-  isCreatorIntent: boolean;
-  hasCompletedDiscovery: boolean;
-  intentSelectedAt?: string;
-  lastActivityContext?: string;
+  isActive: boolean;
 
-  // Creator info (if isCreator is true)
+  // Creator profile ID (if isCreator)
   creatorId?: string;
-
-  // Computed: needs to select intent
-  needsIntentSelection: boolean;
-  // Computed: needs discovery (learners who haven't explored)
-  needsDiscovery: boolean;
-  // Computed: needs creator onboarding
-  needsCreatorOnboarding: boolean;
 }
 
 /**
- * Hook to get current user information and roles from AthenaCore backend.
- *
- * Calls:
- * 1. GET /users/me (required - contains isAdmin flag)
- * 2. GET /creators/me (optional - 404 means not a creator)
- * 3. Derives isStudent = !isAdmin && !isCreator
- *
- * @returns React Query result with CurrentUser data
+ * Hook to get current user information from AthenaCore backend.
+ * Simple: get user, check if creator profile exists.
  */
 export function useCurrentUser() {
   const { getToken, isSignedIn } = useAuth();
@@ -62,81 +49,64 @@ export function useCurrentUser() {
     queryFn: async (): Promise<CurrentUser> => {
       const apiClient = createClientApiClient(getToken);
 
-      // 1. Get user info (required)
+      // 1. Get user info
       const userResponse = await apiClient.get("/api/users/me");
       const user = userResponse.data;
 
-      // 2. Check if user is a creator (404 = not a creator)
-      let isCreator = false;
+      // 2. Check if creator profile exists
       let creatorId: string | undefined;
       try {
         const creatorResponse = await apiClient.get("/api/creators/me");
-        isCreator = true;
         creatorId = creatorResponse.data.id;
       } catch (error: any) {
-        // 404 is expected if user is not a creator
+        // 404 = not a creator, which is fine
         if (error.response?.status !== 404) {
           console.error("Error checking creator status:", error);
         }
       }
 
-      // 3. Derive roles
-      const isAdmin = user.isAdmin === true;
-      const isStudent = !isAdmin && !isCreator;
-
-      // Determine role string
-      let role: "student" | "creator" | "admin" = "student";
-      if (isAdmin) role = "admin";
-      else if (isCreator) role = "creator";
-
-      // 4. Compute onboarding state
-      const needsIntentSelection = !user.intentSelectedAt;
-      const needsDiscovery =
-        user.isLearner && !user.hasCompletedDiscovery && !isCreator;
-      const needsCreatorOnboarding =
-        user.isCreatorIntent && !isCreator && !user.hasCompletedOnboarding;
+      // Roles from backend
+      const roles: UserRole[] = user.roles || ["user"];
+      const isCreator = roles.includes("creator");
+      const isAdmin = roles.includes("admin");
 
       return {
         id: user.id,
-        clerkUserId: user.clerkUserId,
         email: user.email,
         username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        role,
-        isAdmin,
+        roles,
         isCreator,
-        isStudent,
-        hasCompletedOnboarding: user.hasCompletedOnboarding,
-        isLearner: user.isLearner,
-        isCreatorIntent: user.isCreatorIntent,
-        hasCompletedDiscovery: user.hasCompletedDiscovery,
-        intentSelectedAt: user.intentSelectedAt,
-        lastActivityContext: user.lastActivityContext,
+        isAdmin,
+        hasCompletedOnboarding: user.hasCompletedOnboarding || false,
+        isActive: user.isActive !== false,
         creatorId,
-        needsIntentSelection,
-        needsDiscovery,
-        needsCreatorOnboarding,
       };
     },
     enabled: isSignedIn === true,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     retry: 1,
   });
 }
 
 /**
- * Hook to set user intent (learn vs earn)
+ * Hook to enable creator power (become a creator)
  */
-export function useSetIntent() {
+export function useEnableCreatorPower() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (intent: "learn" | "earn") => {
+    mutationFn: async (creatorData: {
+      title: string;
+      bio?: string;
+      expertiseLevel?: "beginner" | "intermediate" | "expert";
+      specialties?: string[];
+    }) => {
       const apiClient = createClientApiClient(getToken);
-      const response = await apiClient.post("/api/users/me/intent", { intent });
+      const response = await apiClient.post("/api/creators", creatorData);
       return response.data;
     },
     onSuccess: () => {
@@ -146,16 +116,16 @@ export function useSetIntent() {
 }
 
 /**
- * Hook to mark discovery as completed
+ * Hook to disable creator power
  */
-export function useCompleteDiscovery() {
+export function useDisableCreatorPower() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
       const apiClient = createClientApiClient(getToken);
-      const response = await apiClient.post("/api/users/me/complete-discovery");
+      const response = await apiClient.delete("/api/creators/me/power");
       return response.data;
     },
     onSuccess: () => {

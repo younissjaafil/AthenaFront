@@ -10,7 +10,7 @@ import {
   useUnfollowCreator,
   useIsFollowingCreator,
 } from "@/hooks/useProfile";
-import { useCurrentUser, useCompleteDiscovery } from "@/hooks/useCurrentUser";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth, SignInButton, SignUpButton } from "@clerk/nextjs";
 import {
@@ -180,12 +180,10 @@ export default function ExplorePage() {
   const { isSignedIn } = useAuth();
   const { data: currentUser } = useCurrentUser();
   const { data: creatorsData, isLoading } = useVerifiedCreators();
-  const completeDiscovery = useCompleteDiscovery();
   const followCreator = useFollowCreator();
   const unfollowCreator = useUnfollowCreator();
 
-  const isCreatorUser =
-    currentUser?.role === "creator" || currentUser?.role === "admin";
+  const isCreatorUser = currentUser?.isCreator || currentUser?.isAdmin;
 
   const creators = creatorsData || [];
 

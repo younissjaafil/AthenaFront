@@ -41,8 +41,7 @@ export default function SocialLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
-  const isCreator =
-    currentUser?.role === "creator" || currentUser?.role === "admin";
+  const isCreator = currentUser?.isCreator || currentUser?.isAdmin;
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">

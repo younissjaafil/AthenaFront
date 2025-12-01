@@ -135,8 +135,7 @@ export default function StudentLayout({
 
 function QuickLinks() {
   const { data: currentUser } = useCurrentUser();
-  const isCreator =
-    currentUser?.role === "creator" || currentUser?.role === "admin";
+  const isCreator = currentUser?.isCreator || currentUser?.isAdmin;
 
   return (
     <div className="p-4 border-t border-gray-200 dark:border-slate-800 space-y-2">

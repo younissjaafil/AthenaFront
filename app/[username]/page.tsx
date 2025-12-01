@@ -42,10 +42,14 @@ import {
   X,
   GraduationCap,
   Sparkles,
+  Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type TabType = "posts" | "media";
+// Tabs differ based on creator status
+type CreatorTabType = "posts" | "media" | "agents" | "docs" | "sessions";
+type RegularTabType = "posts" | "media";
+type TabType = CreatorTabType | RegularTabType;
 
 const socialNav = [
   { name: "Home", href: "/", icon: Home },
@@ -104,8 +108,7 @@ export default function PublicProfilePage() {
     }
   };
 
-  const isCreatorUser =
-    currentUser?.role === "creator" || currentUser?.role === "admin";
+  const isCreatorUser = currentUser?.isCreator || currentUser?.isAdmin;
 
   if (isLoading) {
     return (
@@ -430,8 +433,9 @@ export default function PublicProfilePage() {
             )}
           </div>
 
-          {/* Tabs */}
+          {/* Tabs - Different for creators vs regular users */}
           <div className="flex border-b border-gray-200 dark:border-gray-800 sticky top-14 lg:top-0 bg-white dark:bg-gray-950 z-10">
+            {/* Posts tab - Everyone */}
             <button
               onClick={() => setActiveTab("posts")}
               className={cn(
@@ -446,6 +450,8 @@ export default function PublicProfilePage() {
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
               )}
             </button>
+
+            {/* Media tab - Everyone */}
             <button
               onClick={() => setActiveTab("media")}
               className={cn(
@@ -455,22 +461,69 @@ export default function PublicProfilePage() {
                   : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
               )}
             >
-              <Bookmark className="w-5 h-5 mx-auto" />
+              <Video className="w-5 h-5 mx-auto" />
               {activeTab === "media" && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
               )}
             </button>
-            <button
-              className={cn(
-                "flex-1 py-4 text-sm font-medium text-center relative text-gray-500 hover:text-gray-900 dark:hover:text-white"
-              )}
-            >
-              <Heart className="w-5 h-5 mx-auto" />
-            </button>
+
+            {/* Creator-only tabs */}
+            {isCreator && (
+              <>
+                {/* Agents tab */}
+                <button
+                  onClick={() => setActiveTab("agents")}
+                  className={cn(
+                    "flex-1 py-4 text-sm font-medium text-center relative",
+                    activeTab === "agents"
+                      ? "text-gray-900 dark:text-white"
+                      : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                  )}
+                >
+                  <Bot className="w-5 h-5 mx-auto" />
+                  {activeTab === "agents" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
+                  )}
+                </button>
+
+                {/* Docs tab */}
+                <button
+                  onClick={() => setActiveTab("docs")}
+                  className={cn(
+                    "flex-1 py-4 text-sm font-medium text-center relative",
+                    activeTab === "docs"
+                      ? "text-gray-900 dark:text-white"
+                      : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                  )}
+                >
+                  <FileText className="w-5 h-5 mx-auto" />
+                  {activeTab === "docs" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
+                  )}
+                </button>
+
+                {/* Sessions tab */}
+                <button
+                  onClick={() => setActiveTab("sessions")}
+                  className={cn(
+                    "flex-1 py-4 text-sm font-medium text-center relative",
+                    activeTab === "sessions"
+                      ? "text-gray-900 dark:text-white"
+                      : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                  )}
+                >
+                  <Calendar className="w-5 h-5 mx-auto" />
+                  {activeTab === "sessions" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
+                  )}
+                </button>
+              </>
+            )}
           </div>
 
           {/* Tab Content */}
           <div className="pb-20">
+            {/* Posts Tab */}
             {activeTab === "posts" && (
               <div>
                 {postsLoading ? (
@@ -479,6 +532,7 @@ export default function PublicProfilePage() {
                   </div>
                 ) : posts.length === 0 ? (
                   <div className="text-center py-12">
+                    <Grid3X3 className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
                     <p className="text-gray-500 dark:text-gray-400">
                       No posts yet
                     </p>
@@ -498,9 +552,50 @@ export default function PublicProfilePage() {
               </div>
             )}
 
+            {/* Media Tab */}
             {activeTab === "media" && (
               <div className="text-center py-12">
+                <Video className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
                 <p className="text-gray-500 dark:text-gray-400">No media yet</p>
+              </div>
+            )}
+
+            {/* Agents Tab - Creator only */}
+            {activeTab === "agents" && isCreator && (
+              <div className="text-center py-12">
+                <Bot className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-gray-500 dark:text-gray-400 mb-2">
+                  No agents yet
+                </p>
+                <p className="text-sm text-gray-400 dark:text-gray-500">
+                  AI agents created by this creator will appear here
+                </p>
+              </div>
+            )}
+
+            {/* Docs Tab - Creator only */}
+            {activeTab === "docs" && isCreator && (
+              <div className="text-center py-12">
+                <FileText className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-gray-500 dark:text-gray-400 mb-2">
+                  No documents yet
+                </p>
+                <p className="text-sm text-gray-400 dark:text-gray-500">
+                  Knowledge documents shared by this creator
+                </p>
+              </div>
+            )}
+
+            {/* Sessions Tab - Creator only */}
+            {activeTab === "sessions" && isCreator && (
+              <div className="text-center py-12">
+                <Calendar className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                <p className="text-gray-500 dark:text-gray-400 mb-2">
+                  No sessions available
+                </p>
+                <p className="text-sm text-gray-400 dark:text-gray-500">
+                  Book 1-on-1 consultation sessions with this creator
+                </p>
               </div>
             )}
           </div>

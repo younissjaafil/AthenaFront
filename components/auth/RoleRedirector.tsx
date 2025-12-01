@@ -7,10 +7,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 /**
  * Component that redirects users to their appropriate dashboard based on roles.
- * Priority: Admin > Creator > Student
- *
- * Usage: Place this component in layouts or pages where you want automatic redirection
- * after sign-in (e.g., in the student/creator/admin layout to redirect if wrong role)
+ * Priority: Admin > Creator > User (student dashboard)
  */
 export function RoleRedirector() {
   const router = useRouter();
@@ -24,12 +21,12 @@ export function RoleRedirector() {
       router.replace("/admin/dashboard");
     } else if (user.isCreator) {
       router.replace("/creator/dashboard");
-    } else if (user.isStudent) {
+    } else {
+      // Everyone goes to student/learning dashboard
       router.replace("/student/dashboard");
     }
   }, [user, isLoading, router]);
 
-  // Show loading state while determining role
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -44,14 +41,12 @@ export function RoleRedirector() {
 }
 
 /**
- * Higher-order component that wraps a page and ensures user is redirected
- * to their correct dashboard if they're on the wrong route.
- *
- * @param allowedRoles - Array of roles allowed to access this page
+ * Guard component that ensures user has required role to access a page.
+ * Roles: 'admin', 'creator', 'user' (everyone is a user)
  */
 interface RoleGuardProps {
   children: React.ReactNode;
-  allowedRoles: ("admin" | "creator" | "student")[];
+  allowedRoles: ("admin" | "creator" | "user")[];
 }
 
 export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
@@ -65,10 +60,10 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
     const hasAccess =
       (allowedRoles.includes("admin") && user.isAdmin) ||
       (allowedRoles.includes("creator") && user.isCreator) ||
-      (allowedRoles.includes("student") && user.isStudent);
+      allowedRoles.includes("user"); // Everyone is a user
 
     if (!hasAccess) {
-      // Redirect to user's correct dashboard
+      // Redirect to appropriate dashboard
       if (user.isAdmin) {
         router.replace("/admin/dashboard");
       } else if (user.isCreator) {
@@ -79,7 +74,6 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
     }
   }, [user, isLoading, router, allowedRoles]);
 
-  // Show loading state while checking permissions
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -93,7 +87,6 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
     );
   }
 
-  // Show message if not signed in
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -115,9 +108,8 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
   const hasAccess =
     (allowedRoles.includes("admin") && user.isAdmin) ||
     (allowedRoles.includes("creator") && user.isCreator) ||
-    (allowedRoles.includes("student") && user.isStudent);
+    allowedRoles.includes("user");
 
-  // Show access denied message briefly before redirect
   if (!hasAccess) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
