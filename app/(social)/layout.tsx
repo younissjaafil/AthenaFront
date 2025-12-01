@@ -222,21 +222,6 @@ export default function SocialLayout({
             )}
           </nav>
 
-          {/* New Post Button */}
-          {isCreator && (
-            <div className="p-4">
-              <Link
-                href="/creator/posts/new"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <button className="w-full flex items-center justify-center gap-2 py-3 bg-[#00AFF0] hover:bg-[#009AD6] text-white font-semibold rounded-full transition-colors">
-                  <Plus className="w-5 h-5" />
-                  NEW POST
-                </button>
-              </Link>
-            </div>
-          )}
-
           {/* Switch to Student/Creator Quick Links */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
             <Link
@@ -258,6 +243,21 @@ export default function SocialLayout({
               </Link>
             )}
           </div>
+
+          {/* New Post Button */}
+          {isCreator && (
+            <div className="p-4">
+              <Link
+                href="/creator/posts/new"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <button className="w-full flex items-center justify-center gap-2 py-3 bg-[#00AFF0] hover:bg-[#009AD6] text-white font-semibold rounded-full transition-colors">
+                  <Plus className="w-5 h-5" />
+                  NEW POST
+                </button>
+              </Link>
+            </div>
+          )}
         </aside>
 
         {/* Main Content */}

@@ -177,6 +177,7 @@ export default function FeedPage() {
                 Athena
               </span>
             </Link>
+            <ThemeToggle />
           </div>
 
           {/* Navigation */}
