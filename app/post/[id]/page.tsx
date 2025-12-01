@@ -86,7 +86,7 @@ export default function PostDetailPage() {
     if (!commentText.trim()) return;
 
     createComment.mutate(
-      { postId, content: commentText },
+      { postId, data: { content: commentText } },
       {
         onSuccess: () => {
           setCommentText("");

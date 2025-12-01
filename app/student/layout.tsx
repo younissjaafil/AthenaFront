@@ -107,21 +107,21 @@ export default function StudentLayout({
 
         {/* User Section */}
         <div className="p-4 border-t border-gray-200 dark:border-slate-800">
-          <div className="flex items-center gap-3 px-4 py-2">
+          {/* <div className="flex items-center gap-3 px-4 py-2">
             <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-600/20 flex items-center justify-center">
               <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
                 S
               </span>
             </div>
-            {/* <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                 Student
               </p>
               <p className="text-xs text-gray-500 dark:text-slate-500 truncate">
                 student@athena.ai
               </p>
-            </div> */}
-          </div>
+            </div>
+          </div> */}
         </div>
       </aside>
 
