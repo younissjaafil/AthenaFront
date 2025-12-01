@@ -114,7 +114,7 @@ export default function CreatorLayout({
           {/* Quick Links to Social & Student */}
           <div className="p-4 border-t border-border-light dark:border-gray-800 space-y-2">
             <Link
-              href="/home"
+              href="/"
               onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-xl transition-colors"
             >

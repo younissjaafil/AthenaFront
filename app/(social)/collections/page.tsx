@@ -39,7 +39,7 @@ export default function CollectionsPage() {
         <p className="text-gray-500 dark:text-gray-400 mb-6">
           Save posts you want to revisit later
         </p>
-        <Link href="/home">
+        <Link href="/">
           <button className="px-6 py-2.5 bg-[#00AFF0] hover:bg-[#009AD6] text-white font-semibold rounded-full transition-colors">
             Browse Feed
           </button>

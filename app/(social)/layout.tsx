@@ -54,7 +54,7 @@ export default function SocialLayout({
           <Menu className="w-5 h-5 text-gray-700 dark:text-gray-300" />
         </button>
         <Link
-          href="/home"
+          href="/"
           className="text-xl font-bold text-brand-purple-600 dark:text-brand-purple-400"
         >
           Athena
@@ -91,25 +91,10 @@ export default function SocialLayout({
             </button>
           </div>
 
-          {/* User Avatar - Desktop */}
+          {/* User Info - Desktop */}
           <div className="hidden lg:block p-4 border-b border-gray-200 dark:border-gray-800">
-            <div className="flex items-center gap-3">
-              {currentUser?.profileImageUrl ? (
-                <Image
-                  src={currentUser.profileImageUrl}
-                  alt="Profile"
-                  width={40}
-                  height={40}
-                  className="rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-semibold">
-                  {currentUser?.firstName?.[0] ||
-                    currentUser?.username?.[0] ||
-                    "U"}
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
+            <div className="flex flex-col gap-2">
+              <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                   {currentUser?.firstName || currentUser?.username || "User"}
                 </p>
@@ -117,6 +102,15 @@ export default function SocialLayout({
                   @{currentUser?.username || "user"}
                 </p>
               </div>
+              {!isCreator && (
+                <Link
+                  href="/creator/onboarding"
+                  className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Become Creator</span>
+                </Link>
+              )}
             </div>
           </div>
 
@@ -162,6 +156,9 @@ export default function SocialLayout({
             {/* Expanded More Options */}
             {showMore && (
               <div className="mt-2 mx-4 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl space-y-1">
+                <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 pb-3">
+                  <ThemeToggle />
+                </div>
                 <Link
                   href="/student/dashboard"
                   onClick={() => setSidebarOpen(false)}
@@ -188,9 +185,6 @@ export default function SocialLayout({
                 >
                   <span>Settings</span>
                 </Link>
-                <div className="px-4 py-2">
-                  <ThemeToggle />
-                </div>
               </div>
             )}
           </nav>
