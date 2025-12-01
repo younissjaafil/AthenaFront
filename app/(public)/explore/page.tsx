@@ -109,7 +109,7 @@ function CreatorCard({
         </div>
 
         {/* Info */}
-        <Link href={`/u/${creator.userId}`}>
+        <Link href={`/u/${creator.profile?.handle || creator.userId}`}>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
             {fullName}
           </h3>

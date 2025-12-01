@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -57,6 +57,13 @@ export default function ProfilePage() {
 
   const followCreator = useFollowCreator();
   const unfollowCreator = useUnfollowCreator();
+
+  // Redirect to canonical URL if accessed via UUID or different handle
+  useEffect(() => {
+    if (profile && profile.handle && profile.handle !== handle) {
+      router.replace(`/u/${profile.handle}`);
+    }
+  }, [profile, handle, router]);
 
   const isOwnProfile = currentUser?.id === profile?.userId;
   const isCreator = !!profile?.creatorId;

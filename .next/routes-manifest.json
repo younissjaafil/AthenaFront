@@ -106,6 +106,14 @@
         "nxtPid": "nxtPid"
       },
       "namedRegex": "^/student/sessions/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/u/[handle]",
+      "regex": "^/u/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPhandle": "nxtPhandle"
+      },
+      "namedRegex": "^/u/(?<nxtPhandle>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -134,6 +142,12 @@
       "namedRegex": "^/admin/dashboard(?:/)?$"
     },
     {
+      "page": "/collections",
+      "regex": "^/collections(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/collections(?:/)?$"
+    },
+    {
       "page": "/creator",
       "regex": "^/creator(?:/)?$",
       "routeKeys": {},
@@ -158,16 +172,16 @@
       "namedRegex": "^/creator/dashboard(?:/)?$"
     },
     {
+      "page": "/creator/onboarding",
+      "regex": "^/creator/onboarding(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/creator/onboarding(?:/)?$"
+    },
+    {
       "page": "/creator/sessions",
       "regex": "^/creator/sessions(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/creator/sessions(?:/)?$"
-    },
-    {
-      "page": "/creator/sessions/availability",
-      "regex": "^/creator/sessions/availability(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/creator/sessions/availability(?:/)?$"
     },
     {
       "page": "/creator/sessions/settings",
@@ -194,10 +208,40 @@
       "namedRegex": "^/explore/agents(?:/)?$"
     },
     {
+      "page": "/home",
+      "regex": "^/home(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/home(?:/)?$"
+    },
+    {
+      "page": "/messages",
+      "regex": "^/messages(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/messages(?:/)?$"
+    },
+    {
+      "page": "/notifications",
+      "regex": "^/notifications(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/notifications(?:/)?$"
+    },
+    {
+      "page": "/onboarding/intent",
+      "regex": "^/onboarding/intent(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/onboarding/intent(?:/)?$"
+    },
+    {
       "page": "/onboarding/role",
       "regex": "^/onboarding/role(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/onboarding/role(?:/)?$"
+    },
+    {
+      "page": "/profile",
+      "regex": "^/profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/profile(?:/)?$"
     },
     {
       "page": "/student",
@@ -234,6 +278,12 @@
       "regex": "^/student/sessions(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/student/sessions(?:/)?$"
+    },
+    {
+      "page": "/subscriptions",
+      "regex": "^/subscriptions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/subscriptions(?:/)?$"
     }
   ],
   "dataRoutes": [],
