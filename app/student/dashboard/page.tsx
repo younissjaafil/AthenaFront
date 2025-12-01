@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useConversations } from "@/hooks/useConversations";
 import { usePublicAgents } from "@/hooks/useAgents";
 import { useEntitlements } from "@/hooks/usePayments";
+import { useMyProfile, usePromoteToCreator } from "@/hooks/useProfile";
 import { ConversationStatus } from "@/lib/types/conversation";
 import {
   MessageSquare,
@@ -18,13 +21,23 @@ import {
   BookOpen,
   CreditCard,
   Crown,
+  Rocket,
+  Users,
+  X,
 } from "lucide-react";
 
 export default function StudentDashboard() {
+  const router = useRouter();
+  const [showCreatorBanner, setShowCreatorBanner] = useState(true);
+
   const { data: conversations, isLoading: conversationsLoading } =
     useConversations(ConversationStatus.ACTIVE);
   const { data: agents, isLoading: agentsLoading } = usePublicAgents();
   const { data: entitlements } = useEntitlements();
+  const { data: myProfile } = useMyProfile();
+  const promoteToCreator = usePromoteToCreator();
+
+  const isCreator = !!myProfile?.creatorId;
 
   // Get recent conversations (last 5)
   const recentConversations = conversations?.slice(0, 5) || [];
@@ -32,6 +45,18 @@ export default function StudentDashboard() {
   // Get recommended agents (free ones or top rated)
   const recommendedAgents =
     agents?.filter((a) => a.isFree || a.averageRating >= 4).slice(0, 4) || [];
+
+  const handleBecomeCreator = async () => {
+    try {
+      await promoteToCreator.mutateAsync({
+        title: "Expert Creator",
+        bio: "Share your expertise with the world",
+      });
+      router.push("/onboarding/role");
+    } catch (error) {
+      console.error("Failed to become creator:", error);
+    }
+  };
 
   return (
     <div className="min-h-full bg-gray-50 dark:bg-slate-950">
@@ -91,6 +116,58 @@ export default function StudentDashboard() {
             </p>
           </div>
         </motion.div>
+
+        {/* Become a Creator Banner - show only if not already creator */}
+        {!isCreator && showCreatorBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-6 relative"
+          >
+            <div className="bg-gradient-to-r from-teal-600/10 to-purple-600/10 dark:from-teal-600/20 dark:to-purple-600/20 rounded-xl border border-teal-200 dark:border-teal-500/30 p-6 shadow-sm">
+              <button
+                onClick={() => setShowCreatorBanner(false)}
+                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-teal-600 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <Rocket className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                    Become a Creator
+                  </h3>
+                  <p className="text-gray-600 dark:text-slate-400 mb-4">
+                    Share your expertise, create AI agents, host sessions, and
+                    earn money. Join our community of expert creators today!
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={handleBecomeCreator}
+                      disabled={promoteToCreator.isPending}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-purple-600 text-white rounded-lg hover:from-teal-500 hover:to-purple-500 transition-all font-medium disabled:opacity-50"
+                    >
+                      <Users className="w-4 h-4" />
+                      {promoteToCreator.isPending
+                        ? "Creating Profile..."
+                        : "Get Started"}
+                    </button>
+                    <Link
+                      href="/explore/creators"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      Browse Creators
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Premium Access Banner - show if user has unlocked agents */}
         {entitlements && entitlements.length > 0 && (
