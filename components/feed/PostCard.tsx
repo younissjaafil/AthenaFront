@@ -90,11 +90,26 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
       ? `${post.creator.user.firstName} ${post.creator.user.lastName}`
       : post.creator.title || "Creator";
 
+  const handlePostClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("button") ||
+      target.closest("a") ||
+      target.closest("video") ||
+      target.closest("input")
+    ) {
+      return;
+    }
+    window.location.href = `/post/${post.id}`;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+      onClick={handlePostClick}
+      className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
     >
       {/* Header */}
       <div className="p-4 flex items-start justify-between">
