@@ -14,8 +14,14 @@ import {
   useTestimonials,
   useTestimonialStats,
 } from "@/hooks/useProfile";
+import {
+  useCreatorAgents,
+  useCreatorDocuments,
+  useCreatorSessionSettings,
+} from "@/hooks/useCreators";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AnimatedCard } from "@/components/ui/animated-card";
+import { AgentsTab, DocumentsTab, SessionsTab } from "@/components/profile";
 import {
   User,
   MapPin,
@@ -33,6 +39,7 @@ import {
   Check,
   Trophy,
   TrendingUp,
+  Bot,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -57,6 +64,15 @@ export default function ProfilePage() {
   const { data: isFollowingData } = useIsFollowingCreator(
     profile?.creatorId || ""
   );
+
+  // Creator content hooks for tabs
+  const { data: creatorAgents, isLoading: agentsLoading } = useCreatorAgents(
+    profile?.creatorId || ""
+  );
+  const { data: creatorDocuments, isLoading: documentsLoading } =
+    useCreatorDocuments(profile?.creatorId || "");
+  const { data: sessionSettings, isLoading: sessionsLoading } =
+    useCreatorSessionSettings(profile?.creatorId || "");
 
   const followUser = useFollowUser();
   const unfollowUser = useUnfollowUser();
@@ -338,10 +354,25 @@ export default function ProfilePage() {
                       : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
-                  {tab === "agents" && <Users className="w-4 h-4" />}
+                  {tab === "agents" && <Bot className="w-4 h-4" />}
                   {tab === "documents" && <FileText className="w-4 h-4" />}
                   {tab === "sessions" && <Video className="w-4 h-4" />}
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  {/* Badge showing count */}
+                  {tab === "agents" &&
+                    creatorAgents &&
+                    creatorAgents.length > 0 && (
+                      <span className="ml-1 px-1.5 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full">
+                        {creatorAgents.length}
+                      </span>
+                    )}
+                  {tab === "documents" &&
+                    creatorDocuments &&
+                    creatorDocuments.length > 0 && (
+                      <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+                        {creatorDocuments.length}
+                      </span>
+                    )}
                 </button>
               ))}
             </div>
@@ -350,23 +381,30 @@ export default function ProfilePage() {
             <div className="mb-8">
               {activeTab === "agents" && (
                 <AnimatedCard className="p-6">
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Agents coming soon...
-                  </p>
+                  <AgentsTab
+                    agents={creatorAgents || []}
+                    isLoading={agentsLoading}
+                    creatorId={profile.creatorId!}
+                  />
                 </AnimatedCard>
               )}
               {activeTab === "documents" && (
                 <AnimatedCard className="p-6">
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Documents coming soon...
-                  </p>
+                  <DocumentsTab
+                    documents={creatorDocuments || []}
+                    isLoading={documentsLoading}
+                    creatorId={profile.creatorId!}
+                  />
                 </AnimatedCard>
               )}
               {activeTab === "sessions" && (
                 <AnimatedCard className="p-6">
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Sessions coming soon...
-                  </p>
+                  <SessionsTab
+                    sessionSettings={sessionSettings}
+                    isLoading={sessionsLoading}
+                    creatorId={profile.creatorId!}
+                    creatorName={profile.displayName || handle}
+                  />
                 </AnimatedCard>
               )}
             </div>

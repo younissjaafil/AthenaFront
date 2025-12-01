@@ -38,12 +38,81 @@ export interface Creator {
   updatedAt: string;
 }
 
+export interface CreatorAgent {
+  id: string;
+  creatorId: string;
+  name: string;
+  description?: string;
+  model: string;
+  category: string[];
+  tags: string[];
+  pricePerMessage: number;
+  pricePerConversation: number;
+  isFree: boolean;
+  isPublic: boolean;
+  status: string;
+  profileImageUrl?: string;
+  totalConversations: number;
+  totalMessages: number;
+  averageRating: number;
+  createdAt: string;
+  updatedAt: string;
+  creator?: {
+    id: string;
+    userId: string;
+    bio?: string;
+    specialties: string[];
+    averageRating: number;
+  };
+}
+
+export interface CreatorDocument {
+  id: string;
+  agentId: string;
+  filename: string;
+  originalFilename: string;
+  fileType: string;
+  fileSize: number;
+  s3Url?: string;
+  status: string;
+  chunkCount: number;
+  embeddingCount: number;
+  metadata?: {
+    title?: string;
+    description?: string;
+    [key: string]: any;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SessionSettings {
+  id: string;
+  creatorId: string;
+  sessionDurations: number[];
+  defaultDuration: number;
+  bufferTime: number;
+  minimumNoticeHours: number;
+  maxAdvanceBookingDays: number;
+  autoConfirm: boolean;
+  allowFreeSession: boolean;
+  pricePerDuration?: Record<string, number>;
+  timezone: string;
+  welcomeMessage?: string;
+  cancellationPolicy?: string;
+}
+
 export const creatorKeys = {
   all: ["creators"] as const,
   verified: ["creators", "verified"] as const,
   available: ["creators", "available"] as const,
   detail: (id: string) => ["creators", id] as const,
   me: ["creators", "me"] as const,
+  agents: (creatorId: string) => ["creators", creatorId, "agents"] as const,
+  documents: (creatorId: string) =>
+    ["creators", creatorId, "documents"] as const,
+  sessionSettings: (creatorId: string) =>
+    ["creators", creatorId, "sessions", "settings"] as const,
 };
 
 // Get all verified creators (public)
@@ -95,5 +164,55 @@ export function useMyCreatorProfile() {
       const response = await apiClient.get<Creator>("/api/creators/me");
       return response.data;
     },
+  });
+}
+
+// Get creator's public agents
+export function useCreatorAgents(
+  creatorId: string,
+  visibility: "public" | "all" = "public"
+) {
+  return useQuery({
+    queryKey: [...creatorKeys.agents(creatorId), visibility],
+    queryFn: async () => {
+      const response = await axios.get<CreatorAgent[]>(
+        `${API_URL}/api/creators/${creatorId}/agents`,
+        { params: { visibility } }
+      );
+      return response.data;
+    },
+    enabled: !!creatorId,
+  });
+}
+
+// Get creator's public documents
+export function useCreatorDocuments(
+  creatorId: string,
+  visibility: "public" | "all" = "public"
+) {
+  return useQuery({
+    queryKey: [...creatorKeys.documents(creatorId), visibility],
+    queryFn: async () => {
+      const response = await axios.get<CreatorDocument[]>(
+        `${API_URL}/api/creators/${creatorId}/documents`,
+        { params: { visibility } }
+      );
+      return response.data;
+    },
+    enabled: !!creatorId,
+  });
+}
+
+// Get creator's session settings
+export function useCreatorSessionSettings(creatorId: string) {
+  return useQuery({
+    queryKey: creatorKeys.sessionSettings(creatorId),
+    queryFn: async () => {
+      const response = await axios.get<SessionSettings>(
+        `${API_URL}/api/creators/${creatorId}/sessions/settings`
+      );
+      return response.data;
+    },
+    enabled: !!creatorId,
   });
 }
