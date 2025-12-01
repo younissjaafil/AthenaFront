@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { RoleGuard } from "@/components/auth/RoleRedirector";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Home, GraduationCap } from "lucide-react";
 
 const creatorNav = [
   { name: "Dashboard", href: "/creator/dashboard", icon: "📊" },
@@ -110,6 +110,26 @@ export default function CreatorLayout({
               );
             })}
           </nav>
+
+          {/* Quick Links to Social & Student */}
+          <div className="p-4 border-t border-border-light dark:border-gray-800 space-y-2">
+            <Link
+              href="/home"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-xl transition-colors"
+            >
+              <Home className="w-5 h-5" />
+              <span>Social Feed</span>
+            </Link>
+            <Link
+              href="/student/dashboard"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-950 rounded-xl transition-colors"
+            >
+              <GraduationCap className="w-5 h-5" />
+              <span>Student Dashboard</span>
+            </Link>
+          </div>
 
           {/* User Section */}
           <div className="p-4 border-t border-border-light dark:border-gray-800">

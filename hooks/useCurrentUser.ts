@@ -12,9 +12,13 @@ export interface CurrentUser {
   id: string;
   clerkUserId: string;
   email: string;
+  username?: string;
   firstName?: string;
   lastName?: string;
   profileImageUrl?: string;
+
+  // Role from backend
+  role: "student" | "creator" | "admin";
 
   // Role flags (derived from backend responses)
   isAdmin: boolean;
@@ -80,6 +84,11 @@ export function useCurrentUser() {
       const isAdmin = user.isAdmin === true;
       const isStudent = !isAdmin && !isCreator;
 
+      // Determine role string
+      let role: "student" | "creator" | "admin" = "student";
+      if (isAdmin) role = "admin";
+      else if (isCreator) role = "creator";
+
       // 4. Compute onboarding state
       const needsIntentSelection = !user.intentSelectedAt;
       const needsDiscovery =
@@ -91,9 +100,11 @@ export function useCurrentUser() {
         id: user.id,
         clerkUserId: user.clerkUserId,
         email: user.email,
+        username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
+        role,
         isAdmin,
         isCreator,
         isStudent,

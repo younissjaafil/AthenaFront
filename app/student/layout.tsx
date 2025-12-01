@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Menu, X } from "lucide-react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Menu, X, Home, Sparkles } from "lucide-react";
 
 const studentNav = [
   { name: "Dashboard", href: "/student/dashboard", icon: "📊" },
@@ -101,6 +102,9 @@ export default function StudentLayout({
           })}
         </nav>
 
+        {/* Quick Links to Social & Creator */}
+        <QuickLinks />
+
         {/* User Section */}
         <div className="p-4 border-t border-gray-200 dark:border-slate-800">
           <div className="flex items-center gap-3 px-4 py-2">
@@ -125,6 +129,33 @@ export default function StudentLayout({
       <main className="flex-1 overflow-auto bg-gray-50 dark:bg-slate-950 pt-14 lg:pt-0">
         {children}
       </main>
+    </div>
+  );
+}
+
+function QuickLinks() {
+  const { data: currentUser } = useCurrentUser();
+  const isCreator =
+    currentUser?.role === "creator" || currentUser?.role === "admin";
+
+  return (
+    <div className="p-4 border-t border-gray-200 dark:border-slate-800 space-y-2">
+      <Link
+        href="/home"
+        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-xl transition-colors"
+      >
+        <Home className="w-5 h-5" />
+        <span>Social Feed</span>
+      </Link>
+      {isCreator && (
+        <Link
+          href="/creator/dashboard"
+          className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 hover:bg-teal-100 dark:hover:bg-teal-950 rounded-xl transition-colors"
+        >
+          <Sparkles className="w-5 h-5" />
+          <span>Creator Studio</span>
+        </Link>
+      )}
     </div>
   );
 }
