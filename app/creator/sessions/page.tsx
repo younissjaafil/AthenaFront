@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { AnimatedCard, StaggerContainer } from "@/components/ui/animated-card";
-import { SessionCard } from "@/components/sessions";
+import { SessionCard, CancelSessionModal } from "@/components/sessions";
 import {
   useCreatorSessions,
   useConfirmSession,
@@ -218,6 +218,7 @@ export default function CreatorSessionsPage() {
 
 // Creator Session Card with actions
 function CreatorSessionCard({ session }: { session: Session }) {
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const confirmSession = useConfirmSession(session.id);
   const cancelSession = useCancelSession(session.id);
 
@@ -229,21 +230,30 @@ function CreatorSessionCard({ session }: { session: Session }) {
     }
   };
 
-  const handleCancel = async () => {
-    const reason = prompt("Reason for cancellation (optional):");
+  const handleCancel = async (reason?: string) => {
     try {
-      await cancelSession.mutateAsync(reason || undefined);
+      await cancelSession.mutateAsync(reason);
+      setShowCancelModal(false);
     } catch (error) {
       console.error("Failed to cancel session:", error);
     }
   };
 
   return (
-    <SessionCard
-      session={session}
-      variant="creator"
-      onConfirm={handleConfirm}
-      onCancel={handleCancel}
-    />
+    <>
+      <SessionCard
+        session={session}
+        variant="creator"
+        onConfirm={handleConfirm}
+        onCancel={() => setShowCancelModal(true)}
+      />
+      <CancelSessionModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleCancel}
+        isLoading={cancelSession.isPending}
+        sessionWith={session.studentName}
+      />
+    </>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AnimatedCard } from "@/components/ui/animated-card";
-import { DateOverrideEditor } from "@/components/sessions";
+import { AvailabilityCalendar } from "@/components/sessions";
 import {
   useMySessionSettings,
   useUpdateSessionSettings,
@@ -96,10 +96,17 @@ export default function SessionSettingsPage() {
         maxAdvanceBookingDays,
         autoConfirm,
         timezone,
-        pricePerDuration:
-          Object.keys(pricePerDuration).length > 0
-            ? pricePerDuration
-            : undefined,
+        pricePerDuration: (() => {
+          // Filter out zero/empty prices and ensure values are numbers
+          const validPrices: Record<string, number> = {};
+          for (const [key, value] of Object.entries(pricePerDuration)) {
+            const numValue = Number(value);
+            if (numValue > 0) {
+              validPrices[key] = numValue;
+            }
+          }
+          return Object.keys(validPrices).length > 0 ? validPrices : undefined;
+        })(),
       });
       setHasSettingsChanges(false);
     } catch (error) {
@@ -195,13 +202,12 @@ export default function SessionSettingsPage() {
               date can have different hours.
             </p>
             <AnimatedCard className="p-4">
-              <DateOverrideEditor
+              <AvailabilityCalendar
                 overrides={dateOverrides}
                 onChange={(newOverrides) => {
                   setDateOverrides(newOverrides);
                   setHasDateChanges(true);
                 }}
-                isLoading={setOverrides.isPending}
               />
             </AnimatedCard>
           </section>

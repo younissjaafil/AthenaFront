@@ -198,13 +198,16 @@ export function CalendarBooking({
       <AnimatedCard className="p-4" hoverEffect={false}>
         <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
           {selectedDate
-            ? `Available Times - ${new Date(
-                selectedDate + "T00:00:00"
-              ).toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "short",
-                day: "numeric",
-              })}`
+            ? (() => {
+                // Parse the date string manually to avoid timezone issues
+                const [year, month, day] = selectedDate.split("-").map(Number);
+                const date = new Date(year, month - 1, day);
+                return `Available Times - ${date.toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "short",
+                  day: "numeric",
+                })}`;
+              })()
             : "Select a Date"}
         </h3>
 

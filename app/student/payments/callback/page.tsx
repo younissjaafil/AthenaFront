@@ -39,6 +39,26 @@ function PaymentCallbackContent() {
         setSyncStatus("syncing");
         await syncAllPending.mutateAsync();
         setSyncStatus("done");
+
+        // Invalidate payment-related queries AFTER sync completes
+        await queryClient.invalidateQueries({
+          queryKey: paymentKeys.entitlements,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: paymentKeys.transactions,
+        });
+        if (agentId) {
+          await queryClient.invalidateQueries({
+            queryKey: paymentKeys.agentAccess(agentId),
+          });
+        }
+        // Invalidate session queries if this was a session payment
+        if (sessionId) {
+          await queryClient.invalidateQueries({ queryKey: ["sessions"] });
+          await queryClient.invalidateQueries({
+            queryKey: ["sessions", sessionId],
+          });
+        }
       } catch (error) {
         console.error("Failed to sync payments:", error);
         setSyncStatus("error");
@@ -46,20 +66,6 @@ function PaymentCallbackContent() {
     };
 
     syncPayments();
-
-    // Invalidate payment-related queries to refresh entitlements
-    queryClient.invalidateQueries({ queryKey: paymentKeys.entitlements });
-    queryClient.invalidateQueries({ queryKey: paymentKeys.transactions });
-    if (agentId) {
-      queryClient.invalidateQueries({
-        queryKey: paymentKeys.agentAccess(agentId),
-      });
-    }
-    // Invalidate session queries if this was a session payment
-    if (sessionId) {
-      queryClient.invalidateQueries({ queryKey: ["sessions"] });
-      queryClient.invalidateQueries({ queryKey: ["sessions", sessionId] });
-    }
 
     // Show success/failure for a moment
     const timer = setTimeout(() => {
@@ -79,7 +85,9 @@ function PaymentCallbackContent() {
           <p className="text-gray-600 dark:text-slate-400">
             {syncStatus === "syncing"
               ? "Verifying payment..."
-              : "Processing payment..."}
+              : syncStatus === "done"
+              ? "Payment verified! Redirecting..."
+              : "Finalizing..."}
           </p>
         </div>
       </div>

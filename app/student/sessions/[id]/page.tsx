@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { AnimatedCard } from "@/components/ui/animated-card";
-import { SessionStatusBadge } from "@/components/sessions";
+import { SessionStatusBadge, CancelSessionModal } from "@/components/sessions";
 import { JitsiMeet } from "@/components/sessions/JitsiMeet";
 import {
   useSession,
@@ -42,6 +42,7 @@ export default function SessionDetailPage() {
 
   const [showVideo, setShowVideo] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const { data: user } = useCurrentUser();
   const { data: session, isLoading, error, refetch } = useSession(sessionId);
@@ -56,10 +57,10 @@ export default function SessionDetailPage() {
   const isCreator = session?.creatorId === user?.creatorId;
   const isStudent = session?.userId === user?.id;
 
-  const handleCancel = async () => {
-    const reason = prompt("Reason for cancellation (optional):");
+  const handleCancel = async (reason?: string) => {
     try {
-      await cancelSession.mutateAsync(reason || undefined);
+      await cancelSession.mutateAsync(reason);
+      setShowCancelModal(false);
     } catch (error) {
       console.error("Failed to cancel:", error);
     }
@@ -369,7 +370,7 @@ export default function SessionDetailPage() {
               {(session.status === "pending" ||
                 session.status === "confirmed") && (
                 <button
-                  onClick={handleCancel}
+                  onClick={() => setShowCancelModal(true)}
                   disabled={cancelSession.isPending}
                   className="w-full px-4 py-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
                 >
@@ -432,6 +433,15 @@ export default function SessionDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Cancel Session Modal */}
+      <CancelSessionModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleCancel}
+        isLoading={cancelSession.isPending}
+        sessionWith={session.creatorName}
+      />
     </div>
   );
 }

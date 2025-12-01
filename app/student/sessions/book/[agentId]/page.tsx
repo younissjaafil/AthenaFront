@@ -42,6 +42,14 @@ export default function BookSessionPage() {
   const { data: settings, isLoading: loadingSettings } =
     useCreatorSessionSettings(agent?.creatorId || "");
 
+  // Helper to format date as YYYY-MM-DD using local date parts (no UTC shift)
+  const formatLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   // Calculate date range (next 30 days or based on settings)
   const dateRange = useMemo(() => {
     const start = new Date();
@@ -50,8 +58,8 @@ export default function BookSessionPage() {
     end.setDate(end.getDate() + (settings?.maxAdvanceBookingDays || 30));
 
     return {
-      startDate: start.toISOString().split("T")[0],
-      endDate: end.toISOString().split("T")[0],
+      startDate: formatLocalDate(start),
+      endDate: formatLocalDate(end),
     };
   }, [settings?.maxAdvanceBookingDays]);
 
@@ -82,58 +90,22 @@ export default function BookSessionPage() {
   const handleBook = async () => {
     if (!selectedDate || !selectedTime || !agent?.creatorId) return;
 
-    // Find the timezone from the available slots for this date
-    const slotData = availableSlots?.find((s) => s.date === selectedDate);
-    const creatorTimezone = slotData?.timezone || settings?.timezone || "UTC";
-
-    // Create the datetime string with the creator's timezone
-    // The slot time (e.g., "02:00") is in the creator's timezone
-    // We need to send it as an ISO string that the backend understands
-    const dateTimeStr = `${selectedDate}T${selectedTime}:00`;
-
-    // Get the offset for the creator's timezone
-    const tempDate = new Date(dateTimeStr + "Z"); // Treat as UTC first
-    const formatter = new Intl.DateTimeFormat("en-US", {
-      timeZone: creatorTimezone,
-      hour: "numeric",
-      hour12: false,
-    });
-
-    // Calculate offset by checking what hour noon UTC shows as in the target timezone
-    const testDate = new Date(`${selectedDate}T12:00:00Z`);
-    const localHour = parseInt(formatter.format(testDate));
-    const offsetHours = localHour - 12;
-
-    // Adjust the time to get UTC
-    const [hours, minutes] = selectedTime.split(":").map(Number);
-    const utcHours = hours - offsetHours;
-
-    // Handle day wraparound
-    let adjustedDate = selectedDate;
-    let adjustedHours = utcHours;
-    if (utcHours < 0) {
-      adjustedHours = utcHours + 24;
-      const d = new Date(selectedDate);
-      d.setDate(d.getDate() - 1);
-      adjustedDate = d.toISOString().split("T")[0];
-    } else if (utcHours >= 24) {
-      adjustedHours = utcHours - 24;
-      const d = new Date(selectedDate);
-      d.setDate(d.getDate() + 1);
-      adjustedDate = d.toISOString().split("T")[0];
-    }
-
-    const scheduledAt = `${adjustedDate}T${adjustedHours
-      .toString()
-      .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00.000Z`;
+    // Send the datetime as-is without timezone conversion
+    // The time the user selects is the time they want (e.g., 2 AM means 2 AM)
+    const scheduledAt = `${selectedDate}T${selectedTime}:00`;
 
     try {
+      // Get price from settings - ensure it's a number
+      const priceValue =
+        settings?.pricePerDuration?.[selectedDuration.toString()];
+      const price = priceValue ? Number(priceValue) : undefined;
+
       await bookSession.mutateAsync({
         creatorId: agent.creatorId,
         scheduledAt,
         durationMinutes: selectedDuration,
         studentNotes: notes || undefined,
-        price: settings?.pricePerDuration?.[selectedDuration.toString()],
+        price: price && price > 0 ? price : undefined,
         currency: "USD",
       });
 
@@ -273,15 +245,19 @@ export default function BookSessionPage() {
                 <Calendar className="w-5 h-5 text-purple-500" />
                 <span>
                   {selectedDate &&
-                    new Date(selectedDate + "T00:00:00").toLocaleDateString(
-                      "en-US",
-                      {
+                    (() => {
+                      // Parse the date string manually to avoid timezone issues
+                      const [year, month, day] = selectedDate
+                        .split("-")
+                        .map(Number);
+                      const date = new Date(year, month - 1, day);
+                      return date.toLocaleDateString("en-US", {
                         weekday: "long",
                         month: "long",
                         day: "numeric",
                         year: "numeric",
-                      }
-                    )}
+                      });
+                    })()}
                 </span>
               </div>
 
