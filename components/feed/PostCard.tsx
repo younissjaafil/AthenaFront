@@ -153,7 +153,10 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
       )}
       {/* Header */}
       <div className="p-5 flex items-start justify-between">
-        <Link href={`/${creatorHandle}`} className="flex items-start gap-3 hover:opacity-80 transition-opacity">
+        <Link
+          href={`/${creatorHandle}`}
+          className="flex items-start gap-3 hover:opacity-80 transition-opacity"
+        >
           <div className="w-11 h-11 rounded-full overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 ring-2 ring-gray-100 dark:ring-gray-700">
             {creatorAvatar ? (
               <img
@@ -328,9 +331,11 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
               : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
           }`}
         >
-          <Heart className={`w-5 h-5 transition-all duration-200 ${
-            post.isLiked ? "fill-red-500 scale-110" : ""
-          }`} />
+          <Heart
+            className={`w-5 h-5 transition-all duration-200 ${
+              post.isLiked ? "fill-red-500 scale-110" : ""
+            }`}
+          />
           <span className="text-sm font-medium">Like</span>
         </button>
 
