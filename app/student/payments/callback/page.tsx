@@ -67,10 +67,10 @@ function PaymentCallbackContent() {
 
     syncPayments();
 
-    // Show success/failure for a moment
+    // Show success/failure for longer to ensure sync completes
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+    }, 5000); // Increased to 5 seconds to ensure sync fully completes
 
     return () => clearTimeout(timer);
   }, [queryClient, agentId, sessionId, syncAllPending]);
