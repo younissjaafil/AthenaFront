@@ -221,7 +221,7 @@ export default function FeedPage() {
                   className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-950 rounded-xl transition-colors"
                 >
                   <GraduationCap className="w-5 h-5" />
-                  <span>Student Dashboard</span>
+                  <span>Student Studio</span>
                 </Link>
 
                 {isCreator && (

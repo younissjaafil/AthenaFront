@@ -52,7 +52,7 @@ A modern, clean Next.js application with professional design and full authentica
 - **Sign Up** (`/sign-up`) - Clerk registration
 - Centered layout with gradient background
 
-#### Student Dashboard (`/student/`)
+#### Student Studio (`/student/`)
 
 - Sidebar navigation: Dashboard, My Chats, Sessions, Settings
 - Dashboard with stats and recent activity
@@ -163,6 +163,10 @@ Defined in `globals.css`:
 ```css
 /* Cards */
 .card              /* Basic card */
+/* Basic card */
+/* Basic card */
+/* Basic card */
+/* Basic card */
 /* Basic card */
 /* Basic card */
 /* Basic card */

@@ -7,7 +7,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 /**
  * Component that redirects users to their appropriate dashboard based on roles.
- * Priority: Admin > Creator > User (student dashboard)
+ * Priority: Admin > Creator > User (student Studio)
  */
 export function RoleRedirector() {
   const router = useRouter();

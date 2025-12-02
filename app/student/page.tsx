@@ -8,7 +8,7 @@ export default function StudentPage() {
           Student Area
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          (Placeholder - Student dashboard coming soon)
+          (Placeholder - Student Studio coming soon)
         </p>
       </div>
     </div>
