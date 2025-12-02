@@ -42,8 +42,12 @@ export default function AgentDetailPage({
   const handleStartChat = async () => {
     if (!agent) return;
 
-    // If agent is free or user has access, create conversation directly
-    if (agent.isFree || access?.hasAccess) {
+    // Check if user is the creator or has access
+    const isCreator = currentUser?.id === agent.creatorId;
+    const hasAccess = agent.isFree || access?.hasAccess || isCreator;
+
+    // If agent is free, user has access, or user is the creator - create conversation directly
+    if (hasAccess) {
       try {
         const conversation = await createConversation.mutateAsync({
           agentId: agent.id,
@@ -270,7 +274,9 @@ export default function AgentDetailPage({
                   createConversation.isPending || createPayment.isPending
                 }
                 className={`w-full py-4 rounded-xl font-semibold text-white transition-all flex items-center justify-center gap-2 ${
-                  agent.isFree || access?.hasAccess
+                  agent.isFree ||
+                  access?.hasAccess ||
+                  currentUser?.id === agent.creatorId
                     ? "bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 shadow-lg shadow-purple-500/25"
                     : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/25"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
@@ -280,7 +286,9 @@ export default function AgentDetailPage({
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Processing...
                   </>
-                ) : agent.isFree || access?.hasAccess ? (
+                ) : agent.isFree ||
+                  access?.hasAccess ||
+                  currentUser?.id === agent.creatorId ? (
                   <>
                     <MessageSquare className="w-5 h-5" />
                     Start Chatting
@@ -294,11 +302,15 @@ export default function AgentDetailPage({
               </button>
 
               {/* Access Info */}
-              {access?.hasAccess && (
+              {(access?.hasAccess || currentUser?.id === agent.creatorId) && (
                 <div className="mt-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/30">
                   <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 text-sm">
                     <Check className="w-4 h-4" />
-                    <span className="font-medium">You have access</span>
+                    <span className="font-medium">
+                      {currentUser?.id === agent.creatorId
+                        ? "You own this agent"
+                        : "You have access"}
+                    </span>
                   </div>
                 </div>
               )}
