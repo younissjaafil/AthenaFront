@@ -14,6 +14,7 @@ import {
 } from "@/hooks/useProfile";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCreatorPosts } from "@/hooks/useFeed";
+import { useCreatorAgents } from "@/hooks/useAgents";
 import { PostCard } from "@/components/feed";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth, SignInButton, SignUpButton } from "@clerk/nextjs";
@@ -82,6 +83,9 @@ export default function PublicProfilePage() {
     profile?.creatorId || "",
     1,
     20
+  );
+  const { data: creatorAgents, isLoading: agentsLoading } = useCreatorAgents(
+    profile?.creatorId || ""
   );
 
   const followCreator = useFollowCreator();
@@ -576,14 +580,94 @@ export default function PublicProfilePage() {
 
             {/* Agents Tab - Creator only */}
             {activeTab === "agents" && isCreator && (
-              <div className="text-center py-12">
-                <Bot className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-                <p className="text-gray-500 dark:text-gray-400 mb-2">
-                  No agents yet
-                </p>
-                <p className="text-sm text-gray-400 dark:text-gray-500">
-                  AI agents created by this creator will appear here
-                </p>
+              <div>
+                {agentsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                  </div>
+                ) : !creatorAgents || creatorAgents.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Bot className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400 mb-2">
+                      No agents yet
+                    </p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500">
+                      AI agents created by this creator will appear here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                    {creatorAgents.map((agent) => (
+                      <Link
+                        key={agent.id}
+                        href={`/explore/agents/${agent.id}`}
+                        className="block group"
+                      >
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg">
+                          {/* Agent Header */}
+                          <div className="flex items-start gap-4 mb-4">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                              <Bot className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
+                                {agent.name}
+                              </h3>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                {agent.category}
+                              </p>
+                            </div>
+                            {/* Price Badge */}
+                            {agent.pricePerMessage === 0 &&
+                            agent.pricePerConversation === 0 ? (
+                              <div className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                                Free
+                              </div>
+                            ) : (
+                              <div className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium">
+                                $
+                                {(agent.pricePerMessage ||
+                                  agent.pricePerConversation ||
+                                  0
+                                ).toFixed(2)}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Agent Description */}
+                          <p className="text-sm text-gray-600 dark:text-slate-400 mb-4 line-clamp-2">
+                            {agent.description ||
+                              "AI assistant ready to help you"}
+                          </p>
+
+                          {/* Agent Stats */}
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <Users className="w-4 h-4" />
+                              <span>
+                                {agent.totalConversations || 0} users
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                              <span>
+                                {agent.averageRating
+                                  ? agent.averageRating.toFixed(1)
+                                  : "New"}
+                              </span>
+                            </div>
+                            {agent.category && agent.category.length > 0 && (
+                              <div className="flex items-center gap-1">
+                                <Sparkles className="w-4 h-4" />
+                                <span>{agent.category[0]}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

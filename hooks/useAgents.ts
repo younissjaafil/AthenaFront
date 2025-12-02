@@ -57,6 +57,20 @@ export function useAgentsByCategory(category: string) {
   });
 }
 
+// Fetch agents by creator (no auth required)
+export function useCreatorAgents(creatorId: string) {
+  return useQuery({
+    queryKey: ["agents", "creator", creatorId] as const,
+    queryFn: async () => {
+      const response = await axios.get<PublicAgent[]>(
+        `${API_URL}/api/creators/${creatorId}/agents`
+      );
+      return response.data;
+    },
+    enabled: !!creatorId,
+  });
+}
+
 // Fetch my agents (for creators)
 export function useMyAgents() {
   const { getToken } = useAuth();
