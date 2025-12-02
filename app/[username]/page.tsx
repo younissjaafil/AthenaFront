@@ -109,6 +109,7 @@ export default function PublicProfilePage() {
   };
 
   const isCreatorUser = currentUser?.isCreator || currentUser?.isAdmin;
+  const isViewingOwnProfileByUsername = currentUser?.username === username;
 
   if (isLoading) {
     return (
@@ -120,18 +121,29 @@ export default function PublicProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-950">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-950 px-4">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           Profile not found
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">
-          User @{username} does not exist
+        <p className="text-gray-500 dark:text-gray-400 mb-6 text-center">
+          {isViewingOwnProfileByUsername
+            ? `Your profile @${username} is being set up. Please try accessing it from the My Profile menu.`
+            : `User @${username} does not exist`}
         </p>
-        <Link href="/explore">
-          <button className="px-6 py-2 bg-[#00AFF0] text-white rounded-full font-medium hover:bg-[#009AD6] transition-colors">
-            Explore Creators
-          </button>
-        </Link>
+        <div className="flex gap-3">
+          {isViewingOwnProfileByUsername && (
+            <Link href="/profile">
+              <button className="px-6 py-2 bg-purple-600 text-white rounded-full font-medium hover:bg-purple-700 transition-colors">
+                Go to My Profile
+              </button>
+            </Link>
+          )}
+          <Link href="/explore">
+            <button className="px-6 py-2 bg-[#00AFF0] text-white rounded-full font-medium hover:bg-[#009AD6] transition-colors">
+              Explore Creators
+            </button>
+          </Link>
+        </div>
       </div>
     );
   }

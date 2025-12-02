@@ -182,19 +182,27 @@ export default function SocialLayout({
             <Link
               href="/student/dashboard"
               onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-950 rounded-xl transition-colors"
+              className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 hover:from-blue-500/20 hover:to-cyan-500/20 border border-blue-200/50 dark:border-blue-500/30 rounded-xl transition-all group"
             >
-              <GraduationCap className="w-5 h-5" />
-              <span>Student Dashboard</span>
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-medium text-blue-700 dark:text-blue-300 group-hover:text-blue-800 dark:group-hover:text-blue-200">
+                Student Dashboard
+              </span>
             </Link>
             {isCreator && (
               <Link
                 href="/creator/dashboard"
                 onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 hover:bg-teal-100 dark:hover:bg-teal-950 rounded-xl transition-colors"
+                className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 border border-purple-200/50 dark:border-purple-500/30 rounded-xl transition-all group"
               >
-                <Sparkles className="w-5 h-5" />
-                <span>Creator Studio</span>
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-medium text-purple-700 dark:text-purple-300 group-hover:text-purple-800 dark:group-hover:text-purple-200">
+                  Creator Studio
+                </span>
               </Link>
             )}
           </div>

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useMyProfile } from "@/hooks/useProfile";
 import {
   Settings,
   Edit,
@@ -17,11 +19,20 @@ import {
 } from "lucide-react";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { data: currentUser, isLoading } = useCurrentUser();
+  const { data: myProfile } = useMyProfile();
   const [activeTab, setActiveTab] = useState<"posts" | "media" | "likes">(
     "posts"
   );
   const isCreator = currentUser?.isCreator || currentUser?.isAdmin;
+
+  // Redirect to username-based profile if we have a handle
+  useEffect(() => {
+    if (myProfile?.handle) {
+      router.replace(`/${myProfile.handle}`);
+    }
+  }, [myProfile?.handle, router]);
 
   if (isLoading) {
     return (

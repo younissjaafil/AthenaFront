@@ -27,7 +27,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useDiscoverFeed, Post } from "@/hooks/useFeed";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { PostCard } from "@/components/feed";
+import { PostCard, CreatePostForm } from "@/components/feed";
 import { useVerifiedCreators } from "@/hooks/useCreators";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -314,42 +314,8 @@ export default function FeedPage() {
           <div className="max-w-2xl mx-auto">
             {/* Compose Box - Only for logged in users */}
             {isSignedIn ? (
-              <div className="border-b border-gray-200 dark:border-gray-800 p-4">
-                <div className="flex items-start gap-3">
-                  {currentUser?.profileImageUrl ? (
-                    <Image
-                      src={currentUser.profileImageUrl}
-                      alt="Profile"
-                      width={40}
-                      height={40}
-                      className="rounded-full object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                      {currentUser?.firstName?.[0] ||
-                        currentUser?.username?.[0] ||
-                        "U"}
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      placeholder="Compose new post..."
-                      className="w-full bg-transparent text-gray-500 dark:text-gray-400 placeholder-gray-400 outline-none py-2"
-                    />
-                    <div className="flex items-center gap-4 mt-2 text-gray-400">
-                      <button className="hover:text-[#00AFF0] transition-colors">
-                        <ImageIcon className="w-5 h-5" />
-                      </button>
-                      <button className="hover:text-[#00AFF0] transition-colors">
-                        <AlignLeft className="w-5 h-5" />
-                      </button>
-                      <button className="hover:text-[#00AFF0] transition-colors">
-                        <ArrowUpRight className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+                <CreatePostForm />
               </div>
             ) : (
               <div className="border-b border-gray-200 dark:border-gray-800 p-6 text-center">

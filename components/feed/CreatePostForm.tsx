@@ -84,9 +84,19 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
         <div className="flex gap-3">
           {/* Avatar */}
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0">
-            <div className="w-full h-full flex items-center justify-center text-gray-400 font-semibold">
-              {currentUser?.firstName?.charAt(0) || "U"}
-            </div>
+            {currentUser?.profileImageUrl ? (
+              <img
+                src={currentUser.profileImageUrl}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-500 to-orange-600 text-white font-semibold">
+                {currentUser?.firstName?.charAt(0) ||
+                  currentUser?.username?.charAt(0) ||
+                  "U"}
+              </div>
+            )}
           </div>
 
           {/* Input Area */}
