@@ -3,7 +3,12 @@
 import { useState, useEffect, useRef, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useConversation, useSendMessage, useConversations } from "@/hooks/useConversations";
+import Image from "next/image";
+import {
+  useConversation,
+  useSendMessage,
+  useConversations,
+} from "@/hooks/useConversations";
 import { useAgentAccessInfo } from "@/hooks/usePayments";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { PaywallModal } from "@/components/payments";
@@ -234,7 +239,8 @@ export default function ChatPage({
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: currentUser } = useCurrentUser();
-  const { data: conversations, isLoading: conversationsLoading } = useConversations();
+  const { data: conversations, isLoading: conversationsLoading } =
+    useConversations();
 
   const {
     data: conversation,
@@ -327,10 +333,12 @@ export default function ChatPage({
   const messages = conversation.messages || [];
 
   // Filter conversations by search
-  const filteredConversations = conversations?.filter((conv) =>
-    conv.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    conv.agent?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredConversations =
+    conversations?.filter(
+      (conv) =>
+        conv.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        conv.agent?.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   // Format date
   const formatDate = (date: string) => {
@@ -387,7 +395,9 @@ export default function ChatPage({
                 <div className="text-center py-8 px-4">
                   <History className="w-8 h-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {searchQuery ? "No conversations found" : "No conversations yet"}
+                    {searchQuery
+                      ? "No conversations found"
+                      : "No conversations yet"}
                   </p>
                 </div>
               ) : (
@@ -417,9 +427,11 @@ export default function ChatPage({
                             <span className="text-xs text-gray-400 dark:text-gray-500">
                               {formatDate(conv.updatedAt)}
                             </span>
-                            <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
                             <span className="text-xs text-gray-400 dark:text-gray-500">
-                              {conv.totalMessages || 0} messages
+                              •
+                            </span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              {0} messages
                             </span>
                           </div>
                         </div>
@@ -434,9 +446,11 @@ export default function ChatPage({
             <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 {currentUser?.profileImageUrl ? (
-                  <img
+                  <Image
                     src={currentUser.profileImageUrl}
                     alt={currentUser.username || "User"}
+                    width={32}
+                    height={32}
                     className="w-8 h-8 rounded-full"
                   />
                 ) : (
@@ -475,19 +489,18 @@ export default function ChatPage({
                 )}
               </button>
               <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center">
-                <Bot className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="font-semibold text-gray-900 dark:text-white">
-                  {agentName}
-                </h1>
-                <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-                  <span>Online</span>
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
                 </div>
-              </div>
-            </div>
+                <div>
+                  <h1 className="font-semibold text-gray-900 dark:text-white">
+                    {agentName}
+                  </h1>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+                    <span>Online</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -504,27 +517,27 @@ export default function ChatPage({
         {/* Messages Area */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-4 py-6">
-          {needsPayment ? (
-            <PaywallMessage
-              agentName={agentName}
-              onUnlock={() => setShowPaywall(true)}
-            />
-          ) : messages.length === 0 ? (
-            <WelcomeMessage agentName={agentName} />
-          ) : (
-            <>
-              {messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  message={message}
-                  agentName={agentName}
-                />
-              ))}
-              <AnimatePresence>
-                {sendMessage.isPending && <TypingIndicator />}
-              </AnimatePresence>
-            </>
-          )}
+            {needsPayment ? (
+              <PaywallMessage
+                agentName={agentName}
+                onUnlock={() => setShowPaywall(true)}
+              />
+            ) : messages.length === 0 ? (
+              <WelcomeMessage agentName={agentName} />
+            ) : (
+              <>
+                {messages.map((message) => (
+                  <MessageBubble
+                    key={message.id}
+                    message={message}
+                    agentName={agentName}
+                  />
+                ))}
+                <AnimatePresence>
+                  {sendMessage.isPending && <TypingIndicator />}
+                </AnimatePresence>
+              </>
+            )}
             <div ref={messagesEndRef} />
           </div>
         </main>
@@ -532,46 +545,46 @@ export default function ChatPage({
         {/* Input Area */}
         <footer className="flex-shrink-0 border-t border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto px-4 py-4">
-          {needsPayment ? (
-            <div className="text-center py-2">
-              <p className="text-gray-500 dark:text-slate-400 text-sm">
-                Unlock this agent to start chatting
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="relative flex items-end gap-3 bg-gray-100 dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 focus-within:border-purple-500/50 transition-colors">
-                <textarea
-                  ref={inputRef}
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={`Message ${agentName}...`}
-                  rows={1}
-                  className="flex-1 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 px-4 py-3 resize-none focus:outline-none max-h-32 scrollbar-thin"
-                  style={{
-                    height: "auto",
-                    minHeight: "48px",
-                  }}
-                  disabled={sendMessage.isPending}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={!inputValue.trim() || sendMessage.isPending}
-                  className="m-2 p-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  {sendMessage.isPending ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
-                </button>
+            {needsPayment ? (
+              <div className="text-center py-2">
+                <p className="text-gray-500 dark:text-slate-400 text-sm">
+                  Unlock this agent to start chatting
+                </p>
               </div>
-              <p className="text-center text-xs text-gray-500 dark:text-slate-500 mt-3">
-                Athena can make mistakes. Verify important information.
-              </p>
-            </>
-          )}
+            ) : (
+              <>
+                <div className="relative flex items-end gap-3 bg-gray-100 dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 focus-within:border-purple-500/50 transition-colors">
+                  <textarea
+                    ref={inputRef}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={`Message ${agentName}...`}
+                    rows={1}
+                    className="flex-1 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 px-4 py-3 resize-none focus:outline-none max-h-32 scrollbar-thin"
+                    style={{
+                      height: "auto",
+                      minHeight: "48px",
+                    }}
+                    disabled={sendMessage.isPending}
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={!inputValue.trim() || sendMessage.isPending}
+                    className="m-2 p-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {sendMessage.isPending ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+                <p className="text-center text-xs text-gray-500 dark:text-slate-500 mt-3">
+                  Athena can make mistakes. Verify important information.
+                </p>
+              </>
+            )}
           </div>
         </footer>
       </div>
