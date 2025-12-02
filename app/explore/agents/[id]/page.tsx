@@ -216,15 +216,15 @@ export default function AgentDetailPage({
                         <Database className="w-5 h-5 text-emerald-500" />
                         <span>
                           Trained on{" "}
-                          {documentStats.totalChunks.toLocaleString()} knowledge
+                          {(documentStats.totalChunks || 0).toLocaleString()} knowledge
                           chunks
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600 dark:text-slate-400">
                         <FileText className="w-5 h-5 text-emerald-500" />
                         <span>
-                          {documentStats.totalDocuments} document
-                          {documentStats.totalDocuments !== 1 ? "s" : ""}{" "}
+                          {documentStats.totalDocuments || 0} document
+                          {(documentStats.totalDocuments || 0) !== 1 ? "s" : ""}{" "}
                           uploaded
                         </span>
                       </div>
@@ -324,7 +324,7 @@ export default function AgentDetailPage({
                       Training Data
                     </span>
                     <span className="font-semibold text-purple-600 dark:text-purple-400">
-                      {documentStats.totalChunks.toLocaleString()} chunks
+                      {(documentStats.totalChunks || 0).toLocaleString()} chunks
                     </span>
                   </div>
                 )}
