@@ -117,26 +117,6 @@ export default function ProfilePage() {
             Followers
           </span>
         </div>
-
-        {/* Quick Actions */}
-        <div className="flex gap-2 mt-4">
-          <Link
-            href="/student/dashboard"
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-950 rounded-full transition-colors"
-          >
-            <GraduationCap className="w-4 h-4" />
-            Student Dashboard
-          </Link>
-          {isCreator && (
-            <Link
-              href="/creator/dashboard"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 hover:bg-teal-100 dark:hover:bg-teal-950 rounded-full transition-colors"
-            >
-              <Sparkles className="w-4 h-4" />
-              Creator Studio
-            </Link>
-          )}
-        </div>
       </div>
 
       {/* Tabs */}

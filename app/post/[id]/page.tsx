@@ -107,9 +107,9 @@ export default function PostDetailPage() {
 
   const handleCommentLikeToggle = (commentId: string, isLiked: boolean) => {
     if (isLiked) {
-      unlikeComment.mutate(commentId);
+      unlikeComment.mutate({ commentId, postId });
     } else {
-      likeComment.mutate(commentId);
+      likeComment.mutate({ commentId, postId });
     }
   };
 

@@ -171,7 +171,7 @@ export default function FeedPage() {
           </div>
 
           {/* Logo - Desktop */}
-          <div className="hidden lg:block p-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="hidden lg:flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
             <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl font-bold text-brand-purple-600 dark:text-brand-purple-400">
                 Athena
@@ -214,24 +214,32 @@ export default function FeedPage() {
 
             {/* Quick Links for logged in users */}
             {isSignedIn && (
-              <div className="mt-4 mx-4 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl space-y-1">
+              <div className="mt-4 mx-4 space-y-2">
                 <Link
                   href="/student/dashboard"
                   onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 hover:from-blue-500/20 hover:to-cyan-500/20 border border-blue-200/50 dark:border-blue-500/30 rounded-xl transition-all group"
                 >
-                  <GraduationCap className="w-5 h-5" />
-                  <span>Student Studio</span>
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                    <GraduationCap className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="font-medium text-blue-700 dark:text-blue-300 group-hover:text-blue-800 dark:group-hover:text-blue-200">
+                    Student Dashboard
+                  </span>
                 </Link>
-                <br></br>
+
                 {isCreator && (
                   <Link
                     href="/creator/dashboard"
                     onClick={() => setSidebarOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 border border-purple-200/50 dark:border-purple-500/30 rounded-xl transition-all group"
                   >
-                    <Sparkles className="w-5 h-5" />
-                    <span>Creator Studio</span>
+                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="font-medium text-purple-700 dark:text-purple-300 group-hover:text-purple-800 dark:group-hover:text-purple-200">
+                      Creator Studio
+                    </span>
                   </Link>
                 )}
               </div>

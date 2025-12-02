@@ -14,7 +14,6 @@ import {
   Bookmark,
   Users,
   User,
-  MoreHorizontal,
   Plus,
   Menu,
   X,
@@ -39,7 +38,6 @@ export default function SocialLayout({
   const pathname = usePathname();
   const { data: currentUser } = useCurrentUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showMore, setShowMore] = useState(false);
   const enableCreatorPower = useEnableCreatorPower();
 
   const isCreator = currentUser?.isCreator || currentUser?.isAdmin;
@@ -176,53 +174,10 @@ export default function SocialLayout({
                   </li>
                 );
               })}
-
-              {/* More dropdown */}
-              <li>
-                <button
-                  onClick={() => setShowMore(!showMore)}
-                  className="w-full flex items-center gap-4 px-6 py-3 text-[15px] text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
-                >
-                  <MoreHorizontal className="w-5 h-5" />
-                  <span>More</span>
-                </button>
-              </li>
             </ul>
-
-            {/* Expanded More Options */}
-            {showMore && (
-              <div className="mt-2 mx-4 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl space-y-1">
-                <Link
-                  href="/student/dashboard"
-                  onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 rounded-lg transition-colors"
-                >
-                  <GraduationCap className="w-5 h-5" />
-                  <span>Student Dashboard</span>
-                </Link>
-                {isCreator && (
-                  <Link
-                    href="/creator/dashboard"
-                    onClick={() => setSidebarOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 rounded-lg transition-colors"
-                  >
-                    <Sparkles className="w-5 h-5" />
-                    <span>Creator Studio</span>
-                  </Link>
-                )}
-                <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
-                <Link
-                  href="/settings"
-                  onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 rounded-lg transition-colors"
-                >
-                  <span>Settings</span>
-                </Link>
-              </div>
-            )}
           </nav>
 
-          {/* Switch to Student/Creator Quick Links */}
+          {/* Dashboard Quick Links */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
             <Link
               href="/student/dashboard"
@@ -246,7 +201,7 @@ export default function SocialLayout({
 
           {/* New Post Button */}
           {isCreator && (
-            <div className="p-4">
+            <div className="p-4 pt-0">
               <Link
                 href="/creator/posts/new"
                 onClick={() => setSidebarOpen(false)}
