@@ -23,7 +23,7 @@ export function useAgentDocuments(agentId: string) {
     queryKey: documentKeys.byAgent(agentId),
     queryFn: async () => {
       const response = await apiClient.get<Document[]>(
-        `/api/documents/agent/${agentId}`
+        `/documents/agent/${agentId}`
       );
       return response.data;
     },
@@ -57,7 +57,7 @@ export function useDocumentStats(agentId: string) {
     queryKey: documentKeys.stats(agentId),
     queryFn: async () => {
       const response = await apiClient.get<DocumentStats>(
-        `/api/documents/agent/${agentId}/stats`
+        `/documents/agent/${agentId}/stats`
       );
       return response.data;
     },
@@ -73,7 +73,7 @@ export function useMyDocuments() {
   return useQuery({
     queryKey: documentKeys.myDocuments,
     queryFn: async () => {
-      const response = await apiClient.get<Document[]>("/api/documents/me");
+      const response = await apiClient.get<Document[]>("/documents/me");
       return response.data;
     },
   });
@@ -153,7 +153,7 @@ export function useDeleteDocument() {
       documentId: string;
       agentId: string;
     }) => {
-      await apiClient.delete(`/api/documents/${documentId}`);
+      await apiClient.delete(`/documents/${documentId}`);
       return { documentId, agentId };
     },
     onSuccess: ({ documentId, agentId }) => {
@@ -183,7 +183,7 @@ export function usePollDocumentStatus(
     queryKey: documentKeys.detail(documentId || ""),
     queryFn: async () => {
       const response = await apiClient.get<Document>(
-        `/api/documents/${documentId}`
+        `/documents/${documentId}`
       );
       return response.data;
     },

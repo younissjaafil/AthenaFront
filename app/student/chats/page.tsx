@@ -100,7 +100,7 @@ export default function ChatsPage() {
             </p>
           </div>
           <Link
-            href="/explore"
+            href="/explore/agents"
             className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-cyan-600 text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" />
@@ -269,7 +269,7 @@ export default function ChatsPage() {
               : "Start chatting with an AI agent to see your conversation history here"}
           </p>
           <Link
-            href="/explore"
+            href="/explore/agents"
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-cyan-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
           >
             <Sparkles className="w-5 h-5" />

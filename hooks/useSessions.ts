@@ -50,7 +50,7 @@ export function useMySessions() {
   return useQuery({
     queryKey: sessionKeys.mySessions,
     queryFn: async () => {
-      const response = await apiClient.get<Session[]>("/api/sessions/me");
+      const response = await apiClient.get<Session[]>("/sessions/me");
       return response.data;
     },
   });
@@ -64,7 +64,7 @@ export function useUpcomingSessions() {
   return useQuery({
     queryKey: sessionKeys.upcoming,
     queryFn: async () => {
-      const response = await apiClient.get<Session[]>("/api/sessions/upcoming");
+      const response = await apiClient.get<Session[]>("/sessions/upcoming");
       return response.data;
     },
   });
@@ -79,7 +79,7 @@ export function useCreatorSessions(creatorId: string) {
     queryKey: sessionKeys.creatorSessions(creatorId),
     queryFn: async () => {
       const response = await apiClient.get<Session[]>(
-        `/api/sessions/creator/${creatorId}`
+        `/sessions/creator/${creatorId}`
       );
       return response.data;
     },
@@ -96,7 +96,7 @@ export function useSession(sessionId: string) {
     queryKey: sessionKeys.detail(sessionId),
     queryFn: async () => {
       const response = await apiClient.get<Session>(
-        `/api/sessions/${sessionId}`
+        `/sessions/${sessionId}`
       );
       return response.data;
     },
@@ -113,7 +113,7 @@ export function useBookSession() {
   return useMutation({
     mutationFn: async (data: BookSessionDto) => {
       const response = await apiClient.post<Session>(
-        "/api/sessions/book",
+        "/sessions/book",
         data
       );
       return response.data;
@@ -134,7 +134,7 @@ export function useUpdateSessionStatus(sessionId: string) {
   return useMutation({
     mutationFn: async (data: UpdateSessionStatusDto) => {
       const response = await apiClient.patch<Session>(
-        `/api/sessions/${sessionId}/status`,
+        `/sessions/${sessionId}/status`,
         data
       );
       return response.data;
@@ -158,7 +158,7 @@ export function useConfirmSession(sessionId: string) {
   return useMutation({
     mutationFn: async () => {
       const response = await apiClient.patch<Session>(
-        `/api/sessions/${sessionId}/status`,
+        `/sessions/${sessionId}/status`,
         { status: "confirmed" }
       );
       return response.data;
@@ -181,7 +181,7 @@ export function useStartSession(sessionId: string) {
   return useMutation({
     mutationFn: async () => {
       const response = await apiClient.patch<Session>(
-        `/api/sessions/${sessionId}/start`
+        `/sessions/${sessionId}/start`
       );
       return response.data;
     },
@@ -224,7 +224,7 @@ export function useCancelSession(sessionId: string) {
   return useMutation({
     mutationFn: async (reason?: string) => {
       const response = await apiClient.patch<Session>(
-        `/api/sessions/${sessionId}/cancel`,
+        `/sessions/${sessionId}/cancel`,
         null,
         { params: { reason } }
       );
@@ -251,7 +251,7 @@ export function useMyAvailability() {
     queryKey: sessionKeys.myAvailability,
     queryFn: async () => {
       const response = await apiClient.get<AvailabilitySlot[]>(
-        "/api/availability/me"
+        "/availability/me"
       );
       return response.data;
     },
@@ -281,7 +281,7 @@ export function useSetAvailability() {
   return useMutation({
     mutationFn: async (data: SetAvailabilityDto) => {
       const response = await apiClient.post<AvailabilitySlot[]>(
-        "/api/availability",
+        "/availability",
         data
       );
       return response.data;
@@ -334,7 +334,7 @@ export function useMySessionSettings() {
     queryKey: sessionKeys.mySettings,
     queryFn: async () => {
       const response = await apiClient.get<SessionSettings>(
-        "/api/availability/settings"
+        "/availability/settings"
       );
       return response.data;
     },
@@ -364,7 +364,7 @@ export function useUpdateSessionSettings() {
   return useMutation({
     mutationFn: async (data: UpdateSessionSettingsDto) => {
       const response = await apiClient.patch<SessionSettings>(
-        "/api/availability/settings",
+        "/availability/settings",
         data
       );
       return response.data;
@@ -393,7 +393,7 @@ export function useMyDateOverrides() {
           endTime: string | null;
           isAvailable: boolean;
         }[]
-      >("/api/availability/overrides");
+      >("/availability/overrides");
       return response.data;
     },
   });

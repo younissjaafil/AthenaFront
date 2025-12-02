@@ -167,7 +167,7 @@ export function useMyCreatorProfile() {
   return useQuery({
     queryKey: creatorKeys.me,
     queryFn: async () => {
-      const response = await apiClient.get<Creator | null>("/api/creators/me");
+      const response = await apiClient.get<Creator | null>("/creators/me");
       return response.data;
     },
   });
@@ -239,7 +239,7 @@ export function useBecomeCreator() {
       expertiseLevel?: string;
       hourlyRate?: number;
     }) => {
-      const response = await apiClient.post<Creator>("/api/creators", data);
+      const response = await apiClient.post<Creator>("/creators", data);
       return response.data;
     },
     onSuccess: () => {
@@ -270,7 +270,7 @@ export function useUpdateCreatorProfile() {
       githubUrl?: string;
       isAvailable?: boolean;
     }) => {
-      const response = await apiClient.patch<Creator>("/api/creators/me", data);
+      const response = await apiClient.patch<Creator>("/creators/me", data);
       return response.data;
     },
     onSuccess: () => {

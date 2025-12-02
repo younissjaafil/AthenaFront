@@ -29,7 +29,7 @@ export function useTransactions() {
     queryKey: paymentKeys.transactions,
     queryFn: async () => {
       const response = await apiClient.get<Transaction[]>(
-        "/api/payments/transactions"
+        "/payments/transactions"
       );
       return response.data;
     },
@@ -45,7 +45,7 @@ export function useEntitlements() {
     queryKey: paymentKeys.entitlements,
     queryFn: async () => {
       const response = await apiClient.get<Entitlement[]>(
-        "/api/payments/entitlements"
+        "/payments/entitlements"
       );
       return response.data;
     },
@@ -69,7 +69,7 @@ export function useCreatorRevenue() {
           revenue: number;
           count: number;
         }[];
-      }>("/api/payments/creator/revenue");
+      }>("/payments/creator/revenue");
       return response.data;
     },
   });
@@ -84,7 +84,7 @@ export function useAgentAccess(agentId: string) {
     queryKey: paymentKeys.agentAccess(agentId),
     queryFn: async () => {
       const response = await apiClient.get<AgentAccessResponse>(
-        `/api/payments/agent/${agentId}/access`
+        `/payments/agent/${agentId}/access`
       );
       return response.data;
     },
@@ -101,7 +101,7 @@ export function useTransactionStatus(transactionId: string) {
     queryKey: paymentKeys.transactionStatus(transactionId),
     queryFn: async () => {
       const response = await apiClient.get<Transaction>(
-        `/api/payments/transactions/${transactionId}/status`
+        `/payments/transactions/${transactionId}/status`
       );
       return response.data;
     },
@@ -131,7 +131,7 @@ export function useCreatePayment() {
       data: CreatePaymentDto;
     }) => {
       const response = await apiClient.post<Transaction>(
-        `/api/payments/agent/${agentId}`,
+        `/payments/agent/${agentId}`,
         data
       );
       return response.data;
@@ -151,7 +151,7 @@ export function useSyncTransaction() {
   return useMutation({
     mutationFn: async (transactionId: string) => {
       const response = await apiClient.post<Transaction>(
-        `/api/payments/transactions/${transactionId}/sync`
+        `/payments/transactions/${transactionId}/sync`
       );
       return response.data;
     },
@@ -176,7 +176,7 @@ export function useSyncAllPending() {
       const response = await apiClient.post<{
         synced: number;
         updated: number;
-      }>(`/api/payments/sync-all-pending`);
+      }>(`/payments/sync-all-pending`);
       return response.data;
     },
     onSuccess: () => {
@@ -201,7 +201,7 @@ export function useCreateSessionPayment() {
       data: CreatePaymentDto;
     }) => {
       const response = await apiClient.post<Transaction>(
-        `/api/payments/session/${sessionId}`,
+        `/payments/session/${sessionId}`,
         data
       );
       return response.data;

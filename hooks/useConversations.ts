@@ -30,7 +30,7 @@ export function useConversations(status?: ConversationStatus) {
     queryFn: async () => {
       const params = status ? `?status=${status}` : "";
       const response = await apiClient.get<Conversation[]>(
-        `/api/conversations${params}`
+        `/conversations${params}`
       );
       return response.data;
     },
@@ -46,7 +46,7 @@ export function useConversation(conversationId: string) {
     queryKey: conversationKeys.detail(conversationId),
     queryFn: async () => {
       const response = await apiClient.get<Conversation>(
-        `/api/conversations/${conversationId}`
+        `/conversations/${conversationId}`
       );
       return response.data;
     },
@@ -63,7 +63,7 @@ export function useFindOrCreateConversation() {
   return useMutation({
     mutationFn: async (dto: CreateConversationDto) => {
       const response = await apiClient.post<Conversation>(
-        "/api/conversations",
+        "/conversations",
         dto
       );
       return response.data;
@@ -84,7 +84,7 @@ export function useSendMessage(conversationId: string) {
   return useMutation({
     mutationFn: async (dto: SendMessageDto) => {
       const response = await apiClient.post<SendMessageResponse>(
-        `/api/conversations/${conversationId}/messages`,
+        `/conversations/${conversationId}/messages`,
         dto
       );
       return response.data;
@@ -120,7 +120,7 @@ export function useArchiveConversation() {
 
   return useMutation({
     mutationFn: async (conversationId: string) => {
-      await apiClient.patch(`/api/conversations/${conversationId}/archive`);
+      await apiClient.patch(`/conversations/${conversationId}/archive`);
       return conversationId;
     },
     onSuccess: () => {
@@ -137,7 +137,7 @@ export function useDeleteConversation() {
 
   return useMutation({
     mutationFn: async (conversationId: string) => {
-      await apiClient.delete(`/api/conversations/${conversationId}`);
+      await apiClient.delete(`/conversations/${conversationId}`);
       return conversationId;
     },
     onSuccess: () => {
