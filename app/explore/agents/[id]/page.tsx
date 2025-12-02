@@ -64,8 +64,8 @@ export default function AgentDetailPage({
             amount: amountUSD,
             currency: PaymentCurrency.USD,
             invoice: `Access to ${agent.name}`,
-            successRedirectUrl: `${window.location.origin}/student/chat`,
-            failureRedirectUrl: `${window.location.origin}/explore/agents/${agent.id}`,
+            successRedirectUrl: `${window.location.origin}/student/payments/callback?status=success&agentId=${agent.id}`,
+            failureRedirectUrl: `${window.location.origin}/student/payments/callback?status=failed&agentId=${agent.id}`,
           },
         });
         if (payment.collectUrl) {
@@ -216,15 +216,17 @@ export default function AgentDetailPage({
                         <Database className="w-5 h-5 text-emerald-500" />
                         <span>
                           Trained on{" "}
-                          {(documentStats.totalChunks || 0).toLocaleString()} knowledge
-                          chunks
+                          {(documentStats.totalChunks || 0).toLocaleString()}{" "}
+                          knowledge chunks
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600 dark:text-slate-400">
                         <FileText className="w-5 h-5 text-emerald-500" />
                         <span>
                           {documentStats.totalDocuments || 0} document
-                          {(documentStats.totalDocuments || 0) !== 1 ? "s" : ""}{" "}
+                          {(documentStats.totalDocuments || 0) !== 1
+                            ? "s"
+                            : ""}{" "}
                           uploaded
                         </span>
                       </div>

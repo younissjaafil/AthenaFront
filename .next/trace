@@ -1,2 +1,4 @@
 [{"name":"hot-reloader","duration":64,"timestamp":50421602883,"id":3,"tags":{"version":"15.5.6"},"startTime":1764705728176,"traceId":"7459d9fe78f1343f"},{"name":"compile-path","duration":536005,"timestamp":50421951013,"id":4,"tags":{"trigger":"middleware"},"startTime":1764705728524,"traceId":"7459d9fe78f1343f"}]
 [{"name":"next-dev","duration":171272180,"timestamp":50419481193,"id":1,"tags":{},"startTime":1764705726055,"traceId":"7459d9fe78f1343f"}]
+[{"name":"hot-reloader","duration":55,"timestamp":50990881301,"id":3,"tags":{"version":"15.5.6"},"startTime":1764706297465,"traceId":"cf2e7dce068682be"},{"name":"compile-path","duration":341674,"timestamp":50991000353,"id":4,"tags":{"trigger":"middleware"},"startTime":1764706297584,"traceId":"cf2e7dce068682be"}]
+[{"name":"next-dev","duration":87942797,"timestamp":50989291802,"id":1,"tags":{},"startTime":1764706295869,"traceId":"cf2e7dce068682be"}]
