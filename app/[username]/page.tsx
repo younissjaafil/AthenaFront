@@ -299,7 +299,7 @@ export default function PublicProfilePage() {
                     {currentUser?.firstName || currentUser?.username || "User"}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    @{currentUser?.username || "user"}
+                    @{currentUser?.username}
                   </p>
                 </div>
               </Link>
@@ -341,7 +341,7 @@ export default function PublicProfilePage() {
           <div className="relative px-4 md:px-6 pb-4 border-b border-gray-200 dark:border-gray-800">
             {/* Avatar */}
             <div className="absolute -top-16 left-4 md:left-6">
-              <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-950 overflow-hidden bg-gray-200 dark:bg-gray-800">
+              <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-950 overflow-hidden bg-gray-200 dark:bg-gray-800 relative">
                 {profile.avatarUrl ? (
                   <Image
                     src={profile.avatarUrl}
@@ -351,7 +351,7 @@ export default function PublicProfilePage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-gray-400">
-                    {(profile.displayName || profile.handle || "U").charAt(0)}
+                    {(profile.displayName || profile.handle || "U").charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
@@ -365,7 +365,7 @@ export default function PublicProfilePage() {
                     Edit profile
                   </button>
                 </Link>
-              ) : isSignedIn ? (
+              ) : isCreator && isSignedIn ? (
                 <button
                   onClick={handleFollowToggle}
                   disabled={isFollowPending}
@@ -384,13 +384,13 @@ export default function PublicProfilePage() {
                     "Follow"
                   )}
                 </button>
-              ) : (
+              ) : isCreator && !isSignedIn ? (
                 <SignInButton mode="modal">
                   <button className="px-5 py-2 bg-[#00AFF0] text-white rounded-full text-sm font-semibold hover:bg-[#009AD6] transition-colors">
                     Follow
                   </button>
                 </SignInButton>
-              )}
+              ) : null}
               <button className="p-2 border border-gray-300 dark:border-gray-700 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <Share2 className="w-4 h-4" />
               </button>

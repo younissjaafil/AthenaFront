@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, createClientApiClient } from "@/lib/api-client";
+import { useAuth } from "@clerk/nextjs";
 import type {
   UserProfile,
   CreateProfileDto,
@@ -328,10 +329,12 @@ export function usePromoteToCreator() {
  * Follow a creator
  */
 export function useFollowCreator() {
+  const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (creatorId: string): Promise<void> => {
+      const apiClient = createClientApiClient(getToken);
       await apiClient.post(`/creators/${creatorId}/follow`);
     },
     onSuccess: (_, creatorId) => {
@@ -350,10 +353,12 @@ export function useFollowCreator() {
  * Unfollow a creator
  */
 export function useUnfollowCreator() {
+  const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (creatorId: string): Promise<void> => {
+      const apiClient = createClientApiClient(getToken);
       await apiClient.delete(`/creators/${creatorId}/follow`);
     },
     onSuccess: (_, creatorId) => {
