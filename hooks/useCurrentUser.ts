@@ -56,7 +56,8 @@ export function useCurrentUser() {
       let creatorId: string | undefined;
       try {
         const creatorResponse = await apiClient.get("/api/creators/me");
-        creatorId = creatorResponse.data.id;
+        // Backend returns null if no creator profile
+        creatorId = creatorResponse.data?.id;
       } catch (error: any) {
         // 404 = not a creator, which is fine
         if (error.response?.status !== 404) {

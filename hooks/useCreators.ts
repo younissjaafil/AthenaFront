@@ -167,7 +167,7 @@ export function useMyCreatorProfile() {
   return useQuery({
     queryKey: creatorKeys.me,
     queryFn: async () => {
-      const response = await apiClient.get<Creator>("/api/creators/me");
+      const response = await apiClient.get<Creator | null>("/api/creators/me");
       return response.data;
     },
   });

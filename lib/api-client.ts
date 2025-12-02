@@ -3,13 +3,14 @@
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_ATHENA_CORE_URL;
+const BASE_URL = API_URL?.endsWith("/api") ? API_URL : `${API_URL}/api`;
 
 /**
  * Pre-configured API client for use in hooks.
  * Note: For authenticated requests, use createClientApiClient with getToken.
  */
 export const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -23,7 +24,7 @@ export const createClientApiClient = (
   getToken: () => Promise<string | null>
 ) => {
   const client = axios.create({
-    baseURL: API_URL,
+    baseURL: BASE_URL,
     headers: {
       "Content-Type": "application/json",
     },

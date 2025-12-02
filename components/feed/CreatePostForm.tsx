@@ -101,15 +101,6 @@ export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
 
           {/* Input Area */}
           <div className="flex-1">
-            {isExpanded && (
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Add a title (optional)"
-                className="w-full mb-2 px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            )}
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
