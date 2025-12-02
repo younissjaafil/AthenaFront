@@ -54,6 +54,8 @@ export default function NewAgentPage() {
           ? checked
           : type === "number"
           ? parseFloat(value) || 0
+          : name === "category"
+          ? [value] // Convert category string to array
           : value,
     }));
 
@@ -240,7 +242,7 @@ export default function NewAgentPage() {
                 </label>
                 <select
                   name="category"
-                  value={formData.category}
+                  value={formData.category?.[0] || ""}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-purple-500"
                 >
