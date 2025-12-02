@@ -194,10 +194,10 @@ export default function StudentSessionsPage() {
         {/* Book New Session */}
         <Link
           href="/explore"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-teal-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-teal-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity whitespace-nowrap"
         >
           <Plus className="w-4 h-4" />
-          Book Session
+          Find Creator
         </Link>
       </div>
 

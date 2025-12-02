@@ -335,6 +335,7 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
             className={`w-5 h-5 transition-all duration-200 ${
               post.isLiked ? "fill-red-500 scale-110" : ""
             }`}
+            fill={post.isLiked ? "currentColor" : "none"}
           />
           <span className="text-sm font-medium">Like</span>
         </button>
