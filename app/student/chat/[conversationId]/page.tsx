@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useConversation, useSendMessage } from "@/hooks/useConversations";
+import { useConversation, useSendMessage, useConversations } from "@/hooks/useConversations";
 import { useAgentAccessInfo } from "@/hooks/usePayments";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { PaywallModal } from "@/components/payments";
 import { Message, MessageRole } from "@/lib/types/conversation";
 import {
@@ -21,6 +22,14 @@ import {
   Loader2,
   Lock,
   Crown,
+  MessageSquare,
+  Plus,
+  Search,
+  MoreVertical,
+  Trash2,
+  PanelLeftClose,
+  PanelLeft,
+  History,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -219,8 +228,13 @@ export default function ChatPage({
   const router = useRouter();
   const [inputValue, setInputValue] = useState("");
   const [showPaywall, setShowPaywall] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const { data: currentUser } = useCurrentUser();
+  const { data: conversations, isLoading: conversationsLoading } = useConversations();
 
   const {
     data: conversation,
@@ -312,19 +326,155 @@ export default function ChatPage({
   const agentName = conversation.agent?.name || "AI Agent";
   const messages = conversation.messages || [];
 
+  // Filter conversations by search
+  const filteredConversations = conversations?.filter((conv) =>
+    conv.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    conv.agent?.name.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  // Format date
+  const formatDate = (date: string) => {
+    const d = new Date(date);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (d.toDateString() === today.toDateString()) return "Today";
+    if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
   return (
-    <div className="h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col">
-      {/* Header */}
-      <header className="flex-shrink-0 border-b border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/student/dashboard"
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-500 dark:text-slate-400" />
-            </Link>
-            <div className="flex items-center gap-3">
+    <div className="h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex">
+      {/* Conversation History Sidebar */}
+      <aside
+        className={`${
+          sidebarOpen ? "w-80" : "w-0"
+        } flex-shrink-0 border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all duration-300 overflow-hidden flex flex-col`}
+      >
+        {sidebarOpen && (
+          <>
+            {/* Sidebar Header */}
+            <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-slate-800">
+              <button
+                onClick={() => router.push("/student/dashboard")}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-semibold transition-all shadow-lg shadow-purple-500/20 mb-3"
+              >
+                <Plus className="w-5 h-5" />
+                New Chat
+              </button>
+
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search conversations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 focus:outline-none focus:border-purple-500 text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Conversations List */}
+            <div className="flex-1 overflow-y-auto">
+              {conversationsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                </div>
+              ) : filteredConversations.length === 0 ? (
+                <div className="text-center py-8 px-4">
+                  <History className="w-8 h-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {searchQuery ? "No conversations found" : "No conversations yet"}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-2">
+                  {filteredConversations.map((conv) => (
+                    <button
+                      key={conv.id}
+                      onClick={() => router.push(`/student/chat/${conv.id}`)}
+                      className={`w-full text-left px-3 py-3 rounded-lg mb-1 transition-all group ${
+                        conv.id === conversationId
+                          ? "bg-purple-100 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-500/30"
+                          : "hover:bg-gray-100 dark:hover:bg-slate-800 border border-transparent"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center flex-shrink-0">
+                          <Bot className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {conv.title || conv.agent?.name || "New Chat"}
+                          </h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {conv.agent?.name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              {formatDate(conv.updatedAt)}
+                            </span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              {conv.totalMessages || 0} messages
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar Footer */}
+            <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-slate-800">
+              <div className="flex items-center gap-3">
+                {currentUser?.profileImageUrl ? (
+                  <img
+                    src={currentUser.profileImageUrl}
+                    alt={currentUser.username || "User"}
+                    className="w-8 h-8 rounded-full"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {currentUser?.firstName || currentUser?.username || "User"}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    @{currentUser?.username}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </aside>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <header className="flex-shrink-0 border-b border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+          <div className="px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                {sidebarOpen ? (
+                  <PanelLeftClose className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+                ) : (
+                  <PanelLeft className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+                )}
+              </button>
+              <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center">
                 <Bot className="w-5 h-5 text-white" />
               </div>
@@ -338,21 +488,22 @@ export default function ChatPage({
                 </div>
               </div>
             </div>
-          </div>
+              </div>
+            </div>
 
-          {/* Context indicator */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
-            <BookOpen className="w-4 h-4 text-purple-500 dark:text-purple-400" />
-            <span className="text-sm text-gray-700 dark:text-slate-300">
-              Powered by {agentName}&apos;s Knowledge
-            </span>
+            {/* Context indicator */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+              <BookOpen className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+              <span className="text-sm text-gray-700 dark:text-slate-300">
+                Powered by {agentName}&apos;s Knowledge
+              </span>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        {/* Messages Area */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-4xl mx-auto px-4 py-6">
           {needsPayment ? (
             <PaywallMessage
               agentName={agentName}
@@ -374,13 +525,13 @@ export default function ChatPage({
               </AnimatePresence>
             </>
           )}
-          <div ref={messagesEndRef} />
-        </div>
-      </main>
+            <div ref={messagesEndRef} />
+          </div>
+        </main>
 
-      {/* Input Area */}
-      <footer className="flex-shrink-0 border-t border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+        {/* Input Area */}
+        <footer className="flex-shrink-0 border-t border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto px-4 py-4">
           {needsPayment ? (
             <div className="text-center py-2">
               <p className="text-gray-500 dark:text-slate-400 text-sm">
@@ -421,8 +572,9 @@ export default function ChatPage({
               </p>
             </>
           )}
-        </div>
-      </footer>
+          </div>
+        </footer>
+      </div>
 
       {/* Paywall Modal */}
       {conversation?.agent && (

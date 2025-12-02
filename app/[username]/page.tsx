@@ -626,7 +626,8 @@ export default function PublicProfilePage() {
                             ) : (
                               <div className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium">
                                 $
-                                {(agent.pricePerMessage ||
+                                {(
+                                  agent.pricePerMessage ||
                                   agent.pricePerConversation ||
                                   0
                                 ).toFixed(2)}
@@ -644,9 +645,7 @@ export default function PublicProfilePage() {
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <div className="flex items-center gap-1">
                               <Users className="w-4 h-4" />
-                              <span>
-                                {agent.totalConversations || 0} users
-                              </span>
+                              <span>{agent.totalConversations || 0} users</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
