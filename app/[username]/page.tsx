@@ -330,7 +330,7 @@ export default function PublicProfilePage() {
         {/* Main Content */}
         <main className="flex-1 min-w-0 lg:pt-0 pt-14">
           {/* Banner */}
-          <div className="relative h-48 md:h-56 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500">
+          <div className="relative h-56 md:h-64 lg:h-72 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500">
             {profile.bannerUrl && (
               <Image
                 src={profile.bannerUrl}
@@ -342,32 +342,34 @@ export default function PublicProfilePage() {
           </div>
 
           {/* Profile Info */}
-          <div className="relative px-4 md:px-6 pb-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="relative px-4 md:px-8 pb-6 border-b border-gray-200 dark:border-gray-800">
             {/* Avatar */}
-            <div className="absolute -top-16 left-4 md:left-6">
-              <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-950 overflow-hidden bg-gray-200 dark:bg-gray-800 relative">
-                {profile.avatarUrl ? (
-                  <Image
-                    src={profile.avatarUrl}
-                    alt={profile.displayName || "Profile"}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-gray-400">
-                    {(profile.displayName || profile.handle || "U")
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
-                )}
+            <div className="absolute -top-20 md:-top-24 left-4 md:left-8">
+              <div className="w-40 h-40 md:w-44 md:h-44 rounded-full p-1 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500">
+                <div className="w-full h-full rounded-full border-4 border-white dark:border-gray-950 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 relative">
+                  {profile.avatarUrl ? (
+                    <Image
+                      src={profile.avatarUrl}
+                      alt={profile.displayName || "Profile"}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-gray-400">
+                      {(profile.displayName || profile.handle || "U")
+                        .charAt(0)
+                        .toUpperCase()}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end gap-3 pt-4">
               {isOwnProfile ? (
                 <Link href="/profile">
-                  <button className="px-5 py-2 border border-gray-300 dark:border-gray-700 rounded-full text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <button className="px-6 py-2.5 border-2 border-gray-300 dark:border-gray-700 rounded-full text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
                     Edit profile
                   </button>
                 </Link>
@@ -376,10 +378,10 @@ export default function PublicProfilePage() {
                   onClick={handleFollowToggle}
                   disabled={isFollowPending}
                   className={cn(
-                    "px-5 py-2 rounded-full text-sm font-semibold transition-colors",
+                    "px-6 py-2.5 rounded-full text-sm font-semibold transition-all",
                     isFollowing
-                      ? "border border-gray-300 dark:border-gray-700 hover:border-red-500 hover:text-red-500"
-                      : "bg-[#00AFF0] text-white hover:bg-[#009AD6]"
+                      ? "border-2 border-gray-300 dark:border-gray-700 hover:border-red-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      : "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg"
                   )}
                 >
                   {isFollowPending ? (
@@ -392,57 +394,57 @@ export default function PublicProfilePage() {
                 </button>
               ) : isCreator && !isSignedIn ? (
                 <SignInButton mode="modal">
-                  <button className="px-5 py-2 bg-[#00AFF0] text-white rounded-full text-sm font-semibold hover:bg-[#009AD6] transition-colors">
+                  <button className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full text-sm font-semibold hover:from-purple-700 hover:to-pink-700 shadow-lg transition-all">
                     Follow
                   </button>
                 </SignInButton>
               ) : null}
-              <button className="p-2 border border-gray-300 dark:border-gray-700 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <Share2 className="w-4 h-4" />
+              <button className="p-2.5 border-2 border-gray-300 dark:border-gray-700 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                <Share2 className="w-5 h-5" />
               </button>
-              <button className="p-2 border border-gray-300 dark:border-gray-700 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <MoreHorizontal className="w-4 h-4" />
+              <button className="p-2.5 border-2 border-gray-300 dark:border-gray-700 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                <MoreHorizontal className="w-5 h-5" />
               </button>
             </div>
 
             {/* Name & Handle */}
-            <div className="mt-16 md:mt-4">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            <div className="mt-24 md:mt-6">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                 {profile.displayName || profile.handle}
               </h1>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-base text-gray-500 dark:text-gray-400 mt-1">
                 @{profile.handle}
               </p>
             </div>
 
             {/* Bio */}
             {profile.bio && (
-              <p className="mt-3 text-gray-700 dark:text-gray-300">
+              <p className="mt-4 text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                 {profile.bio}
               </p>
             )}
 
             {/* Stats */}
-            <div className="flex items-center gap-4 mt-4 text-sm">
-              <span>
-                <strong className="text-gray-900 dark:text-white">
+            <div className="flex items-center gap-6 mt-5">
+              <button className="hover:underline transition-all">
+                <strong className="text-gray-900 dark:text-white font-bold text-base">
                   {profile.followingCount || 0}
                 </strong>{" "}
-                <span className="text-gray-500">Following</span>
-              </span>
-              <span>
-                <strong className="text-gray-900 dark:text-white">
+                <span className="text-gray-500 text-sm">Following</span>
+              </button>
+              <button className="hover:underline transition-all">
+                <strong className="text-gray-900 dark:text-white font-bold text-base">
                   {profile.followerCount || 0}
                 </strong>{" "}
-                <span className="text-gray-500">Followers</span>
-              </span>
+                <span className="text-gray-500 text-sm">Followers</span>
+              </button>
             </div>
 
             {/* Quick Actions for Creator */}
             {isCreator && (
-              <div className="flex items-center gap-2 mt-4">
+              <div className="flex items-center gap-3 mt-5">
                 <Link href="/student/dashboard">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-full text-sm font-medium hover:bg-teal-500/20 transition-colors">
+                  <button className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-sm font-semibold hover:from-teal-600 hover:to-cyan-600 shadow-md transition-all">
                     <GraduationCap className="w-4 h-4" />
                     Student Studio
                   </button>
@@ -452,20 +454,21 @@ export default function PublicProfilePage() {
           </div>
 
           {/* Tabs - Different for creators vs regular users */}
-          <div className="flex border-b border-gray-200 dark:border-gray-800 sticky top-14 lg:top-0 bg-white dark:bg-gray-950 z-10">
+          <div className="flex border-b border-gray-200 dark:border-gray-800 sticky top-14 lg:top-0 bg-white dark:bg-gray-950 z-10 overflow-x-auto">
             {/* Posts tab - Everyone */}
             <button
               onClick={() => setActiveTab("posts")}
               className={cn(
-                "flex-1 py-4 text-sm font-medium text-center relative",
+                "flex-1 min-w-[80px] py-4 px-4 text-sm font-semibold text-center relative transition-all",
                 activeTab === "posts"
                   ? "text-gray-900 dark:text-white"
-                  : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                  : "text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
               )}
             >
-              <Grid3X3 className="w-5 h-5 mx-auto" />
+              <Grid3X3 className="w-5 h-5 mx-auto mb-1" />
+              <span className="text-xs">Posts</span>
               {activeTab === "posts" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-t-full" />
               )}
             </button>
 
@@ -473,15 +476,16 @@ export default function PublicProfilePage() {
             <button
               onClick={() => setActiveTab("media")}
               className={cn(
-                "flex-1 py-4 text-sm font-medium text-center relative",
+                "flex-1 min-w-[80px] py-4 px-4 text-sm font-semibold text-center relative transition-all",
                 activeTab === "media"
                   ? "text-gray-900 dark:text-white"
-                  : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                  : "text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
               )}
             >
-              <Video className="w-5 h-5 mx-auto" />
+              <Video className="w-5 h-5 mx-auto mb-1" />
+              <span className="text-xs">Media</span>
               {activeTab === "media" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-t-full" />
               )}
             </button>
 
@@ -492,15 +496,16 @@ export default function PublicProfilePage() {
                 <button
                   onClick={() => setActiveTab("agents")}
                   className={cn(
-                    "flex-1 py-4 text-sm font-medium text-center relative",
+                    "flex-1 min-w-[80px] py-4 px-4 text-sm font-semibold text-center relative transition-all",
                     activeTab === "agents"
                       ? "text-gray-900 dark:text-white"
-                      : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                      : "text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
                   )}
                 >
-                  <Bot className="w-5 h-5 mx-auto" />
+                  <Bot className="w-5 h-5 mx-auto mb-1" />
+                  <span className="text-xs">Agents</span>
                   {activeTab === "agents" && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-t-full" />
                   )}
                 </button>
 
@@ -508,15 +513,16 @@ export default function PublicProfilePage() {
                 <button
                   onClick={() => setActiveTab("docs")}
                   className={cn(
-                    "flex-1 py-4 text-sm font-medium text-center relative",
+                    "flex-1 min-w-[80px] py-4 px-4 text-sm font-semibold text-center relative transition-all",
                     activeTab === "docs"
                       ? "text-gray-900 dark:text-white"
-                      : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                      : "text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
                   )}
                 >
-                  <FileText className="w-5 h-5 mx-auto" />
+                  <FileText className="w-5 h-5 mx-auto mb-1" />
+                  <span className="text-xs">Docs</span>
                   {activeTab === "docs" && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-t-full" />
                   )}
                 </button>
 
@@ -524,15 +530,16 @@ export default function PublicProfilePage() {
                 <button
                   onClick={() => setActiveTab("sessions")}
                   className={cn(
-                    "flex-1 py-4 text-sm font-medium text-center relative",
+                    "flex-1 min-w-[80px] py-4 px-4 text-sm font-semibold text-center relative transition-all",
                     activeTab === "sessions"
                       ? "text-gray-900 dark:text-white"
-                      : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                      : "text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
                   )}
                 >
-                  <Calendar className="w-5 h-5 mx-auto" />
+                  <Calendar className="w-5 h-5 mx-auto mb-1" />
+                  <span className="text-xs">Sessions</span>
                   {activeTab === "sessions" && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00AFF0]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-t-full" />
                   )}
                 </button>
               </>
