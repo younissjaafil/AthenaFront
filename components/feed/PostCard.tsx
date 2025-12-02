@@ -114,9 +114,13 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
   };
 
   const creatorName =
-    post.creator.user.firstName && post.creator.user.lastName
+    post.creator.profile?.displayName ||
+    (post.creator.user.firstName && post.creator.user.lastName
       ? `${post.creator.user.firstName} ${post.creator.user.lastName}`
-      : post.creator.title || "Creator";
+      : post.creator.user.firstName || post.creator.title || "User");
+
+  const creatorHandle = post.creator.profile?.handle || `user_${post.creator.userId}`;
+  const creatorAvatar = post.creator.profile?.avatarUrl || post.creator.user.profileImageUrl;
 
   const handlePostClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on interactive elements
@@ -148,13 +152,13 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
       {/* Header */}
       <div className="p-4 flex items-start justify-between">
         <Link
-          href={`/u/${post.creator.profile?.handle || post.creator.userId}`}
-          className="flex items-center gap-3"
+          href={`/${creatorHandle}`}
+          className="flex items-start gap-3"
         >
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-            {post.creator.user.profileImageUrl ? (
+            {creatorAvatar ? (
               <img
-                src={post.creator.user.profileImageUrl}
+                src={creatorAvatar}
                 alt={creatorName}
                 className="w-full h-full object-cover"
               />
@@ -174,6 +178,8 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
               )}
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <span>@{creatorHandle}</span>
+              <span>•</span>
               <span>{formatRelativeTime(post.createdAt)}</span>
               <span>•</span>
               <div className="flex items-center gap-1">

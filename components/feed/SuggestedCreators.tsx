@@ -46,7 +46,7 @@ export function SuggestedCreators() {
           return (
             <Link
               key={creator.id}
-              href={`/u/${creator.profile?.handle || creator.id}`}
+              href={`/${creator.profile?.handle || creator.id}`}
               className="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">

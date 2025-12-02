@@ -350,7 +350,9 @@ export function DateOverrideEditor({
                     )}
                   >
                     <span>
-                      {override.isAvailable && override.startTime && override.endTime
+                      {override.isAvailable &&
+                      override.startTime &&
+                      override.endTime
                         ? `${formatTime(override.startTime)} - ${formatTime(
                             override.endTime
                           )}`
