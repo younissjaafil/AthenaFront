@@ -54,11 +54,15 @@ export default function AgentDetailPage({
     } else {
       // Redirect to payment
       try {
+        // Calculate amount in USD
+        const amountUSD =
+          agent.pricePerConversation || agent.pricePerMessage * 50 || 1;
+
         const payment = await createPayment.mutateAsync({
           agentId: agent.id,
           data: {
-            amount: agent.pricePerConversation || agent.pricePerMessage * 50,
-            currency: PaymentCurrency.LBP,
+            amount: amountUSD,
+            currency: PaymentCurrency.USD,
             invoice: `Access to ${agent.name}`,
             successRedirectUrl: `${window.location.origin}/student/chat`,
             failureRedirectUrl: `${window.location.origin}/explore/agents/${agent.id}`,
