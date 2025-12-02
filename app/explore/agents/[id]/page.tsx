@@ -34,7 +34,8 @@ export default function AgentDetailPage({
   const { data: agent, isLoading } = useAgent(id);
   const { data: access } = useAgentAccess(id);
   const { data: currentUser } = useCurrentUser();
-  const { data: documentStats } = useDocumentStats(id);
+  const { data: documentStats, isLoading: isStatsLoading } =
+    useDocumentStats(id);
   const createConversation = useFindOrCreateConversation();
   const createPayment = useCreatePayment();
 
