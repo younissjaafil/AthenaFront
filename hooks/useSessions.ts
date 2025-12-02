@@ -414,7 +414,7 @@ export function useSetDateOverrides() {
         isAvailable: boolean;
       }[]
     ) => {
-      const response = await apiClient.post("/api/availability/overrides", {
+      const response = await apiClient.post("/availability/overrides", {
         overrides,
       });
       return response.data;

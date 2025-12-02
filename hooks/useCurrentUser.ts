@@ -49,13 +49,13 @@ export function useCurrentUser() {
       const apiClient = createClientApiClient(getToken);
 
       // 1. Get user info
-      const userResponse = await apiClient.get("/api/users/me");
+      const userResponse = await apiClient.get("/users/me");
       const user = userResponse.data;
 
       // 2. Check if creator profile exists
       let creatorId: string | undefined;
       try {
-        const creatorResponse = await apiClient.get("/api/creators/me");
+        const creatorResponse = await apiClient.get("/creators/me");
         // Backend returns null if no creator profile
         creatorId = creatorResponse.data?.id;
       } catch (error: any) {
@@ -105,7 +105,7 @@ export function useEnableCreatorPower() {
       specialties?: string[];
     }) => {
       const apiClient = createClientApiClient(getToken);
-      const response = await apiClient.post("/api/creators", creatorData);
+      const response = await apiClient.post("/creators", creatorData);
       return response.data;
     },
     onSuccess: () => {
@@ -124,7 +124,7 @@ export function useDisableCreatorPower() {
   return useMutation({
     mutationFn: async () => {
       const apiClient = createClientApiClient(getToken);
-      const response = await apiClient.delete("/api/creators/me/power");
+      const response = await apiClient.delete("/creators/me/power");
       return response.data;
     },
     onSuccess: () => {
