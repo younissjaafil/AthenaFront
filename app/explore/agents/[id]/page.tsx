@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAgent } from "@/hooks/useAgents";
 import { useAgentAccess, useCreatePayment } from "@/hooks/usePayments";
-import { useCreateConversation } from "@/hooks/useConversations";
+import { useFindOrCreateConversation } from "@/hooks/useConversations";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   Bot,
@@ -30,7 +30,7 @@ export default function AgentDetailPage({
   const { data: agent, isLoading } = useAgent(id);
   const { data: access } = useAgentAccess(id);
   const { data: currentUser } = useCurrentUser();
-  const createConversation = useCreateConversation();
+  const createConversation = useFindOrCreateConversation();
   const createPayment = useCreatePayment();
 
   const handleStartChat = async () => {
