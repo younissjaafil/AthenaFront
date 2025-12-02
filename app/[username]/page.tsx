@@ -15,8 +15,18 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCreatorPosts } from "@/hooks/useFeed";
 import { useCreatorAgents } from "@/hooks/useAgents";
+import {
+  useCreatorAvailability,
+  useCreatorSessionSettings,
+  useCreatorDateOverrides,
+} from "@/hooks/useSessions";
 import { PostCard } from "@/components/feed";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  DAY_NAMES,
+  type AvailabilitySlot,
+  type DayOfWeek,
+} from "@/lib/types/session";
 import { useAuth, SignInButton, SignUpButton } from "@clerk/nextjs";
 import {
   ArrowLeft,
@@ -85,6 +95,13 @@ export default function PublicProfilePage() {
     20
   );
   const { data: creatorAgents, isLoading: agentsLoading } = useCreatorAgents(
+    profile?.creatorId || ""
+  );
+  const { data: availability, isLoading: availabilityLoading } =
+    useCreatorAvailability(profile?.creatorId || "");
+  const { data: sessionSettings, isLoading: settingsLoading } =
+    useCreatorSessionSettings(profile?.creatorId || "");
+  const { data: dateOverrides } = useCreatorDateOverrides(
     profile?.creatorId || ""
   );
 
@@ -593,120 +610,263 @@ export default function PublicProfilePage() {
                   {/* Agents Tab - Creator only */}
                   {activeTab === "agents" && isCreator && (
                     <div>
-                {agentsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                  </div>
-                ) : !creatorAgents || creatorAgents.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Bot className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-                    <p className="text-gray-500 dark:text-gray-400 mb-2">
-                      No agents yet
-                    </p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500">
-                      AI agents created by this creator will appear here
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                    {creatorAgents.map((agent) => (
-                      <Link
-                        key={agent.id}
-                        href={`/explore/agents/${agent.id}`}
-                        className="block group"
-                      >
-                        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg">
-                          {/* Agent Header */}
-                          <div className="flex items-start gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                              <Bot className="w-6 h-6 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
-                                {agent.name}
-                              </h3>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {agent.category}
+                      {agentsLoading ? (
+                        <div className="flex justify-center py-8">
+                          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                        </div>
+                      ) : !creatorAgents || creatorAgents.length === 0 ? (
+                        <div className="text-center py-12">
+                          <Bot className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                          <p className="text-gray-500 dark:text-gray-400 mb-2">
+                            No agents yet
+                          </p>
+                          <p className="text-sm text-gray-400 dark:text-gray-500">
+                            AI agents created by this creator will appear here
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                          {creatorAgents.map((agent) => (
+                            <Link
+                              key={agent.id}
+                              href={`/explore/agents/${agent.id}`}
+                              className="block group"
+                            >
+                              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg">
+                                {/* Agent Header */}
+                                <div className="flex items-start gap-4 mb-4">
+                                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                                    <Bot className="w-6 h-6 text-white" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
+                                      {agent.name}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                      {agent.category}
+                                    </p>
+                                  </div>
+                                  {/* Price Badge */}
+                                  {agent.pricePerMessage === 0 &&
+                                  agent.pricePerConversation === 0 ? (
+                                    <div className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                                      Free
+                                    </div>
+                                  ) : (
+                                    <div className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium">
+                                      $
+                                      {(
+                                        agent.pricePerMessage ||
+                                        agent.pricePerConversation ||
+                                        0
+                                      ).toFixed(2)}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Agent Description */}
+                                <p className="text-sm text-gray-600 dark:text-slate-400 mb-4 line-clamp-2">
+                                  {agent.description ||
+                                    "AI assistant ready to help you"}
+                                </p>
+
+                                {/* Agent Stats */}
+                                <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                  <div className="flex items-center gap-1">
+                                    <Users className="w-4 h-4" />
+                                    <span>
+                                      {agent.totalConversations || 0} users
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                    <span>
+                                      {agent.averageRating
+                                        ? agent.averageRating.toFixed(1)
+                                        : "New"}
+                                    </span>
+                                  </div>
+                                  {agent.category &&
+                                    agent.category.length > 0 && (
+                                      <div className="flex items-center gap-1">
+                                        <Sparkles className="w-4 h-4" />
+                                        <span>{agent.category[0]}</span>
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Docs Tab - Creator only */}
+                  {activeTab === "docs" && isCreator && (
+                    <div className="text-center py-12">
+                      <FileText className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                      <p className="text-gray-500 dark:text-gray-400 mb-2">
+                        No documents yet
+                      </p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500">
+                        Knowledge documents shared by this creator
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Sessions Tab - Creator only */}
+                  {activeTab === "sessions" && isCreator && (
+                    <div className="space-y-6 p-4">
+                      {/* Session Settings */}
+                      {settingsLoading ? (
+                        <div className="flex justify-center py-8">
+                          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                        </div>
+                      ) : sessionSettings ? (
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                            Session Settings
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-500 dark:text-gray-400">
+                                Available Durations:
+                              </span>
+                              <p className="text-gray-900 dark:text-white font-medium">
+                                {sessionSettings.sessionDurations
+                                  ?.map((d) => `${d} min`)
+                                  .join(", ") || "Not set"}
                               </p>
                             </div>
-                            {/* Price Badge */}
-                            {agent.pricePerMessage === 0 &&
-                            agent.pricePerConversation === 0 ? (
-                              <div className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
-                                Free
-                              </div>
-                            ) : (
-                              <div className="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium">
-                                $
-                                {(
-                                  agent.pricePerMessage ||
-                                  agent.pricePerConversation ||
-                                  0
-                                ).toFixed(2)}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Agent Description */}
-                          <p className="text-sm text-gray-600 dark:text-slate-400 mb-4 line-clamp-2">
-                            {agent.description ||
-                              "AI assistant ready to help you"}
-                          </p>
-
-                          {/* Agent Stats */}
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <div className="flex items-center gap-1">
-                              <Users className="w-4 h-4" />
-                              <span>{agent.totalConversations || 0} users</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              <span>
-                                {agent.averageRating
-                                  ? agent.averageRating.toFixed(1)
-                                  : "New"}
+                            <div>
+                              <span className="text-gray-500 dark:text-gray-400">
+                                Buffer Time:
                               </span>
+                              <p className="text-gray-900 dark:text-white font-medium">
+                                {sessionSettings.bufferTime || 0} minutes
+                              </p>
                             </div>
-                            {agent.category && agent.category.length > 0 && (
-                              <div className="flex items-center gap-1">
-                                <Sparkles className="w-4 h-4" />
-                                <span>{agent.category[0]}</span>
-                              </div>
-                            )}
+                            <div>
+                              <span className="text-gray-500 dark:text-gray-400">
+                                Minimum Notice:
+                              </span>
+                              <p className="text-gray-900 dark:text-white font-medium">
+                                {sessionSettings.minimumNoticeHours || 0} hours
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-gray-500 dark:text-gray-400">
+                                Timezone:
+                              </span>
+                              <p className="text-gray-900 dark:text-white font-medium">
+                                {sessionSettings.timezone || "Not set"}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+                      ) : null}
 
-            {/* Docs Tab - Creator only */}
-            {activeTab === "docs" && isCreator && (
-              <div className="text-center py-12">
-                <FileText className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-                <p className="text-gray-500 dark:text-gray-400 mb-2">
-                  No documents yet
-                </p>
-                <p className="text-sm text-gray-400 dark:text-gray-500">
-                  Knowledge documents shared by this creator
-                </p>
-              </div>
-            )}
+                      {/* Weekly Availability */}
+                      {availabilityLoading ? (
+                        <div className="flex justify-center py-8">
+                          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                        </div>
+                      ) : availability && availability.length > 0 ? (
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                            Weekly Availability
+                          </h3>
+                          <div className="space-y-3">
+                            {availability.map((slot) => (
+                              <div
+                                key={slot.id}
+                                className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-700 last:border-0"
+                              >
+                                <span className="font-medium text-gray-900 dark:text-white">
+                                  {DAY_NAMES[slot.dayOfWeek as DayOfWeek]}
+                                </span>
+                                <span className="text-gray-600 dark:text-gray-400">
+                                  {slot.startTime} - {slot.endTime}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 text-center">
+                          <Calendar className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                          <p className="text-gray-500 dark:text-gray-400">
+                            No weekly availability set
+                          </p>
+                        </div>
+                      )}
 
-            {/* Sessions Tab - Creator only */}
-            {activeTab === "sessions" && isCreator && (
-              <div className="text-center py-12">
-                <Calendar className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-                <p className="text-gray-500 dark:text-gray-400 mb-2">
-                  No sessions available
-                </p>
-                <p className="text-sm text-gray-400 dark:text-gray-500">
-                  Book 1-on-1 consultation sessions with this creator
-                </p>
-              </div>
-            )}
+                      {/* Date Overrides */}
+                      {dateOverrides && dateOverrides.length > 0 && (
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                            Specific Date Availability
+                          </h3>
+                          <div className="space-y-3">
+                            {dateOverrides.map((override) => (
+                              <div
+                                key={override.id}
+                                className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-700 last:border-0"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Calendar className="w-4 h-4 text-gray-400" />
+                                  <span className="font-medium text-gray-900 dark:text-white">
+                                    {new Date(override.date).toLocaleDateString(
+                                      "en-US",
+                                      {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                      }
+                                    )}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  {override.isAvailable ? (
+                                    <>
+                                      <span className="text-gray-600 dark:text-gray-400 text-sm">
+                                        {override.startTime} -{" "}
+                                        {override.endTime}
+                                      </span>
+                                      <span className="px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                                        Available
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span className="px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-medium">
+                                      Unavailable
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Empty State - Only if no settings, availability, or overrides */}
+                      {!sessionSettings &&
+                        (!availability || availability.length === 0) &&
+                        (!dateOverrides || dateOverrides.length === 0) && (
+                          <div className="text-center py-12">
+                            <Calendar className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                            <p className="text-gray-500 dark:text-gray-400 mb-2">
+                              No sessions available
+                            </p>
+                            <p className="text-sm text-gray-400 dark:text-gray-500">
+                              Book 1-on-1 consultation sessions with this
+                              creator
+                            </p>
+                          </div>
+                        )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

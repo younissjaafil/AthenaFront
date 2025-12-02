@@ -394,6 +394,26 @@ export function useMyDateOverrides() {
   });
 }
 
+// Get creator date overrides (public)
+export function useCreatorDateOverrides(creatorId: string) {
+  return useQuery({
+    queryKey: ["date-overrides", "creator", creatorId],
+    queryFn: async () => {
+      const response = await axios.get<
+        {
+          id: string;
+          date: string;
+          startTime: string | null;
+          endTime: string | null;
+          isAvailable: boolean;
+        }[]
+      >(`${API_BASE}/availability/overrides/${creatorId}`);
+      return response.data;
+    },
+    enabled: !!creatorId,
+  });
+}
+
 // Set date overrides
 export function useSetDateOverrides() {
   const { getToken } = useAuth();
