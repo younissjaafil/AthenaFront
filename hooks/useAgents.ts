@@ -65,7 +65,7 @@ export function useMyAgents() {
   return useQuery({
     queryKey: agentKeys.myAgents,
     queryFn: async () => {
-      const response = await apiClient.get<Agent[]>("/api/agents/my-agents");
+      const response = await apiClient.get<Agent[]>("/agents/my-agents");
       return response.data;
     },
   });
@@ -79,7 +79,7 @@ export function useAgent(agentId: string) {
   return useQuery({
     queryKey: agentKeys.detail(agentId),
     queryFn: async () => {
-      const response = await apiClient.get<Agent>(`/api/agents/${agentId}`);
+      const response = await apiClient.get<Agent>(`/agents/${agentId}`);
       return response.data;
     },
     enabled: !!agentId,
@@ -94,7 +94,7 @@ export function useCreateAgent() {
 
   return useMutation({
     mutationFn: async (data: CreateAgentDto) => {
-      const response = await apiClient.post<Agent>("/api/agents", data);
+      const response = await apiClient.post<Agent>("/agents", data);
       return response.data;
     },
     onSuccess: () => {
@@ -112,7 +112,7 @@ export function useUpdateAgent() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateAgentDto }) => {
-      const response = await apiClient.patch<Agent>(`/api/agents/${id}`, data);
+      const response = await apiClient.patch<Agent>(`/agents/${id}`, data);
       return response.data;
     },
     onSuccess: (updatedAgent) => {
@@ -131,7 +131,7 @@ export function useDeleteAgent() {
 
   return useMutation({
     mutationFn: async (agentId: string) => {
-      await apiClient.delete(`/api/agents/${agentId}`);
+      await apiClient.delete(`/agents/${agentId}`);
       return agentId;
     },
     onSuccess: (deletedId) => {
