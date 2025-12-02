@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { SessionSettings } from "@/hooks/useCreators";
+import { useCreatorAvailability } from "@/hooks/useSessions";
+import { DAY_NAMES, type DayOfWeek } from "@/lib/types/session";
 
 interface SessionsTabProps {
   sessionSettings: SessionSettings | null | undefined;
@@ -27,6 +29,9 @@ export function SessionsTab({
   creatorId,
   creatorName,
 }: SessionsTabProps) {
+  const { data: availability, isLoading: availabilityLoading } =
+    useCreatorAvailability(creatorId);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -65,6 +70,24 @@ export function SessionsTab({
   const hasFreeOption =
     sessionSettings.allowFreeSession ||
     pricingOptions.some((opt) => opt.price === 0);
+
+  // Group availability by day
+  const availabilityByDay = availability?.reduce((acc, slot) => {
+    if (!acc[slot.dayOfWeek]) {
+      acc[slot.dayOfWeek] = [];
+    }
+    acc[slot.dayOfWeek].push(slot);
+    return acc;
+  }, {} as Record<DayOfWeek, typeof availability>);
+
+  // Format time for display
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -144,11 +167,78 @@ export function SessionsTab({
         </Link>
       </motion.div>
 
+      {/* Weekly Availability Schedule */}
+      {availability && availability.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <h4 className="font-semibold text-gray-900 dark:text-white">
+              Weekly Availability
+            </h4>
+          </div>
+          <div className="space-y-3">
+            {[0, 1, 2, 3, 4, 5, 6].map((day) => {
+              const daySlots = availabilityByDay?.[day as DayOfWeek] || [];
+              const hasSlots = daySlots.length > 0;
+
+              return (
+                <div
+                  key={day}
+                  className="flex items-start gap-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                >
+                  <div className="min-w-[100px]">
+                    <p
+                      className={`font-medium ${
+                        hasSlots
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-gray-400 dark:text-gray-600"
+                      }`}
+                    >
+                      {DAY_NAMES[day as DayOfWeek]}
+                    </p>
+                  </div>
+                  <div className="flex-1">
+                    {hasSlots ? (
+                      <div className="flex flex-wrap gap-2">
+                        {daySlots.map((slot, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium rounded-full border border-green-300 dark:border-green-700"
+                          >
+                            <Clock className="w-3 h-3" />
+                            {formatTime(slot.startTime)} -{" "}
+                            {formatTime(slot.endTime)}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-400 dark:text-gray-600">
+                        Not available
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Timezone: {sessionSettings.timezone || "UTC"}
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Session Details */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        transition={{ delay: 0.2 }}
         className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6"
       >
         <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
@@ -227,7 +317,7 @@ export function SessionsTab({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.3 }}
           className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4"
         >
           <div className="flex items-start gap-3">
