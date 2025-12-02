@@ -402,7 +402,7 @@ export default function FeedPage() {
           </div>
         </main>
 
-        {/* Right Sidebar */}
+        {/* Right Sidebar - Monetization & Discovery */}
         <aside className="hidden xl:block w-80 h-screen sticky top-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto">
           {/* Search */}
           <div className="p-4">
@@ -418,39 +418,267 @@ export default function FeedPage() {
             </div>
           </div>
 
-          {/* Suggestions */}
-          <div className="px-4 pb-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Suggestions
-              </h3>
-              <div className="flex items-center gap-1">
-                <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-                  <RefreshCw className="w-4 h-4 text-gray-400" />
+          {/* Featured Sponsor Ad */}
+          <div className="mx-4 mb-4">
+            <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 p-4 group cursor-pointer hover:shadow-lg transition-shadow">
+              <div className="absolute top-2 right-2">
+                <span className="text-[10px] font-semibold text-white/70 bg-black/20 px-2 py-0.5 rounded-full">
+                  Sponsored
+                </span>
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-sm">
+                      Athena Premium
+                    </h4>
+                    <p className="text-white/90 text-xs">Unlock full access</p>
+                  </div>
+                </div>
+                <p className="text-white/95 text-xs mb-3 leading-relaxed">
+                  Get unlimited AI agents, priority support, and exclusive
+                  creator content
+                </p>
+                <button className="w-full py-2 bg-white text-purple-600 font-semibold rounded-lg text-sm hover:bg-gray-100 transition-colors">
+                  Try Premium Free
                 </button>
               </div>
             </div>
+          </div>
 
-            {/* Creator Suggestion Cards */}
+          {/* What's Happening */}
+          <div className="mx-4 mb-4 bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
+              What&apos;s happening
+            </h3>
+            <div className="space-y-3">
+              <div className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Trending in Tech
+                  </span>
+                  <MoreHorizontal className="w-3 h-3 text-gray-400" />
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  #AIAgents
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  12.5K posts
+                </span>
+              </div>
+
+              <div className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Trending in Learning
+                  </span>
+                  <MoreHorizontal className="w-3 h-3 text-gray-400" />
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  #MachineLearning
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  8.3K posts
+                </span>
+              </div>
+
+              <div className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Education · Trending
+                  </span>
+                  <MoreHorizontal className="w-3 h-3 text-gray-400" />
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Online Courses
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  5.1K posts
+                </span>
+              </div>
+            </div>
+            <button className="mt-3 text-[#00AFF0] text-sm font-medium hover:underline">
+              Show more
+            </button>
+          </div>
+
+          {/* Top Creators */}
+          <div className="mx-4 mb-4 bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                Top Creators
+              </h3>
+              <button className="text-[#00AFF0] text-xs font-medium hover:underline">
+                See all
+              </button>
+            </div>
             <SuggestedCreatorsCards />
+          </div>
+
+          {/* Banner Ad Slot */}
+          <div className="mx-4 mb-4">
+            <div className="relative rounded-xl overflow-hidden bg-gradient-to-r from-teal-500 to-cyan-600 p-4 cursor-pointer hover:shadow-lg transition-shadow">
+              <div className="absolute top-2 right-2">
+                <span className="text-[10px] font-semibold text-white/70 bg-black/20 px-2 py-0.5 rounded-full">
+                  Ad
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                  <GraduationCap className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-white font-semibold text-sm">
+                    Learn Faster
+                  </h4>
+                  <p className="text-white/90 text-xs">
+                    AI-powered study tools
+                  </p>
+                </div>
+              </div>
+              <button className="mt-3 w-full py-1.5 bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg text-xs hover:bg-white/30 transition-colors">
+                Get Started →
+              </button>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="mx-4 mb-4 bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
+              Recent Activity
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5" />
+                <div className="flex-1">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      5 new creators
+                    </span>{" "}
+                    joined today
+                  </p>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-500">
+                    2 hours ago
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-pink-500 rounded-full mt-1.5" />
+                <div className="flex-1">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      150+ active learners
+                    </span>{" "}
+                    right now
+                  </p>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-500">
+                    Live
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-teal-500 rounded-full mt-1.5" />
+                <div className="flex-1">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      New AI agent
+                    </span>{" "}
+                    for coding help
+                  </p>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-500">
+                    5 hours ago
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Promotional Card */}
+          <div className="mx-4 mb-4">
+            <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-4 cursor-pointer hover:shadow-lg transition-shadow">
+              <div className="absolute top-2 right-2">
+                <span className="text-[10px] font-semibold text-white/70 bg-black/20 px-2 py-0.5 rounded-full">
+                  Promoted
+                </span>
+              </div>
+              <div className="relative z-10">
+                <h4 className="text-white font-bold text-sm mb-2">
+                  📚 Become a Creator
+                </h4>
+                <p className="text-white/95 text-xs mb-3 leading-relaxed">
+                  Share your knowledge and earn. Create AI agents, host
+                  sessions, and build your audience.
+                </p>
+                <Link href="/creator/onboarding">
+                  <button className="w-full py-2 bg-white text-purple-600 font-semibold rounded-lg text-sm hover:bg-gray-100 transition-colors">
+                    Start Creating
+                  </button>
+                </Link>
+              </div>
+            </div>
           </div>
 
           {/* Auth prompt for guests */}
           {!isSignedIn && (
-            <div className="mx-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                New to Athena?
+            <div className="mx-4 mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-2">
+                Don&apos;t miss what&apos;s happening
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Sign up to follow creators, like posts, and more.
+                Join Athena to follow creators, chat with AI agents, and book
+                sessions.
               </p>
-              <SignUpButton mode="modal">
-                <button className="w-full px-4 py-2 bg-[#00AFF0] hover:bg-[#009AD6] text-white font-semibold rounded-full transition-colors text-sm">
-                  Create account
-                </button>
-              </SignUpButton>
+              <div className="space-y-2">
+                <SignInButton mode="modal">
+                  <button className="w-full px-4 py-2.5 bg-[#00AFF0] hover:bg-[#009AD6] text-white font-semibold rounded-full transition-colors text-sm">
+                    Log in
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white font-semibold rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm">
+                    Create account
+                  </button>
+                </SignUpButton>
+              </div>
             </div>
           )}
+
+          {/* Footer Links */}
+          <div className="px-4 pb-4">
+            <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <a href="#" className="hover:underline">
+                Terms of Service
+              </a>
+              <span>·</span>
+              <a href="#" className="hover:underline">
+                Privacy Policy
+              </a>
+              <span>·</span>
+              <a href="#" className="hover:underline">
+                Cookie Policy
+              </a>
+              <span>·</span>
+              <a href="#" className="hover:underline">
+                Accessibility
+              </a>
+              <span>·</span>
+              <a href="#" className="hover:underline">
+                Ads info
+              </a>
+              <span>·</span>
+              <a href="#" className="hover:underline">
+                More
+              </a>
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+              © 2025 Athena Corp.
+            </p>
+          </div>
         </aside>
       </div>
     </div>

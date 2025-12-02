@@ -102,8 +102,8 @@ export interface AvailabilitySlot {
 // Date-specific availability override (for one-time availability or blocks)
 export interface DateOverride {
   date: string; // YYYY-MM-DD format
-  startTime: string;
-  endTime: string;
+  startTime?: string; // Optional - can block entire day without time
+  endTime?: string; // Optional - can block entire day without time
   isAvailable: boolean; // true = available, false = blocked
 }
 

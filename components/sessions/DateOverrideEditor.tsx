@@ -112,7 +112,8 @@ export function DateOverrideEditor({
     );
   };
 
-  const formatTime = (time: string) => {
+  const formatTime = (time?: string) => {
+    if (!time) return "";
     const [hours, minutes] = time.split(":");
     const hour = parseInt(hours);
     const ampm = hour >= 12 ? "PM" : "AM";
@@ -349,10 +350,12 @@ export function DateOverrideEditor({
                     )}
                   >
                     <span>
-                      {override.isAvailable
+                      {override.isAvailable && override.startTime && override.endTime
                         ? `${formatTime(override.startTime)} - ${formatTime(
                             override.endTime
                           )}`
+                        : override.isAvailable
+                        ? "Available all day"
                         : "Blocked all day"}
                     </span>
                     <button
