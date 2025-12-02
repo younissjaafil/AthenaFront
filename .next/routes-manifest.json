@@ -52,6 +52,22 @@
       "namedRegex": "^/creator/sessions/(?<nxtPid>[^/]+?)(?:/)?$"
     },
     {
+      "page": "/explore/agents/[id]",
+      "regex": "^/explore/agents/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/explore/agents/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/post/[id]",
+      "regex": "^/post/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/post/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/sign-in/[[...sign-in]]",
       "regex": "^/sign\\-in(?:/(.+?))?(?:/)?$",
       "routeKeys": {
@@ -184,6 +200,12 @@
       "regex": "^/explore(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/explore(?:/)?$"
+    },
+    {
+      "page": "/explore/agents",
+      "regex": "^/explore/agents(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/explore/agents(?:/)?$"
     },
     {
       "page": "/messages",

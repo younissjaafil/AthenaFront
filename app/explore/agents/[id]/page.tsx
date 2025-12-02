@@ -8,6 +8,7 @@ import { useAgent } from "@/hooks/useAgents";
 import { useAgentAccess, useCreatePayment } from "@/hooks/usePayments";
 import { useFindOrCreateConversation } from "@/hooks/useConversations";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { PaymentCurrency } from "@/lib/types/payment";
 import {
   Bot,
   ArrowLeft,
@@ -51,10 +52,16 @@ export default function AgentDetailPage({
       try {
         const payment = await createPayment.mutateAsync({
           agentId: agent.id,
-          amount: agent.pricePerConversation || agent.pricePerMessage * 50, // Estimate 50 messages
+          data: {
+            amount: agent.pricePerConversation || agent.pricePerMessage * 50,
+            currency: PaymentCurrency.LBP,
+            invoice: `Access to ${agent.name}`,
+            successRedirectUrl: `${window.location.origin}/student/chat`,
+            failureRedirectUrl: `${window.location.origin}/explore/agents/${agent.id}`,
+          },
         });
-        if (payment.paymentUrl) {
-          window.location.href = payment.paymentUrl;
+        if (payment.collectUrl) {
+          window.location.href = payment.collectUrl;
         }
       } catch (error) {
         console.error("Failed to create payment:", error);
