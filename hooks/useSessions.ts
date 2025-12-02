@@ -95,9 +95,7 @@ export function useSession(sessionId: string) {
   return useQuery({
     queryKey: sessionKeys.detail(sessionId),
     queryFn: async () => {
-      const response = await apiClient.get<Session>(
-        `/sessions/${sessionId}`
-      );
+      const response = await apiClient.get<Session>(`/sessions/${sessionId}`);
       return response.data;
     },
     enabled: !!sessionId,
@@ -112,10 +110,7 @@ export function useBookSession() {
 
   return useMutation({
     mutationFn: async (data: BookSessionDto) => {
-      const response = await apiClient.post<Session>(
-        "/sessions/book",
-        data
-      );
+      const response = await apiClient.post<Session>("/sessions/book", data);
       return response.data;
     },
     onSuccess: () => {

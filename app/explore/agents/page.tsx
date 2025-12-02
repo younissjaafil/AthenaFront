@@ -169,8 +169,12 @@ export default function ExploreAgentsPage() {
                             Free
                           </span>
                         ) : (
-                          <span className="text-gray-600 dark:text-slate-400">
-                            ${agent.pricePerMessage}/msg
+                          <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                            {agent.pricePerMessage > 0
+                              ? `$${agent.pricePerMessage}/msg`
+                              : agent.pricePerConversation > 0
+                              ? `$${agent.pricePerConversation}/chat`
+                              : "Premium"}
                           </span>
                         )}
                         {agent.averageRating > 0 && (

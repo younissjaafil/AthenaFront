@@ -135,8 +135,12 @@ export default function AgentDetailPage({
                         Free
                       </span>
                     ) : (
-                      <span className="text-gray-600 dark:text-slate-400">
-                        ${agent.pricePerMessage}/message
+                      <span className="text-purple-600 dark:text-purple-400 font-semibold text-lg">
+                        {agent.pricePerMessage > 0
+                          ? `$${agent.pricePerMessage.toLocaleString()}/message`
+                          : agent.pricePerConversation > 0
+                          ? `$${agent.pricePerConversation.toLocaleString()}/conversation`
+                          : "Contact for pricing"}
                       </span>
                     )}
                     {agent.averageRating > 0 && (
@@ -288,8 +292,12 @@ export default function AgentDetailPage({
                     <span className="text-gray-600 dark:text-slate-400 text-sm">
                       Price per Message
                     </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      ${agent.pricePerMessage}
+                    <span className="font-semibold text-purple-600 dark:text-purple-400">
+                      {agent.pricePerMessage > 0
+                        ? `$${agent.pricePerMessage.toLocaleString()}`
+                        : agent.pricePerConversation > 0
+                        ? `$${agent.pricePerConversation.toLocaleString()}/chat`
+                        : "Free trial"}
                     </span>
                   </div>
                 )}
