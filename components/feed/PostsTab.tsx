@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Loader2 } from "lucide-react";
 import { useCreatorPosts, Post } from "@/hooks/useFeed";
@@ -11,9 +12,10 @@ interface PostsTabProps {
 }
 
 export function PostsTab({ creatorId, creatorName }: PostsTabProps) {
-  const { data, isLoading, error } = useCreatorPosts(creatorId, 1, 20);
+  const [page, setPage] = useState(1);
+  const { data, isLoading, error } = useCreatorPosts(creatorId, page, 20);
 
-  if (isLoading) {
+  if (isLoading && page === 1) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
@@ -51,8 +53,19 @@ export function PostsTab({ creatorId, creatorName }: PostsTabProps) {
 
       {data.hasMore && (
         <div className="text-center py-4">
-          <button className="px-6 py-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors">
-            Load More
+          <button
+            onClick={() => setPage((prev) => prev + 1)}
+            disabled={isLoading}
+            className="px-6 py-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading...
+              </span>
+            ) : (
+              "Load More"
+            )}
           </button>
         </div>
       )}

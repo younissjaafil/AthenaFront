@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Heart,
@@ -50,16 +50,44 @@ interface PostCardProps {
 export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
   const { data: currentUser } = useCurrentUser();
   const [showMenu, setShowMenu] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const likePost = useLikePost();
   const unlikePost = useUnlikePost();
 
   const isOwner = currentUser?.id === post.creator.userId;
 
+  // Close menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showMenu]);
+
   const handleLikeToggle = () => {
+    setError(null);
     if (post.isLiked) {
-      unlikePost.mutate(post.id);
+      unlikePost.mutate(post.id, {
+        onError: () => {
+          setError("Failed to unlike post");
+          setTimeout(() => setError(null), 3000);
+        },
+      });
     } else {
-      likePost.mutate(post.id);
+      likePost.mutate(post.id, {
+        onError: () => {
+          setError("Failed to like post");
+          setTimeout(() => setError(null), 3000);
+        },
+      });
     }
   };
 
@@ -111,6 +139,12 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
       onClick={handlePostClick}
       className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
     >
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-4 py-2">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      )}
       {/* Header */}
       <div className="p-4 flex items-start justify-between">
         <Link
@@ -151,7 +185,7 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
         </Link>
 
         {/* Actions Menu */}
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <button
             onClick={() => setShowMenu(!showMenu)}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
