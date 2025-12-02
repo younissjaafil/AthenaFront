@@ -119,8 +119,10 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
       ? `${post.creator.user.firstName} ${post.creator.user.lastName}`
       : post.creator.user.firstName || post.creator.title || "User");
 
-  const creatorHandle = post.creator.profile?.handle || `user_${post.creator.userId}`;
-  const creatorAvatar = post.creator.profile?.avatarUrl || post.creator.user.profileImageUrl;
+  const creatorHandle =
+    post.creator.profile?.handle || `user_${post.creator.userId}`;
+  const creatorAvatar =
+    post.creator.profile?.avatarUrl || post.creator.user.profileImageUrl;
 
   const handlePostClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on interactive elements
@@ -141,7 +143,7 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       onClick={handlePostClick}
-      className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+      className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200"
     >
       {/* Error Message */}
       {error && (
@@ -150,12 +152,9 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
         </div>
       )}
       {/* Header */}
-      <div className="p-4 flex items-start justify-between">
-        <Link
-          href={`/${creatorHandle}`}
-          className="flex items-start gap-3"
-        >
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+      <div className="p-5 flex items-start justify-between">
+        <Link href={`/${creatorHandle}`} className="flex items-start gap-3 hover:opacity-80 transition-opacity">
+          <div className="w-11 h-11 rounded-full overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 ring-2 ring-gray-100 dark:ring-gray-700">
             {creatorAvatar ? (
               <img
                 src={creatorAvatar}
@@ -239,15 +238,15 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
 
       {/* Title */}
       {post.title && (
-        <div className="px-4 pb-2">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="px-5 pb-3">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
             {post.title}
           </h3>
         </div>
       )}
 
       {/* Body */}
-      <div className="px-4 pb-4">
+      <div className="px-5 pb-4">
         <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
           {post.body}
         </p>
@@ -300,7 +299,7 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
       )}
 
       {/* Stats */}
-      <div className="px-4 py-2 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700">
+      <div className="px-5 py-3 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700">
         <span className="flex items-center gap-1">
           <Eye className="w-4 h-4" />
           {post.viewsCount}
@@ -319,29 +318,31 @@ export function PostCard({ post, onDelete, onEdit }: PostCardProps) {
       </div>
 
       {/* Actions */}
-      <div className="px-4 py-2 flex items-center gap-1 border-t border-gray-100 dark:border-gray-700">
+      <div className="px-4 py-3 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700">
         <button
           onClick={handleLikeToggle}
           disabled={likePost.isPending || unlikePost.isPending}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all duration-200 ${
             post.isLiked
               ? "text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
               : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
           }`}
         >
-          <Heart className={`w-5 h-5 ${post.isLiked ? "fill-red-500" : ""}`} />
+          <Heart className={`w-5 h-5 transition-all duration-200 ${
+            post.isLiked ? "fill-red-500 scale-110" : ""
+          }`} />
           <span className="text-sm font-medium">Like</span>
         </button>
 
         <Link
           href={`/post/${post.id}`}
-          className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
         >
           <MessageCircle className="w-5 h-5" />
           <span className="text-sm font-medium">Comment</span>
         </Link>
 
-        <button className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <button className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200">
           <Share2 className="w-5 h-5" />
           <span className="text-sm font-medium">Share</span>
         </button>

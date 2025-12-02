@@ -136,7 +136,7 @@ export function SessionsTab({
         </div>
 
         {/* Book Session CTA */}
-        <Link href={`/book/${creatorId}`}>
+        <Link href={`/student/sessions/book/${creatorId}`}>
           <button className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors">
             <Calendar className="w-5 h-5" />
             Book a Session
