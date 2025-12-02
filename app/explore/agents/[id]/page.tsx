@@ -8,6 +8,7 @@ import { useAgent } from "@/hooks/useAgents";
 import { useAgentAccess, useCreatePayment } from "@/hooks/usePayments";
 import { useFindOrCreateConversation } from "@/hooks/useConversations";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useDocumentStats } from "@/hooks/useDocuments";
 import { PaymentCurrency } from "@/lib/types/payment";
 import {
   Bot,
@@ -19,6 +20,8 @@ import {
   Check,
   TrendingUp,
   Zap,
+  FileText,
+  Database,
 } from "lucide-react";
 
 export default function AgentDetailPage({
@@ -31,6 +34,7 @@ export default function AgentDetailPage({
   const { data: agent, isLoading } = useAgent(id);
   const { data: access } = useAgentAccess(id);
   const { data: currentUser } = useCurrentUser();
+  const { data: documentStats } = useDocumentStats(id);
   const createConversation = useFindOrCreateConversation();
   const createPayment = useCreatePayment();
 
@@ -202,19 +206,42 @@ export default function AgentDetailPage({
                   Capabilities
                 </h2>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-600 dark:text-slate-400">
-                    <Check className="w-5 h-5 text-emerald-500" />
-                    <span>AI Model: {agent.model}</span>
-                  </div>
-                  {agent.useRag && (
+                  {agent.useRag && documentStats && (
+                    <>
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-slate-400">
+                        <Database className="w-5 h-5 text-emerald-500" />
+                        <span>
+                          Trained on{" "}
+                          {documentStats.totalChunks.toLocaleString()} knowledge
+                          chunks
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-slate-400">
+                        <FileText className="w-5 h-5 text-emerald-500" />
+                        <span>
+                          {documentStats.totalDocuments} document
+                          {documentStats.totalDocuments !== 1 ? "s" : ""}{" "}
+                          uploaded
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-slate-400">
+                        <Check className="w-5 h-5 text-emerald-500" />
+                        <span>Enhanced with custom knowledge base</span>
+                      </div>
+                    </>
+                  )}
+                  {!agent.useRag && (
                     <div className="flex items-center gap-2 text-gray-600 dark:text-slate-400">
                       <Check className="w-5 h-5 text-emerald-500" />
-                      <span>Enhanced with custom knowledge base</span>
+                      <span>Powered by advanced AI</span>
                     </div>
                   )}
                   <div className="flex items-center gap-2 text-gray-600 dark:text-slate-400">
                     <Check className="w-5 h-5 text-emerald-500" />
-                    <span>Max {agent.maxTokens} tokens per response</span>
+                    <span>
+                      Up to {agent.maxTokens.toLocaleString()} tokens per
+                      response
+                    </span>
                   </div>
                 </div>
               </div>
@@ -276,7 +303,7 @@ export default function AgentDetailPage({
                     Total Chats
                   </span>
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {agent.totalConversations}
+                    {agent.totalConversations || 0}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -284,9 +311,19 @@ export default function AgentDetailPage({
                     Messages Sent
                   </span>
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {agent.totalMessages}
+                    {agent.totalMessages || 0}
                   </span>
                 </div>
+                {agent.useRag && documentStats && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600 dark:text-slate-400 text-sm">
+                      Training Data
+                    </span>
+                    <span className="font-semibold text-purple-600 dark:text-purple-400">
+                      {documentStats.totalChunks.toLocaleString()} chunks
+                    </span>
+                  </div>
+                )}
                 {!agent.isFree && (
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600 dark:text-slate-400 text-sm">
