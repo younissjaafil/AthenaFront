@@ -30,15 +30,29 @@ function PaymentCallbackContent() {
   const [syncStatus, setSyncStatus] = useState<"syncing" | "done" | "error">(
     "syncing"
   );
+  const [syncResult, setSyncResult] = useState<{
+    synced: number;
+    updated: number;
+  } | null>(null);
 
   useEffect(() => {
+    // Only sync if payment was successful
+    if (status !== "success") {
+      setIsLoading(false);
+      return;
+    }
+
     // Sync all pending payments with Whish API
     // This ensures entitlements are granted even if callback failed
     const syncPayments = async () => {
       try {
         setSyncStatus("syncing");
-        await syncAllPending.mutateAsync();
+        const result = await syncAllPending.mutateAsync();
+        setSyncResult(result);
         setSyncStatus("done");
+
+        // Wait a moment for backend to complete entitlement creation
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Invalidate payment-related queries AFTER sync completes
         await queryClient.invalidateQueries({
@@ -59,36 +73,61 @@ function PaymentCallbackContent() {
             queryKey: ["sessions", sessionId],
           });
         }
+
+        // Show success message for 5 seconds, then redirect directly to agent/session
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        // Redirect directly to agent or session page
+        if (agentId) {
+          router.push(`/explore/agents/${agentId}`);
+        } else if (sessionId) {
+          router.push(`/student/sessions/${sessionId}`);
+        } else {
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error("Failed to sync payments:", error);
         setSyncStatus("error");
+        setIsLoading(false);
       }
     };
 
     syncPayments();
-
-    // Show success/failure for longer to ensure sync completes
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 5000); // Increased to 5 seconds to ensure sync fully completes
-
-    return () => clearTimeout(timer);
-  }, [queryClient, agentId, sessionId, syncAllPending]);
+  }, [queryClient, agentId, sessionId, syncAllPending, status, router]);
 
   const isSuccess = status === "success";
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 text-center">
           <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
-          <p className="text-gray-600 dark:text-slate-400">
-            {syncStatus === "syncing"
-              ? "Verifying payment..."
-              : syncStatus === "done"
-              ? "Payment verified! Redirecting..."
-              : "Finalizing..."}
-          </p>
+          <div>
+            <p className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+              {syncStatus === "syncing"
+                ? "Verifying payment..."
+                : syncStatus === "done"
+                ? "Payment verified!"
+                : syncStatus === "error"
+                ? "Verification failed"
+                : "Processing..."}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-slate-400">
+              {syncStatus === "syncing"
+                ? "Checking payment status with our payment provider..."
+                : syncStatus === "done"
+                ? syncResult && syncResult.updated > 0
+                  ? `Access granted! Redirecting you to ${
+                      agentId ? "the agent" : "your session"
+                    }...`
+                  : `Access granted! Redirecting you to ${
+                      agentId ? "the agent" : "your session"
+                    }...`
+                : syncStatus === "error"
+                ? "Please contact support if this persists"
+                : "Please wait..."}
+            </p>
+          </div>
         </div>
       </div>
     );
