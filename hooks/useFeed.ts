@@ -158,7 +158,7 @@ export function useHomeFeed(page: number = 1, limit: number = 20) {
   return useQuery({
     queryKey: feedKeys.home(page),
     queryFn: async () => {
-      const response = await apiClient.get<FeedResponse>("/api/feed", {
+      const response = await apiClient.get<FeedResponse>("/feed", {
         params: { page, limit },
       });
       return response.data;
@@ -246,7 +246,7 @@ export function useCreatePost() {
 
   return useMutation({
     mutationFn: async (data: CreatePostInput) => {
-      const response = await apiClient.post<Post>("/api/feed/posts", data);
+      const response = await apiClient.post<Post>("/feed/posts", data);
       return response.data;
     },
     onSuccess: () => {
@@ -269,7 +269,7 @@ export function useUpdatePost() {
       data: UpdatePostInput;
     }) => {
       const response = await apiClient.patch<Post>(
-        `/api/feed/posts/${postId}`,
+        `/feed/posts/${postId}`,
         data
       );
       return response.data;
@@ -288,7 +288,7 @@ export function useDeletePost() {
 
   return useMutation({
     mutationFn: async (postId: string) => {
-      await apiClient.delete(`/api/feed/posts/${postId}`);
+      await apiClient.delete(`/feed/posts/${postId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: feedKeys.all });
@@ -303,7 +303,7 @@ export function useLikePost() {
 
   return useMutation({
     mutationFn: async (postId: string) => {
-      await apiClient.post(`/api/feed/posts/${postId}/like`);
+      await apiClient.post(`/feed/posts/${postId}/like`);
     },
     onSuccess: (_, postId) => {
       queryClient.invalidateQueries({ queryKey: feedKeys.post(postId) });
@@ -319,7 +319,7 @@ export function useUnlikePost() {
 
   return useMutation({
     mutationFn: async (postId: string) => {
-      await apiClient.delete(`/api/feed/posts/${postId}/like`);
+      await apiClient.delete(`/feed/posts/${postId}/like`);
     },
     onSuccess: (_, postId) => {
       queryClient.invalidateQueries({ queryKey: feedKeys.post(postId) });
@@ -342,7 +342,7 @@ export function useCreateComment() {
       data: CreateCommentInput;
     }) => {
       const response = await apiClient.post<Comment>(
-        `/api/feed/posts/${postId}/comments`,
+        `/feed/posts/${postId}/comments`,
         data
       );
       return response.data;
@@ -369,7 +369,7 @@ export function useDeleteComment() {
       commentId: string;
       postId: string;
     }) => {
-      await apiClient.delete(`/api/feed/comments/${commentId}`);
+      await apiClient.delete(`/feed/comments/${commentId}`);
       return postId;
     },
     onSuccess: (postId) => {
@@ -394,7 +394,7 @@ export function useLikeComment() {
       commentId: string;
       postId: string;
     }) => {
-      await apiClient.post(`/api/feed/comments/${commentId}/like`);
+      await apiClient.post(`/feed/comments/${commentId}/like`);
       return postId;
     },
     onSuccess: (postId) => {
@@ -418,7 +418,7 @@ export function useUnlikeComment() {
       commentId: string;
       postId: string;
     }) => {
-      await apiClient.delete(`/api/feed/comments/${commentId}/like`);
+      await apiClient.delete(`/feed/comments/${commentId}/like`);
       return postId;
     },
     onSuccess: (postId) => {
