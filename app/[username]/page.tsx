@@ -351,7 +351,9 @@ export default function PublicProfilePage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-gray-400">
-                    {(profile.displayName || profile.handle || "U").charAt(0).toUpperCase()}
+                    {(profile.displayName || profile.handle || "U")
+                      .charAt(0)
+                      .toUpperCase()}
                   </div>
                 )}
               </div>
