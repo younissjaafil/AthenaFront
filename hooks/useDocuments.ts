@@ -74,7 +74,7 @@ export function useDocumentStats(agentId: string) {
   });
 }
 
-// Fetch my documents
+// Fetch my documents (from all my agents)
 export function useMyDocuments() {
   const { getToken } = useAuth();
   const apiClient = createClientApiClient(getToken);
@@ -82,7 +82,9 @@ export function useMyDocuments() {
   return useQuery({
     queryKey: documentKeys.myDocuments,
     queryFn: async () => {
-      const response = await apiClient.get<Document[]>("/documents/me");
+      const response = await apiClient.get<Document[]>(
+        "/documents/my-documents"
+      );
       return response.data;
     },
   });
