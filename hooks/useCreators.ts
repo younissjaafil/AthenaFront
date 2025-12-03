@@ -86,6 +86,7 @@ export interface CreatorDocument {
   metadata?: {
     title?: string;
     description?: string;
+    extractedText?: string;
     [key: string]: any;
   };
   createdAt: string;

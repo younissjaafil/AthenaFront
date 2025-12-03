@@ -215,13 +215,45 @@ export default function PublicProfilePage() {
               {/* Document Preview */}
               <div className="h-[calc(100%-80px)] overflow-auto bg-gray-50 dark:bg-gray-950">
                 {previewDoc.s3Url && (
-                  <iframe
-                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(
-                      previewDoc.s3Url
-                    )}&embedded=true`}
-                    className="w-full h-full border-0"
-                    title={previewDoc.filename}
-                  />
+                  <>
+                    {previewDoc.fileType?.toLowerCase() === "pdf" ? (
+                      <iframe
+                        src={previewDoc.s3Url}
+                        className="w-full h-full border-0"
+                        title={previewDoc.filename}
+                      />
+                    ) : previewDoc.fileType?.toLowerCase() === "docx" ||
+                      previewDoc.fileType?.toLowerCase() === "doc" ? (
+                      <div className="p-8 max-w-4xl mx-auto">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+                          {previewDoc.metadata?.title && (
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                              {previewDoc.metadata.title}
+                            </h1>
+                          )}
+                          {previewDoc.metadata?.description && (
+                            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 border-l-4 border-purple-500 pl-4">
+                              {previewDoc.metadata.description}
+                            </p>
+                          )}
+                          <div className="prose dark:prose-invert max-w-none">
+                            <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed">
+                              {previewDoc.metadata?.extractedText ||
+                                "Document content is being processed..."}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full p-8">
+                        <FileText className="w-16 h-16 text-gray-400 mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
+                          Preview not available for{" "}
+                          {previewDoc.fileType?.toUpperCase()} files
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </motion.div>
