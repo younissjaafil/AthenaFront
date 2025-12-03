@@ -1,7 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useState } from "react";
 import {
   FileText,
   Lock,
@@ -12,6 +13,7 @@ import {
   FileSpreadsheet,
   Sparkles,
   Zap,
+  X,
 } from "lucide-react";
 import { CreatorDocument } from "@/hooks/useCreators";
 
@@ -26,6 +28,8 @@ export function DocumentsTab({
   isLoading,
   creatorId,
 }: DocumentsTabProps) {
+  const [previewDoc, setPreviewDoc] = useState<CreatorDocument | null>(null);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -60,6 +64,53 @@ export function DocumentsTab({
 
   return (
     <div className="space-y-8">
+      {/* Document Preview Modal */}
+      <AnimatePresence>
+        {previewDoc && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+            onClick={() => setPreviewDoc(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-6xl h-[90vh] bg-white dark:bg-gray-900 rounded-xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                    {previewDoc.metadata?.title || previewDoc.originalFilename}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {previewDoc.fileType.toUpperCase()} • {(previewDoc.fileSize / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPreviewDoc(null)}
+                  className="ml-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              {/* Document Preview */}
+              <div className="h-[calc(100%-80px)] overflow-auto bg-gray-50 dark:bg-gray-950">
+                {previewDoc.s3Url && (
+                  <iframe
+                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewDoc.s3Url)}&embedded=true`}
+                    className="w-full h-full border-0"
+                    title={previewDoc.originalFilename}
+                  />
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Free Documents Section */}
       {freeDocuments.length > 0 && (
         <div>
@@ -74,7 +125,12 @@ export function DocumentsTab({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {freeDocuments.map((doc, index) => (
-              <DocumentCard key={doc.id} document={doc} index={index} />
+              <DocumentCard 
+                key={doc.id} 
+                document={doc} 
+                index={index}
+                onPreview={() => setPreviewDoc(doc)}
+              />
             ))}
           </div>
         </div>
@@ -99,6 +155,7 @@ export function DocumentsTab({
                 document={doc}
                 index={index}
                 isPremium
+                onPreview={() => setPreviewDoc(doc)}
               />
             ))}
           </div>
@@ -112,9 +169,10 @@ interface DocumentCardProps {
   document: CreatorDocument;
   index: number;
   isPremium?: boolean;
+  onPreview?: () => void;
 }
 
-function DocumentCard({ document, index, isPremium }: DocumentCardProps) {
+function DocumentCard({ document, index, isPremium, onPreview }: DocumentCardProps) {
   const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
       case "pdf":
@@ -248,15 +306,17 @@ function DocumentCard({ document, index, isPremium }: DocumentCardProps) {
             </button>
           ) : (
             <>
-              <button className="flex items-center gap-1 px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors">
+              <button 
+                onClick={onPreview}
+                className="flex items-center gap-1 px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors"
+              >
                 <Eye className="w-3.5 h-3.5" />
                 Preview
               </button>
               {document.s3Url && (
                 <a
                   href={document.s3Url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  download
                   className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   <Download className="w-3.5 h-3.5" />

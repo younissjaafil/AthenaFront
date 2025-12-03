@@ -589,7 +589,8 @@ export default function FeedPage() {
                   </div>
                 </div>
                 <p className="text-white/95 text-xs mb-3 leading-relaxed">
-                  Chat with our most advanced AI agent. Get help with coding, writing, and more.
+                  Chat with our most advanced AI agent. Get help with coding,
+                  writing, and more.
                 </p>
                 <Link href="/explore/agents">
                   <button className="w-full py-2 bg-white text-purple-600 font-semibold rounded-lg text-sm hover:bg-gray-100 transition-colors">
