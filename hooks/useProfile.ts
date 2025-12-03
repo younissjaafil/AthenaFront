@@ -389,15 +389,19 @@ export function useCreatorStats(creatorId: string) {
 
 /**
  * Check if current user is following a creator
+ * Only runs when user is authenticated (isSignedIn=true)
  */
-export function useIsFollowingCreator(creatorId: string) {
+export function useIsFollowingCreator(
+  creatorId: string,
+  isSignedIn: boolean = false
+) {
   return useQuery({
     queryKey: ["isFollowingCreator", creatorId],
     queryFn: async (): Promise<{ isFollowing: boolean }> => {
       const res = await apiClient.get(`/creators/${creatorId}/is-following`);
       return res.data;
     },
-    enabled: !!creatorId,
+    enabled: !!creatorId && isSignedIn,
   });
 }
 

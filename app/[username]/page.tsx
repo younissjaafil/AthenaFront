@@ -89,7 +89,8 @@ export default function PublicProfilePage() {
   const { data: profile, isLoading } = useProfile(username);
   const { data: creatorStats } = useCreatorStats(profile?.creatorId || "");
   const { data: isFollowingData } = useIsFollowingCreator(
-    profile?.creatorId || ""
+    profile?.creatorId || "",
+    isSignedIn ?? false
   );
   const { data: postsData, isLoading: postsLoading } = useCreatorPosts(
     profile?.creatorId || "",

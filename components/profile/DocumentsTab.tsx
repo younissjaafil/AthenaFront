@@ -98,15 +98,34 @@ export function DocumentsTab({
               </div>
 
               {/* Document Preview */}
-              <div className="h-[calc(100%-80px)] overflow-auto bg-gray-50 dark:bg-gray-950">
+              <div className="h-[calc(100%-80px)] overflow-auto bg-gray-50 dark:bg-gray-950 select-none">
                 {previewDoc.s3Url && (
                   <>
                     {previewDoc.fileType?.toLowerCase() === "pdf" ? (
-                      <iframe
-                        src={previewDoc.s3Url}
-                        className="w-full h-full border-0"
-                        title={previewDoc.originalFilename}
-                      />
+                      <div className="relative w-full h-full">
+                        {/* Overlay to prevent right-click context menu */}
+                        <div
+                          className="absolute inset-0 z-10"
+                          onContextMenu={(e) => e.preventDefault()}
+                          style={{ pointerEvents: "none" }}
+                        />
+                        {/* Use PDF.js viewer with disabled toolbar */}
+                        <iframe
+                          src={`${previewDoc.s3Url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+                          className="w-full h-full border-0"
+                          title={previewDoc.originalFilename}
+                          sandbox="allow-same-origin allow-scripts"
+                          style={{
+                            pointerEvents: "auto",
+                          }}
+                        />
+                        {/* Watermark overlay */}
+                        <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-5">
+                          <span className="text-6xl font-bold text-gray-900 dark:text-white rotate-[-30deg]">
+                            ATHENA VIEW ONLY
+                          </span>
+                        </div>
+                      </div>
                     ) : previewDoc.fileType?.toLowerCase() === "docx" ||
                       previewDoc.fileType?.toLowerCase() === "doc" ? (
                       <div className="p-8 max-w-4xl mx-auto">
@@ -345,25 +364,13 @@ function DocumentCard({
               Unlock ($4.99)
             </button>
           ) : (
-            <>
-              <button
-                onClick={onPreview}
-                className="flex items-center gap-1 px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors"
-              >
-                <Eye className="w-3.5 h-3.5" />
-                Preview
-              </button>
-              {document.s3Url && (
-                <a
-                  href={document.s3Url}
-                  download
-                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Download
-                </a>
-              )}
-            </>
+            <button
+              onClick={onPreview}
+              className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              View
+            </button>
           )}
         </div>
       </div>
