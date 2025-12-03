@@ -92,6 +92,7 @@ export interface PublicDocument {
   filename: string;
   fileType: string;
   fileSize: number;
+  s3Url?: string;
   kind: DocumentKind;
   visibility: DocumentVisibility;
   pricingType: DocumentPricingType;

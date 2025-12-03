@@ -82,6 +82,7 @@ export default function PublicProfilePage() {
   const username = params.username as string;
   const [activeTab, setActiveTab] = useState<TabType>("posts");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<any>(null);
 
   const { isSignedIn } = useAuth();
   const { data: currentUser } = useCurrentUser();
@@ -176,6 +177,58 @@ export default function PublicProfilePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
+      {/* Document Preview Modal */}
+      <AnimatePresence>
+        {previewDoc && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+            onClick={() => setPreviewDoc(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-6xl h-[90vh] bg-white dark:bg-gray-900 rounded-xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                    {previewDoc.filename || previewDoc.originalFilename}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {previewDoc.fileType?.toUpperCase()} •{" "}
+                    {previewDoc.fileSize
+                      ? `${(previewDoc.fileSize / 1024).toFixed(1)} KB`
+                      : ""}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPreviewDoc(null)}
+                  className="ml-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              {/* Document Preview */}
+              <div className="h-[calc(100%-80px)] overflow-auto bg-gray-50 dark:bg-gray-950">
+                {previewDoc.s3Url && (
+                  <iframe
+                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(
+                      previewDoc.s3Url
+                    )}&embedded=true`}
+                    className="w-full h-full border-0"
+                    title={previewDoc.filename}
+                  />
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4">
         <button
@@ -727,7 +780,12 @@ export default function PublicProfilePage() {
                           {profileDocuments.map((doc) => (
                             <div
                               key={doc.id}
-                              className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg"
+                              className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg cursor-pointer"
+                              onClick={() => {
+                                if (doc.s3Url) {
+                                  setPreviewDoc(doc);
+                                }
+                              }}
                             >
                               <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
@@ -767,6 +825,9 @@ export default function PublicProfilePage() {
                                 {doc.chunkCount !== undefined && (
                                   <span>{doc.chunkCount} chunks</span>
                                 )}
+                                <span className="ml-auto text-purple-600 dark:text-purple-400 font-medium">
+                                  Click to preview
+                                </span>
                               </div>
                             </div>
                           ))}

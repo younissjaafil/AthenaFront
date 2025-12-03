@@ -85,7 +85,8 @@ export function DocumentsTab({
                     {previewDoc.metadata?.title || previewDoc.originalFilename}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {previewDoc.fileType.toUpperCase()} • {(previewDoc.fileSize / 1024).toFixed(1)} KB
+                    {previewDoc.fileType.toUpperCase()} •{" "}
+                    {(previewDoc.fileSize / 1024).toFixed(1)} KB
                   </p>
                 </div>
                 <button
@@ -100,7 +101,9 @@ export function DocumentsTab({
               <div className="h-[calc(100%-80px)] overflow-auto bg-gray-50 dark:bg-gray-950">
                 {previewDoc.s3Url && (
                   <iframe
-                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewDoc.s3Url)}&embedded=true`}
+                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(
+                      previewDoc.s3Url
+                    )}&embedded=true`}
                     className="w-full h-full border-0"
                     title={previewDoc.originalFilename}
                   />
@@ -125,9 +128,9 @@ export function DocumentsTab({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {freeDocuments.map((doc, index) => (
-              <DocumentCard 
-                key={doc.id} 
-                document={doc} 
+              <DocumentCard
+                key={doc.id}
+                document={doc}
                 index={index}
                 onPreview={() => setPreviewDoc(doc)}
               />
@@ -172,7 +175,12 @@ interface DocumentCardProps {
   onPreview?: () => void;
 }
 
-function DocumentCard({ document, index, isPremium, onPreview }: DocumentCardProps) {
+function DocumentCard({
+  document,
+  index,
+  isPremium,
+  onPreview,
+}: DocumentCardProps) {
   const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
       case "pdf":
@@ -306,7 +314,7 @@ function DocumentCard({ document, index, isPremium, onPreview }: DocumentCardPro
             </button>
           ) : (
             <>
-              <button 
+              <button
                 onClick={onPreview}
                 className="flex items-center gap-1 px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors"
               >
