@@ -123,7 +123,7 @@ export function DocumentsTab({
                           )}
                           <div className="prose dark:prose-invert max-w-none">
                             <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed">
-                              {previewDoc.metadata?.extractedText ||
+                              {previewDoc.extractedText ||
                                 "Document content is being processed..."}
                             </div>
                           </div>

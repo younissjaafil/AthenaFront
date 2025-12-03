@@ -83,10 +83,10 @@ export interface CreatorDocument {
   status: string;
   chunkCount: number;
   embeddingCount: number;
+  extractedText?: string;
   metadata?: {
     title?: string;
     description?: string;
-    extractedText?: string;
     [key: string]: any;
   };
   createdAt: string;
