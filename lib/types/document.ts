@@ -99,6 +99,8 @@ export interface PublicDocument {
   currency: string;
   title?: string;
   description?: string;
+  status?: DocumentStatus;
+  chunkCount?: number;
   createdAt: string;
 }
 

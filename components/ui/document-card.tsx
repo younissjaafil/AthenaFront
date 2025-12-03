@@ -82,6 +82,17 @@ export function DocumentCard({
 
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
             <span>{formatFileSize(document.fileSize)}</span>
+            {/* Visibility Badge */}
+            {document.visibility && (
+              <>
+                <span>•</span>
+                <span className={document.visibility === "PUBLIC" 
+                  ? "text-green-600 dark:text-green-400" 
+                  : "text-gray-500 dark:text-gray-400"}>
+                  {document.visibility === "PUBLIC" ? "🌐 Public" : "🔒 Private"}
+                </span>
+              </>
+            )}
             {document.status === DocumentStatus.PROCESSED && (
               <>
                 <span>•</span>

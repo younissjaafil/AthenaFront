@@ -36,6 +36,7 @@ export default function CreatorDocumentsPage() {
   // State
   const [selectedAgentId, setSelectedAgentId] = useState<string>("all");
   const [uploadAgentId, setUploadAgentId] = useState<string>("");
+  const [uploadVisibility, setUploadVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [recentUploadId, setRecentUploadId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -134,6 +135,7 @@ export default function CreatorDocumentsPage() {
       const result = await uploadDocument.mutateAsync({
         file,
         agentId: uploadAgentId,
+        visibility: uploadVisibility,
       });
 
       clearInterval(progressInterval);
@@ -314,6 +316,35 @@ export default function CreatorDocumentsPage() {
                 </option>
               ))}
             </select>
+
+            {/* Visibility Toggle */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Visibility:
+              </label>
+              <button
+                type="button"
+                onClick={() => setUploadVisibility(uploadVisibility === "PUBLIC" ? "PRIVATE" : "PUBLIC")}
+                className={`relative inline-flex h-8 w-[120px] items-center rounded-full transition-colors ${
+                  uploadVisibility === "PUBLIC"
+                    ? "bg-green-500"
+                    : "bg-gray-400 dark:bg-gray-600"
+                }`}
+              >
+                <span
+                  className={`absolute left-1 flex h-6 w-14 items-center justify-center rounded-full bg-white text-xs font-medium transition-transform ${
+                    uploadVisibility === "PUBLIC" ? "translate-x-0" : "translate-x-[50px]"
+                  }`}
+                >
+                  {uploadVisibility === "PUBLIC" ? "Public" : "Private"}
+                </span>
+              </button>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {uploadVisibility === "PUBLIC" 
+                  ? "Visible on your profile" 
+                  : "Only you can see"}
+              </span>
+            </div>
           </div>
 
           <FileUpload

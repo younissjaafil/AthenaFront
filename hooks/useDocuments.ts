@@ -101,12 +101,14 @@ export function useUploadDocument() {
       agentId,
       title,
       description,
+      visibility,
       onProgress,
     }: {
       file: File;
       agentId: string;
       title?: string;
       description?: string;
+      visibility?: "PUBLIC" | "PRIVATE";
       onProgress?: (progress: number) => void;
     }) => {
       const token = await getToken();
@@ -116,6 +118,7 @@ export function useUploadDocument() {
       formData.append("agentId", agentId);
       if (title) formData.append("title", title);
       if (description) formData.append("description", description);
+      if (visibility) formData.append("visibility", visibility);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_ATHENA_CORE_URL}/api/documents/upload`,

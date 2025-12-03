@@ -15,6 +15,7 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCreatorPosts } from "@/hooks/useFeed";
 import { useCreatorAgents } from "@/hooks/useAgents";
+import { useCreatorProfileDocuments } from "@/hooks/useDocuments";
 import {
   useCreatorAvailability,
   useCreatorSessionSettings,
@@ -97,6 +98,8 @@ export default function PublicProfilePage() {
   const { data: creatorAgents, isLoading: agentsLoading } = useCreatorAgents(
     profile?.creatorId || ""
   );
+  const { data: profileDocuments, isLoading: documentsLoading } =
+    useCreatorProfileDocuments(profile?.creatorId || "");
   const { data: availability, isLoading: availabilityLoading } =
     useCreatorAvailability(profile?.creatorId || "");
   const { data: sessionSettings, isLoading: settingsLoading } =
@@ -704,14 +707,71 @@ export default function PublicProfilePage() {
 
                   {/* Docs Tab - Creator only */}
                   {activeTab === "docs" && isCreator && (
-                    <div className="text-center py-12">
-                      <FileText className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-                      <p className="text-gray-500 dark:text-gray-400 mb-2">
-                        No documents yet
-                      </p>
-                      <p className="text-sm text-gray-400 dark:text-gray-500">
-                        Knowledge documents shared by this creator
-                      </p>
+                    <div>
+                      {documentsLoading ? (
+                        <div className="flex justify-center py-8">
+                          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                        </div>
+                      ) : !profileDocuments || profileDocuments.length === 0 ? (
+                        <div className="text-center py-12">
+                          <FileText className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                          <p className="text-gray-500 dark:text-gray-400 mb-2">
+                            No documents yet
+                          </p>
+                          <p className="text-sm text-gray-400 dark:text-gray-500">
+                            Knowledge documents shared by this creator
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                          {profileDocuments.map((doc) => (
+                            <div
+                              key={doc.id}
+                              className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg"
+                            >
+                              <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                                  <FileText className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                                    {doc.filename}
+                                  </h3>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    {doc.fileType?.toUpperCase()} •{" "}
+                                    {doc.fileSize
+                                      ? `${(doc.fileSize / 1024).toFixed(1)} KB`
+                                      : "Unknown size"}
+                                  </p>
+                                  {doc.description && (
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">
+                                      {doc.description}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              {/* Document stats */}
+                              <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 text-xs text-gray-500 dark:text-gray-400">
+                                <span
+                                  className={cn(
+                                    "px-2 py-1 rounded-full text-xs font-medium",
+                                    doc.status === "processed"
+                                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                      : doc.status === "processing"
+                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                        : "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+                                  )}
+                                >
+                                  {doc.status}
+                                </span>
+                                {doc.chunkCount !== undefined && (
+                                  <span>{doc.chunkCount} chunks</span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
