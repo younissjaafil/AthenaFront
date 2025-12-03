@@ -12,6 +12,7 @@ const adminNav = [
   { name: "Dashboard", href: "/admin/dashboard", icon: "📊" },
   { name: "Users", href: "/admin/users", icon: "👥" },
   { name: "Agents", href: "/admin/agents", icon: "🤖" },
+  { name: "Academic", href: "/admin/academic", icon: "🎓" },
   { name: "Analytics", href: "/admin/analytics", icon: "📈" },
   { name: "Settings", href: "/admin/settings", icon: "⚙️" },
 ];
