@@ -187,6 +187,53 @@ export function useDeleteDocument() {
   });
 }
 
+// Update document mutation (visibility, title, description)
+export function useUpdateDocument() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      documentId,
+      visibility,
+      title,
+      description,
+    }: {
+      documentId: string;
+      visibility?: "PUBLIC" | "PRIVATE" | "FOLLOWERS" | "SUBSCRIBERS";
+      title?: string;
+      description?: string;
+    }) => {
+      const apiClient = createClientApiClient(getToken);
+      const response = await apiClient.patch<Document>(
+        `/documents/${documentId}`,
+        { visibility, title, description }
+      );
+      return response.data;
+    },
+    onSuccess: (updatedDoc) => {
+      // Invalidate relevant queries
+      if (updatedDoc.agentId) {
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.byAgent(updatedDoc.agentId),
+        });
+      }
+      queryClient.invalidateQueries({
+        queryKey: documentKeys.myDocuments,
+      });
+      queryClient.invalidateQueries({
+        queryKey: documentKeys.detail(updatedDoc.id),
+      });
+      // Also invalidate profile documents if visibility changed
+      if (updatedDoc.ownerId) {
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.byCreatorProfile(updatedDoc.ownerId),
+        });
+      }
+    },
+  });
+}
+
 // Poll document status until processing is complete
 export function usePollDocumentStatus(
   documentId: string | null,

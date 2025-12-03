@@ -8,6 +8,7 @@ import {
   useMyDocuments,
   useUploadDocument,
   useDeleteDocument,
+  useUpdateDocument,
   usePollDocumentStatus,
 } from "@/hooks/useDocuments";
 import { FileUpload } from "@/components/ui/file-upload";
@@ -32,14 +33,18 @@ export default function CreatorDocumentsPage() {
   // Mutations
   const uploadDocument = useUploadDocument();
   const deleteDocument = useDeleteDocument();
+  const updateDocument = useUpdateDocument();
 
   // State
   const [selectedAgentId, setSelectedAgentId] = useState<string>("all");
   const [uploadAgentId, setUploadAgentId] = useState<string>("");
-  const [uploadVisibility, setUploadVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
+  const [uploadVisibility, setUploadVisibility] = useState<
+    "PUBLIC" | "PRIVATE"
+  >("PUBLIC");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [recentUploadId, setRecentUploadId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -175,6 +180,27 @@ export default function CreatorDocumentsPage() {
       });
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleToggleVisibility = async (
+    documentId: string,
+    newVisibility: "PUBLIC" | "PRIVATE"
+  ) => {
+    setUpdatingId(documentId);
+    try {
+      await updateDocument.mutateAsync({ documentId, visibility: newVisibility });
+      setToast({
+        message: `Document is now ${newVisibility === "PUBLIC" ? "public" : "private"}`,
+        type: "success",
+      });
+    } catch (error: any) {
+      setToast({
+        message: error.message || "Failed to update visibility",
+        type: "error",
+      });
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -324,7 +350,11 @@ export default function CreatorDocumentsPage() {
               </label>
               <button
                 type="button"
-                onClick={() => setUploadVisibility(uploadVisibility === "PUBLIC" ? "PRIVATE" : "PUBLIC")}
+                onClick={() =>
+                  setUploadVisibility(
+                    uploadVisibility === "PUBLIC" ? "PRIVATE" : "PUBLIC"
+                  )
+                }
                 className={`relative inline-flex h-8 w-[120px] items-center rounded-full transition-colors ${
                   uploadVisibility === "PUBLIC"
                     ? "bg-green-500"
@@ -333,15 +363,17 @@ export default function CreatorDocumentsPage() {
               >
                 <span
                   className={`absolute left-1 flex h-6 w-14 items-center justify-center rounded-full bg-white text-xs font-medium transition-transform ${
-                    uploadVisibility === "PUBLIC" ? "translate-x-0" : "translate-x-[50px]"
+                    uploadVisibility === "PUBLIC"
+                      ? "translate-x-0"
+                      : "translate-x-[50px]"
                   }`}
                 >
                   {uploadVisibility === "PUBLIC" ? "Public" : "Private"}
                 </span>
               </button>
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                {uploadVisibility === "PUBLIC" 
-                  ? "Visible on your profile" 
+                {uploadVisibility === "PUBLIC"
+                  ? "Visible on your profile"
                   : "Only you can see"}
               </span>
             </div>
@@ -465,7 +497,9 @@ export default function CreatorDocumentsPage() {
                         onDelete={(id) =>
                           handleDelete(id, doc.agentId || uploadAgentId)
                         }
+                        onToggleVisibility={handleToggleVisibility}
                         isDeleting={deletingId === doc.id}
+                        isUpdating={updatingId === doc.id}
                       />
                     </div>
                   </StaggerItem>
