@@ -17,6 +17,32 @@ export enum DocumentType {
   JSON = "json",
 }
 
+// ===== UNIFIED DOCUMENT ENUMS =====
+export enum DocumentOwnerType {
+  AGENT = "AGENT",
+  CREATOR = "CREATOR",
+}
+
+export enum DocumentKind {
+  DOC = "DOC",
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+  AUDIO = "AUDIO",
+}
+
+export enum DocumentVisibility {
+  PUBLIC = "PUBLIC",
+  FOLLOWERS = "FOLLOWERS",
+  SUBSCRIBERS = "SUBSCRIBERS",
+  PRIVATE = "PRIVATE",
+}
+
+export enum DocumentPricingType {
+  FREE = "FREE",
+  ONE_TIME = "ONE_TIME",
+  SUBSCRIPTION = "SUBSCRIPTION",
+}
+
 export interface DocumentMetadata {
   title?: string;
   author?: string;
@@ -28,19 +54,52 @@ export interface DocumentMetadata {
 
 export interface Document {
   id: string;
-  agentId: string;
+  // Ownership
+  ownerType: DocumentOwnerType;
+  ownerId: string;
+  agentId?: string;
+  // File info
   filename: string;
   originalFilename: string;
   fileType: string;
-  fileSize: number; // in bytes
+  fileSize: number;
   s3Url?: string;
+  // Status
   status: string;
   chunkCount: number;
   embeddingCount: number;
   errorMessage?: string;
+  // Usage flags
+  forProfile: boolean;
+  forRag: boolean;
+  // Classification
+  kind: DocumentKind;
+  visibility: DocumentVisibility;
+  // Monetization
+  pricingType: DocumentPricingType;
+  priceCents?: number;
+  currency: string;
+  // Content
+  contentHash?: string;
   metadata?: DocumentMetadata;
+  // Timestamps
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PublicDocument {
+  id: string;
+  filename: string;
+  fileType: string;
+  fileSize: number;
+  kind: DocumentKind;
+  visibility: DocumentVisibility;
+  pricingType: DocumentPricingType;
+  priceCents?: number;
+  currency: string;
+  title?: string;
+  description?: string;
+  createdAt: string;
 }
 
 export interface DocumentStats {
@@ -59,6 +118,22 @@ export interface UploadDocumentDto {
   metadata?: Record<string, unknown>;
 }
 
+// ===== UNIFIED UPLOAD DTO =====
+export interface UnifiedUploadDocumentDto {
+  ownerType: DocumentOwnerType;
+  ownerId: string;
+  forProfile?: boolean;
+  forRag?: boolean;
+  agentId?: string;
+  visibility?: DocumentVisibility;
+  pricingType?: DocumentPricingType;
+  priceCents?: number;
+  currency?: string;
+  title?: string;
+  description?: string;
+  metadata?: Record<string, unknown>;
+}
+
 // File type configurations
 export const ALLOWED_FILE_TYPES = {
   "application/pdf": { extension: "pdf", icon: "📄", label: "PDF" },
@@ -72,6 +147,21 @@ export const ALLOWED_FILE_TYPES = {
   "text/html": { extension: "html", icon: "🌐", label: "HTML" },
   "text/csv": { extension: "csv", icon: "📊", label: "CSV" },
   "application/json": { extension: "json", icon: "🔧", label: "JSON" },
+} as const;
+
+// Extended file types for profile content (images, videos, audio)
+export const EXTENDED_FILE_TYPES = {
+  ...ALLOWED_FILE_TYPES,
+  "image/png": { extension: "png", icon: "🖼️", label: "PNG" },
+  "image/jpeg": { extension: "jpg", icon: "🖼️", label: "JPEG" },
+  "image/gif": { extension: "gif", icon: "🖼️", label: "GIF" },
+  "image/webp": { extension: "webp", icon: "🖼️", label: "WebP" },
+  "video/mp4": { extension: "mp4", icon: "🎥", label: "MP4" },
+  "video/quicktime": { extension: "mov", icon: "🎥", label: "MOV" },
+  "video/webm": { extension: "webm", icon: "🎥", label: "WebM" },
+  "audio/mpeg": { extension: "mp3", icon: "🎵", label: "MP3" },
+  "audio/wav": { extension: "wav", icon: "🎵", label: "WAV" },
+  "audio/ogg": { extension: "ogg", icon: "🎵", label: "OGG" },
 } as const;
 
 export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
