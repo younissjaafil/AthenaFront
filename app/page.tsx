@@ -372,19 +372,21 @@ export default function FeedPage() {
                 </div>
               ) : (
                 // Posts list
-                <AnimatePresence mode="popLayout">
-                  {posts.map((post) => (
-                    <motion.div
-                      key={post.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="border-b border-gray-200 dark:border-gray-800"
-                    >
-                      <PostCard post={post} />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                <div className="space-y-4 p-4">
+                  <AnimatePresence mode="popLayout">
+                    {posts.map((post) => (
+                      <motion.div
+                        key={post.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden"
+                      >
+                        <PostCard post={post} />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
               )}
 
               {/* Load More */}
@@ -403,7 +405,7 @@ export default function FeedPage() {
         </main>
 
         {/* Daily AI News Sidebar */}
-        <aside className="hidden xl:block w-80 h-screen sticky top-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto scrollbar-hide">
+        <aside className="hidden xl:block w-[25rem] h-screen sticky top-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto scrollbar-hide">
           {/* Search */}
           <div className="p-4">
             <div className="relative">
@@ -603,7 +605,7 @@ export default function FeedPage() {
         </aside>
 
         {/* Right Sidebar - Monetization & Discovery */}
-        <aside className="hidden xl:block w-80 h-screen sticky top-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto scrollbar-hide">
+        <aside className="hidden xl:block w-[25rem] h-screen sticky top-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto scrollbar-hide">
           {/* Search */}
           <div className="p-4">
             <div className="relative">
