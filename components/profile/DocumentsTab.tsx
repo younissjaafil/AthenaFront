@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
   FileText,
   Lock,
@@ -144,12 +145,19 @@ function DocumentCard({ document, index, isPremium }: DocumentCardProps) {
   const title = document.metadata?.title || document.originalFilename;
   const description = document.metadata?.description;
 
+  // Check if file type supports thumbnail preview
+  const isImageType = ["jpg", "jpeg", "png", "gif", "webp"].includes(
+    document.fileType.toLowerCase()
+  );
+  const isPdfType = document.fileType.toLowerCase() === "pdf";
+  const hasThumbnail = isImageType || isPdfType;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className={`group relative p-4 rounded-xl border transition-all hover:shadow-md ${
+      className={`group relative overflow-hidden rounded-xl border transition-all hover:shadow-md ${
         isPremium
           ? "bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800 hover:border-purple-300 dark:hover:border-purple-700"
           : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
@@ -157,7 +165,7 @@ function DocumentCard({ document, index, isPremium }: DocumentCardProps) {
     >
       {/* Premium Badge */}
       {isPremium && (
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 z-10">
           <div className="flex items-center gap-1 px-2 py-1 bg-purple-600 text-white text-xs font-medium rounded-full">
             <Lock className="w-3 h-3" />
             Premium
@@ -165,68 +173,99 @@ function DocumentCard({ document, index, isPremium }: DocumentCardProps) {
         </div>
       )}
 
-      <div className="flex gap-4">
-        {/* File Icon */}
-        <div
-          className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
-            isPremium
-              ? "bg-purple-100 dark:bg-purple-800/50 text-purple-600 dark:text-purple-400"
-              : "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400"
-          }`}
-        >
-          {getFileIcon(document.fileType)}
-        </div>
-
-        {/* Document Info */}
-        <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-gray-900 dark:text-white truncate">
-            {title}
-          </h4>
-          {description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1 mt-0.5">
-              {description}
-            </p>
+      {/* Thumbnail Preview */}
+      {hasThumbnail && document.s3Url && (
+        <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-900">
+          {isImageType ? (
+            <Image
+              src={document.s3Url}
+              alt={title}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          ) : (
+            // PDF preview - show first page or placeholder
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20">
+              <div className="text-center">
+                <FileText className="w-16 h-16 mx-auto text-red-600 dark:text-red-400 mb-2" />
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  PDF Document
+                </p>
+              </div>
+            </div>
           )}
-          <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
-            <span className="uppercase font-medium">{document.fileType}</span>
-            <span>•</span>
-            <span>{formatFileSize(document.fileSize)}</span>
-            {document.chunkCount > 0 && (
-              <>
-                <span>•</span>
-                <span>{document.chunkCount} sections</span>
-              </>
+          {/* Overlay gradient for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+      )}
+
+      <div className="p-4">
+        <div className="flex gap-4">
+          {/* File Icon - only show if no thumbnail */}
+          {!hasThumbnail && (
+            <div
+              className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
+                isPremium
+                  ? "bg-purple-100 dark:bg-purple-800/50 text-purple-600 dark:text-purple-400"
+                  : "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400"
+              }`}
+            >
+              {getFileIcon(document.fileType)}
+            </div>
+          )}
+
+          {/* Document Info */}
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-gray-900 dark:text-white truncate">
+              {title}
+            </h4>
+            {description && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1 mt-0.5">
+                {description}
+              </p>
             )}
+            <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <span className="uppercase font-medium">{document.fileType}</span>
+              <span>•</span>
+              <span>{formatFileSize(document.fileSize)}</span>
+              {document.chunkCount > 0 && (
+                <>
+                  <span>•</span>
+                  <span>{document.chunkCount} sections</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Actions Footer */}
-      <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-end gap-2">
-        {isPremium ? (
-          <button className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">
-            <Zap className="w-3.5 h-3.5" />
-            Unlock ($4.99)
-          </button>
-        ) : (
-          <>
-            <button className="flex items-center gap-1 px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors">
-              <Eye className="w-3.5 h-3.5" />
-              Preview
+        {/* Actions Footer */}
+        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-end gap-2">
+          {isPremium ? (
+            <button className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">
+              <Zap className="w-3.5 h-3.5" />
+              Unlock ($4.99)
             </button>
-            {document.s3Url && (
-              <a
-                href={document.s3Url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Download
-              </a>
-            )}
-          </>
-        )}
+          ) : (
+            <>
+              <button className="flex items-center gap-1 px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium rounded-lg transition-colors">
+                <Eye className="w-3.5 h-3.5" />
+                Preview
+              </button>
+              {document.s3Url && (
+                <a
+                  href={document.s3Url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Download
+                </a>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </motion.div>
   );

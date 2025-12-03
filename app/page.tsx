@@ -402,8 +402,207 @@ export default function FeedPage() {
           </div>
         </main>
 
+        {/* Daily AI News Sidebar */}
+        <aside className="hidden xl:block w-80 h-screen sticky top-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto scrollbar-hide">
+          {/* Search */}
+          <div className="p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search AI News"
+                className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full text-sm outline-none focus:ring-2 focus:ring-purple-500 transition-shadow"
+              />
+            </div>
+          </div>
+
+          {/* Daily AI News */}
+          <div className="mx-4 mb-4 bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
+              Daily AI News
+            </h3>
+            <div className="space-y-3">
+              <a
+                href="https://news.google.com/search?q=AI+in+medicine"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">🏥</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Healthcare
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  AI in Medicine
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Latest breakthroughs
+                </span>
+              </a>
+
+              <a
+                href="https://news.google.com/search?q=AI+in+education"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">📚</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    EdTech
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  AI in Education
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Transforming learning
+                </span>
+              </a>
+
+              <a
+                href="https://news.google.com/search?q=new+AI+tools"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">🛠️</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Tools
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  New AI Tools
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Productivity & creative
+                </span>
+              </a>
+
+              <a
+                href="https://news.google.com/search?q=AI+research"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">🔬</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Research
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  AI Research
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Latest discoveries
+                </span>
+              </a>
+            </div>
+            <a
+              href="https://news.google.com/search?q=artificial+intelligence"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 text-purple-600 dark:text-purple-400 text-sm font-medium hover:underline block"
+            >
+              More AI news →
+            </a>
+          </div>
+
+          {/* AI Trending Topics */}
+          <div className="mx-4 mb-4 bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
+              AI Trending
+            </h3>
+            <div className="space-y-3">
+              <div className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    AI · Trending
+                  </span>
+                  <MoreHorizontal className="w-3 h-3 text-gray-400" />
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  #ChatGPT
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  45.2K posts
+                </span>
+              </div>
+
+              <div className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Technology · Trending
+                  </span>
+                  <MoreHorizontal className="w-3 h-3 text-gray-400" />
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  #OpenAI
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  32.8K posts
+                </span>
+              </div>
+
+              <div className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    AI · Trending
+                  </span>
+                  <MoreHorizontal className="w-3 h-3 text-gray-400" />
+                </div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  #GenerativeAI
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  28.1K posts
+                </span>
+              </div>
+            </div>
+            <button className="mt-3 text-purple-600 dark:text-purple-400 text-sm font-medium hover:underline">
+              Show more
+            </button>
+          </div>
+
+          {/* Featured AI Agent */}
+          <div className="mx-4 mb-4">
+            <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 p-4 cursor-pointer hover:shadow-lg transition-shadow">
+              <div className="absolute top-2 right-2">
+                <span className="text-[10px] font-semibold text-white/70 bg-black/20 px-2 py-0.5 rounded-full">
+                  Featured
+                </span>
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-sm">
+                      AI Assistant Pro
+                    </h4>
+                    <p className="text-white/90 text-xs">Your AI companion</p>
+                  </div>
+                </div>
+                <p className="text-white/95 text-xs mb-3 leading-relaxed">
+                  Chat with our most advanced AI agent. Get help with coding, writing, and more.
+                </p>
+                <Link href="/explore/agents">
+                  <button className="w-full py-2 bg-white text-purple-600 font-semibold rounded-lg text-sm hover:bg-gray-100 transition-colors">
+                    Try Now
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </aside>
+
         {/* Right Sidebar - Monetization & Discovery */}
-        <aside className="hidden xl:block w-80 h-screen sticky top-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto">
+        <aside className="hidden xl:block w-80 h-screen sticky top-0 border-l border-gray-200 dark:border-gray-800 overflow-y-auto scrollbar-hide">
           {/* Search */}
           <div className="p-4">
             <div className="relative">
