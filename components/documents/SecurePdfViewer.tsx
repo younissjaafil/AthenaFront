@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,8 +9,14 @@ import {
   Loader2,
   AlertCircle,
   FileText,
+  RefreshCw,
   X,
 } from "lucide-react";
+import {
+  useDocumentPreviewInfo,
+  useDocumentPreviewPage,
+  useGeneratePreviews,
+} from "@/hooks/useDocuments";
 
 interface SecurePdfViewerProps {
   documentId: string;
@@ -19,344 +25,267 @@ interface SecurePdfViewerProps {
   className?: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
-// Simple button component
-function IconButton({
-  onClick,
-  disabled,
-  children,
-  className = "",
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`p-2 rounded-lg transition-colors ${
-        disabled
-          ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
-          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-purple-600"
-      } ${className}`}
-    >
-      {children}
-    </button>
-  );
-}
-
 export function SecurePdfViewer({
   documentId,
   title,
   onClose,
   className = "",
 }: SecurePdfViewerProps) {
-  const [pageCount, setPageCount] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [zoom, setZoom] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [pageImages, setPageImages] = useState<Map<number, string>>(new Map());
-  const [loadingPages, setLoadingPages] = useState<Set<number>>(new Set());
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState(100);
 
-  // Fetch page count on mount
-  useEffect(() => {
-    const fetchPageCount = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await fetch(
-          `${API_BASE_URL}/api/documents/${documentId}/preview/info`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to load document info");
-        }
-        const data = await response.json();
-        setPageCount(data.pageCount);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load document"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch preview info
+  const {
+    data: previewInfo,
+    isLoading: isLoadingInfo,
+    error: infoError,
+  } = useDocumentPreviewInfo(documentId);
 
-    fetchPageCount();
-  }, [documentId]);
+  // Fetch current page preview URL
+  const {
+    data: pageData,
+    isLoading: isLoadingPage,
+    error: pageError,
+    refetch: refetchPage,
+  } = useDocumentPreviewPage(documentId, currentPage);
 
-  // Load page image
-  const loadPageImage = useCallback(
-    async (page: number) => {
-      if (pageImages.has(page) || loadingPages.has(page)) {
-        return;
-      }
+  // Generate previews mutation
+  const generatePreviews = useGeneratePreviews();
 
-      setLoadingPages((prev) => new Set(prev).add(page));
+  const pageCount = previewInfo?.pageCount || 0;
+  const hasPreview = previewInfo?.hasPreviewsGenerated;
+  const previewAvailable = previewInfo?.previewAvailable;
 
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/documents/${documentId}/preview/${page}`
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to load page ${page}`);
-        }
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setPageImages((prev) => new Map(prev).set(page, url));
-      } catch (err) {
-        console.error(`Failed to load page ${page}:`, err);
-      } finally {
-        setLoadingPages((prev) => {
-          const next = new Set(prev);
-          next.delete(page);
-          return next;
-        });
-      }
-    },
-    [documentId, pageImages, loadingPages]
-  );
+  // Navigation
+  const goToPrevPage = useCallback(() => {
+    setCurrentPage((p) => Math.max(1, p - 1));
+  }, []);
 
-  // Preload current and adjacent pages
-  useEffect(() => {
-    if (pageCount === 0) return;
-
-    // Load current page and 2 pages ahead
-    const pagesToLoad = [
-      currentPage,
-      currentPage + 1,
-      currentPage + 2,
-      currentPage - 1,
-    ].filter((p) => p >= 1 && p <= pageCount);
-
-    pagesToLoad.forEach((page) => {
-      loadPageImage(page);
-    });
-  }, [currentPage, pageCount, loadPageImage]);
-
-  // Navigation handlers
-  const goToPage = useCallback(
-    (page: number) => {
-      if (page >= 1 && page <= pageCount) {
-        setCurrentPage(page);
-      }
-    },
-    [pageCount]
-  );
-
-  const prevPage = useCallback(
-    () => goToPage(currentPage - 1),
-    [goToPage, currentPage]
-  );
-  const nextPage = useCallback(
-    () => goToPage(currentPage + 1),
-    [goToPage, currentPage]
-  );
-
-  // Zoom handlers
-  const zoomIn = () => setZoom((z) => Math.min(z + 0.25, 3));
-  const zoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5));
-  const resetZoom = () => setZoom(1);
-
-  // Prevent right-click context menu
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    return false;
-  };
+  const goToNextPage = useCallback(() => {
+    setCurrentPage((p) => Math.min(pageCount, p + 1));
+  }, [pageCount]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") prevPage();
-      if (e.key === "ArrowRight") nextPage();
+      if (e.key === "ArrowLeft") goToPrevPage();
+      if (e.key === "ArrowRight") goToNextPage();
       if (e.key === "Escape" && onClose) onClose();
-      if (e.key === "+" || e.key === "=") zoomIn();
-      if (e.key === "-") zoomOut();
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [prevPage, nextPage, onClose]);
+  }, [goToPrevPage, goToNextPage, onClose]);
 
-  // Cleanup blob URLs on unmount
-  useEffect(() => {
-    return () => {
-      pageImages.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [pageImages]);
+  // Zoom controls
+  const zoomIn = () => setZoom((z) => Math.min(200, z + 25));
+  const zoomOut = () => setZoom((z) => Math.max(50, z - 25));
 
-  if (loading) {
+  // Handle generate previews
+  const handleGeneratePreviews = async () => {
+    try {
+      await generatePreviews.mutateAsync(documentId);
+    } catch (error) {
+      console.error("Failed to generate previews:", error);
+    }
+  };
+
+  // Loading state
+  if (isLoadingInfo) {
     return (
       <div
-        className={`flex flex-col items-center justify-center h-[600px] bg-gray-100 dark:bg-gray-900 rounded-xl ${className}`}
+        className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg ${className}`}
+        style={{ minHeight: 400 }}
       >
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-        <p className="mt-4 text-gray-600 dark:text-gray-400">
-          Loading document...
-        </p>
+        <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span>Loading preview...</span>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  // Error state
+  if (infoError) {
     return (
       <div
-        className={`flex flex-col items-center justify-center h-[600px] bg-gray-100 dark:bg-gray-900 rounded-xl ${className}`}
+        className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg ${className}`}
+        style={{ minHeight: 400 }}
       >
-        <AlertCircle className="h-12 w-12 text-red-500" />
-        <p className="mt-4 text-red-600 dark:text-red-400">{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-        >
-          Retry
-        </button>
+        <div className="flex flex-col items-center gap-3 text-red-500">
+          <AlertCircle className="h-8 w-8" />
+          <span>Failed to load preview info</span>
+        </div>
       </div>
     );
   }
 
-  const currentPageUrl = pageImages.get(currentPage);
+  // No preview available - offer to generate
+  if (!hasPreview) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg ${className}`}
+        style={{ minHeight: 400 }}
+      >
+        <div className="flex flex-col items-center gap-4 text-gray-600 dark:text-gray-400 p-8 text-center">
+          <FileText className="h-12 w-12" />
+          <div className="space-y-2">
+            <p className="font-medium">Preview not available</p>
+            {previewAvailable ? (
+              <>
+                <p className="text-sm text-gray-500 dark:text-gray-500">
+                  This document hasn&apos;t been processed for preview yet.
+                </p>
+                <button
+                  onClick={handleGeneratePreviews}
+                  disabled={generatePreviews.isPending}
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {generatePreviews.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4" />
+                      Generate Preview
+                    </>
+                  )}
+                </button>
+              </>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-500">
+                Preview generation is not available at this time.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
-      className={`flex flex-col bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden ${className}`}
-      onContextMenu={handleContextMenu}
-      style={{ userSelect: "none" }}
+      className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden ${className}`}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-3">
-          <FileText className="h-5 w-5 text-purple-500" />
-          {title && (
-            <span className="font-medium text-gray-900 dark:text-white truncate max-w-[200px]">
-              {title}
-            </span>
-          )}
-        </div>
-
-        {/* Page Navigation */}
-        <div className="flex items-center gap-2">
-          <IconButton onClick={prevPage} disabled={currentPage <= 1}>
-            <ChevronLeft className="h-4 w-4" />
-          </IconButton>
-          <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[80px] text-center">
-            Page {currentPage} of {pageCount}
+      {/* Header with controls */}
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-800 text-white">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="text-sm font-medium truncate">
+            {title || "Document"}
           </span>
-          <IconButton onClick={nextPage} disabled={currentPage >= pageCount}>
-            <ChevronRight className="h-4 w-4" />
-          </IconButton>
         </div>
 
-        {/* Zoom Controls */}
-        <div className="flex items-center gap-2">
-          <IconButton onClick={zoomOut} disabled={zoom <= 0.5}>
-            <ZoomOut className="h-4 w-4" />
-          </IconButton>
+        {/* Page navigation */}
+        <div className="flex items-center gap-2 mx-4">
           <button
-            onClick={resetZoom}
-            className="text-sm text-gray-600 dark:text-gray-400 min-w-[50px] text-center hover:text-purple-500"
+            onClick={goToPrevPage}
+            disabled={currentPage <= 1}
+            className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Previous page"
           >
-            {Math.round(zoom * 100)}%
+            <ChevronLeft className="h-5 w-5" />
           </button>
-          <IconButton onClick={zoomIn} disabled={zoom >= 3}>
-            <ZoomIn className="h-4 w-4" />
-          </IconButton>
+          <span className="text-sm tabular-nums min-w-[4rem] text-center">
+            {currentPage} / {pageCount}
+          </span>
+          <button
+            onClick={goToNextPage}
+            disabled={currentPage >= pageCount}
+            className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Next page"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Zoom controls */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={zoomOut}
+            disabled={zoom <= 50}
+            className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Zoom out"
+          >
+            <ZoomOut className="h-5 w-5" />
+          </button>
+          <span className="text-sm w-12 text-center tabular-nums">{zoom}%</span>
+          <button
+            onClick={zoomIn}
+            disabled={zoom >= 200}
+            className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Zoom in"
+          >
+            <ZoomIn className="h-5 w-5" />
+          </button>
+
+          {/* Close button */}
           {onClose && (
-            <IconButton onClick={onClose} className="ml-2">
-              <X className="h-4 w-4" />
-            </IconButton>
+            <button
+              onClick={onClose}
+              className="ml-2 p-1.5 rounded hover:bg-gray-700 transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
           )}
         </div>
       </div>
 
-      {/* Page Display */}
+      {/* Preview image container */}
       <div
-        ref={containerRef}
-        className="flex-1 overflow-auto flex items-start justify-center p-4 min-h-[500px]"
-        style={{
-          WebkitUserSelect: "none",
-          MozUserSelect: "none",
-          msUserSelect: "none",
-        }}
+        className="flex-1 overflow-auto bg-gray-700 flex items-center justify-center p-4"
+        style={{ minHeight: 500 }}
+        // Disable right-click to prevent downloading
+        onContextMenu={(e) => e.preventDefault()}
       >
-        {loadingPages.has(currentPage) && !currentPageUrl ? (
-          <div className="flex flex-col items-center justify-center h-[500px]">
-            <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              Loading page {currentPage}...
-            </p>
+        {isLoadingPage ? (
+          <div className="flex flex-col items-center gap-3 text-gray-400">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span>Loading page {currentPage}...</span>
           </div>
-        ) : currentPageUrl ? (
+        ) : pageError ? (
+          <div className="flex flex-col items-center gap-3 text-red-400">
+            <AlertCircle className="h-8 w-8" />
+            <span>Failed to load page</span>
+            <button
+              onClick={() => refetchPage()}
+              className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        ) : pageData?.url ? (
           <div
-            className="relative shadow-lg bg-white"
             style={{
-              transform: `scale(${zoom})`,
-              transformOrigin: "top center",
-              transition: "transform 0.2s ease-out",
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: "center",
+              transition: "transform 0.2s ease",
             }}
           >
+            {/* Using regular img for external S3 signed URLs */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={currentPageUrl}
+              src={pageData.url}
               alt={`Page ${currentPage}`}
-              className="max-w-full h-auto pointer-events-none"
+              className="max-w-full shadow-2xl rounded select-none"
+              style={{
+                maxHeight: "70vh",
+                userSelect: "none",
+                pointerEvents: "none",
+              }}
               draggable={false}
-              style={
-                {
-                  maxHeight: "80vh",
-                  WebkitUserDrag: "none",
-                } as React.CSSProperties
-              }
             />
-            {/* Watermark overlay (optional) */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden"
-              style={{ transform: "rotate(-45deg)" }}
-            >
-              <span className="text-6xl font-bold text-gray-900 whitespace-nowrap">
-                ATHENA
-              </span>
-            </div>
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-[500px]">
-            <AlertCircle className="h-8 w-8 text-gray-400" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              Failed to load page
-            </p>
-          </div>
-        )}
+        ) : null}
       </div>
 
-      {/* Page Thumbnails (bottom strip) */}
-      {pageCount > 1 && (
-        <div className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 overflow-x-auto">
-          {Array.from({ length: Math.min(pageCount, 10) }, (_, i) => i + 1).map(
-            (page) => (
-              <button
-                key={page}
-                onClick={() => goToPage(page)}
-                className={`flex-shrink-0 w-12 h-16 rounded border-2 flex items-center justify-center text-xs font-medium transition-colors ${
-                  page === currentPage
-                    ? "border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-600"
-                    : "border-gray-200 dark:border-gray-600 hover:border-purple-300 text-gray-600 dark:text-gray-400"
-                }`}
-              >
-                {page}
-              </button>
-            )
-          )}
-          {pageCount > 10 && (
-            <span className="text-sm text-gray-500 px-2">
-              +{pageCount - 10} more
-            </span>
-          )}
-        </div>
-      )}
+      {/* Footer with watermark notice */}
+      <div className="px-4 py-2 bg-gray-800 text-gray-400 text-xs text-center">
+        🔒 Secure Preview • Watermarked • Page {currentPage} of {pageCount}
+      </div>
     </div>
   );
 }
+
+export default SecurePdfViewer;

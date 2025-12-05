@@ -15,7 +15,7 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCreatorPosts } from "@/hooks/useFeed";
 import { useCreatorAgents } from "@/hooks/useAgents";
-import { useCreatorProfileDocuments } from "@/hooks/useDocuments";
+import { useCreatorProfileDocuments, useDeleteDocument } from "@/hooks/useDocuments";
 import {
   useCreatorAvailability,
   useCreatorSessionSettings,
@@ -55,6 +55,7 @@ import {
   GraduationCap,
   Sparkles,
   Video,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +84,7 @@ export default function PublicProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>("posts");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<any>(null);
+  const [deleteDocId, setDeleteDocId] = useState<string | null>(null);
 
   const { isSignedIn } = useAuth();
   const { data: currentUser } = useCurrentUser();
@@ -112,8 +114,11 @@ export default function PublicProfilePage() {
 
   const followCreator = useFollowCreator();
   const unfollowCreator = useUnfollowCreator();
+  const deleteDocument = useDeleteDocument();
 
   const isOwnProfile = currentUser?.id === profile?.userId;
+  const isAdmin = currentUser?.roles?.includes("admin");
+  const canDeleteDocs = isOwnProfile || isAdmin;
   const isCreator = !!profile?.creatorId;
   const isFollowing = isFollowingData?.isFollowing || false;
   const isFollowPending = followCreator.isPending || unfollowCreator.isPending;
@@ -131,6 +136,18 @@ export default function PublicProfilePage() {
       await unfollowCreator.mutateAsync(profile.creatorId);
     } else {
       await followCreator.mutateAsync(profile.creatorId);
+    }
+  };
+
+  const handleDeleteDocument = async (docId: string) => {
+    try {
+      await deleteDocument.mutateAsync({
+        documentId: docId,
+        creatorId: profile?.creatorId,
+      });
+      setDeleteDocId(null);
+    } catch (error) {
+      console.error("Failed to delete document:", error);
     }
   };
 
@@ -256,6 +273,58 @@ export default function PublicProfilePage() {
                     )}
                   </>
                 )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteDocId && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+            onClick={() => setDeleteDocId(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-gray-900 rounded-xl p-6 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
+                  <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Delete Document
+                </h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Are you sure you want to delete this document? This will also remove all embeddings and cannot be undone.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setDeleteDocId(null)}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDeleteDocument(deleteDocId)}
+                  disabled={deleteDocument.isPending}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {deleteDocument.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </button>
               </div>
             </motion.div>
           </div>
@@ -813,15 +882,17 @@ export default function PublicProfilePage() {
                           {profileDocuments.map((doc) => (
                             <div
                               key={doc.id}
-                              className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg cursor-pointer"
-                              onClick={() => {
-                                if (doc.s3Url) {
-                                  setPreviewDoc(doc);
-                                }
-                              }}
+                              className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg"
                             >
                               <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                                <div 
+                                  className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 cursor-pointer"
+                                  onClick={() => {
+                                    if (doc.s3Url) {
+                                      setPreviewDoc(doc);
+                                    }
+                                  }}
+                                >
                                   <FileText className="w-6 h-6 text-white" />
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -840,6 +911,19 @@ export default function PublicProfilePage() {
                                     </p>
                                   )}
                                 </div>
+                                {/* Delete button for owner/admin */}
+                                {canDeleteDocs && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setDeleteDocId(doc.id);
+                                    }}
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                    title="Delete document"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
                               </div>
                               {/* Document stats */}
                               <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 text-xs text-gray-500 dark:text-gray-400">
@@ -850,6 +934,8 @@ export default function PublicProfilePage() {
                                       ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                                       : doc.status === "processing"
                                       ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                      : doc.status === "failed"
+                                      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                                       : "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
                                   )}
                                 >
@@ -858,9 +944,16 @@ export default function PublicProfilePage() {
                                 {doc.chunkCount !== undefined && (
                                   <span>{doc.chunkCount} chunks</span>
                                 )}
-                                <span className="ml-auto text-purple-600 dark:text-purple-400 font-medium">
+                                <button
+                                  onClick={() => {
+                                    if (doc.s3Url) {
+                                      setPreviewDoc(doc);
+                                    }
+                                  }}
+                                  className="ml-auto text-purple-600 dark:text-purple-400 font-medium hover:underline"
+                                >
                                   Click to preview
-                                </span>
+                                </button>
                               </div>
                             </div>
                           ))}
