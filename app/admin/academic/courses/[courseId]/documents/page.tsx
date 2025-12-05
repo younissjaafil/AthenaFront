@@ -18,6 +18,8 @@ import {
   XCircle,
   ExternalLink,
   Database,
+  FileImage,
+  X,
 } from "lucide-react";
 import { useCourse, useCourseJarvis } from "@/hooks/useAcademic";
 import {
@@ -29,6 +31,7 @@ import {
 } from "@/hooks/useDocuments";
 import { FileUpload } from "@/components/ui/file-upload";
 import { DocumentStatus, formatFileSize } from "@/lib/types/document";
+import { SecurePdfViewer } from "@/components/documents/SecurePdfViewer";
 
 export default function CourseDocumentsPage({
   params,
@@ -66,6 +69,10 @@ export default function CourseDocumentsPage({
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
+  } | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{
+    id: string;
+    title: string;
   } | null>(null);
 
   // Poll for recent upload status
@@ -450,6 +457,20 @@ export default function CourseDocumentsPage({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {doc.fileType === "application/pdf" && (
+                    <button
+                      onClick={() =>
+                        setPreviewDoc({
+                          id: doc.id,
+                          title: doc.originalFilename,
+                        })
+                      }
+                      className="p-2 text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg"
+                      title="Preview PDF"
+                    >
+                      <FileImage className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
                     onClick={() =>
                       handleToggleVisibility(
@@ -485,6 +506,33 @@ export default function CourseDocumentsPage({
           </div>
         )}
       </div>
+
+      {/* PDF Preview Modal */}
+      <AnimatePresence>
+        {previewDoc && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={() => setPreviewDoc(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-5xl max-h-[90vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <SecurePdfViewer
+                documentId={previewDoc.id}
+                title={previewDoc.title}
+                onClose={() => setPreviewDoc(null)}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
