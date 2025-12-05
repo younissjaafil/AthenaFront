@@ -170,10 +170,12 @@ export default function CourseDocumentsPage({
   };
 
   const handleDelete = async (documentId: string) => {
-    if (!confirm("Delete this document? This will also remove all embeddings.")) {
+    if (
+      !confirm("Delete this document? This will also remove all embeddings.")
+    ) {
       return;
     }
-    
+
     setDeletingId(documentId);
     try {
       await deleteDocument.mutateAsync({ documentId, agentId });
