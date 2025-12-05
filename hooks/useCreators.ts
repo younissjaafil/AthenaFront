@@ -279,3 +279,78 @@ export function useUpdateCreatorProfile() {
     },
   });
 }
+
+// Follow a creator
+export function useFollowCreator() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (creatorId: string) => {
+      await apiClient.post(`/creators/${creatorId}/follow`);
+      return creatorId;
+    },
+    onSuccess: (creatorId) => {
+      queryClient.invalidateQueries({ queryKey: creatorKeys.detail(creatorId) });
+      queryClient.invalidateQueries({ queryKey: ["isFollowing", creatorId] });
+    },
+  });
+}
+
+// Unfollow a creator
+export function useUnfollowCreator() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (creatorId: string) => {
+      await apiClient.delete(`/creators/${creatorId}/follow`);
+      return creatorId;
+    },
+    onSuccess: (creatorId) => {
+      queryClient.invalidateQueries({ queryKey: creatorKeys.detail(creatorId) });
+      queryClient.invalidateQueries({ queryKey: ["isFollowing", creatorId] });
+    },
+  });
+}
+
+// Check if following a creator
+export function useIsFollowing(creatorId: string) {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+
+  return useQuery({
+    queryKey: ["isFollowing", creatorId] as const,
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<{ isFollowing: boolean }>(
+          `/creators/${creatorId}/is-following`
+        );
+        return response.data.isFollowing;
+      } catch {
+        return false;
+      }
+    },
+    enabled: !!creatorId,
+  });
+}
+
+// Composite hook that returns all creator hooks
+export function useCreators() {
+  return {
+    useVerifiedCreators,
+    useAvailableCreators,
+    useCreator,
+    useMyCreatorProfile,
+    useCreatorAgents,
+    useCreatorDocuments,
+    useCreatorSessionSettings,
+    useBecomeCreator,
+    useUpdateCreatorProfile,
+    useFollowCreator,
+    useUnfollowCreator,
+    useIsFollowing,
+  };
+}

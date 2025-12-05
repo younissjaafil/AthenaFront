@@ -71,6 +71,26 @@ export function useCreatorAgents(creatorId: string) {
   });
 }
 
+// Alias for useCreatorAgents (used in some components)
+export function useAgentsByCreator(creatorId: string) {
+  return useCreatorAgents(creatorId);
+}
+
+// Fetch all agents (admin - includes private)
+export function useAllAgents() {
+  const { getToken } = useAuth();
+  const apiClient = createClientApiClient(getToken);
+
+  return useQuery({
+    queryKey: agentKeys.all,
+    queryFn: async () => {
+      // For admin, fetch all public agents (we can enhance this later with admin endpoint)
+      const response = await apiClient.get<PublicAgent[]>("/agents");
+      return response.data;
+    },
+  });
+}
+
 // Fetch my agents (for creators)
 export function useMyAgents() {
   const { getToken } = useAuth();
@@ -151,7 +171,25 @@ export function useDeleteAgent() {
     onSuccess: (deletedId) => {
       // Remove from cache
       queryClient.invalidateQueries({ queryKey: agentKeys.myAgents });
+      queryClient.invalidateQueries({ queryKey: agentKeys.all });
       queryClient.removeQueries({ queryKey: agentKeys.detail(deletedId) });
     },
   });
+}
+
+// Composite hook that returns all agent hooks
+export function useAgents() {
+  return {
+    useAllAgents,
+    usePublicAgents,
+    useFreeAgents,
+    useMyAgents,
+    useAgent,
+    useAgentsByCategory,
+    useAgentsByCreator,
+    useCreatorAgents,
+    useCreateAgent,
+    useUpdateAgent,
+    useDeleteAgent,
+  };
 }
