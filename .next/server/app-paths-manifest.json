@@ -9,6 +9,7 @@
   "/[username]/page": "app/[username]/page.js",
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
+  "/admin/academic/courses/[courseId]/documents/page": "app/admin/academic/courses/[courseId]/documents/page.js",
   "/admin/academic/page": "app/admin/academic/page.js",
   "/admin/agents/page": "app/admin/agents/page.js",
   "/admin/dashboard/page": "app/admin/dashboard/page.js",

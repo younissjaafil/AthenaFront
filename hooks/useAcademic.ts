@@ -36,6 +36,7 @@ export interface Major {
 
 export interface CourseJarvisInfo {
   creatorId: string;
+  agentId?: string;
   profileHandle?: string;
   profileUrl?: string;
 }
@@ -62,6 +63,7 @@ export interface CreateJarvisResponse {
   courseId: string;
   creatorId: string;
   userId: string;
+  agentId: string;
   profileHandle: string;
   profileUrl: string;
   displayName: string;

@@ -15,6 +15,8 @@ import {
   Edit,
   Trash2,
   ExternalLink,
+  FileText,
+  Upload,
 } from "lucide-react";
 import {
   useUniversities,
@@ -678,13 +680,23 @@ export default function AcademicPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         {course.hasJarvis ? (
-                          <Link
-                            href={course.jarvis?.profileUrl || "#"}
-                            target="_blank"
-                            className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </Link>
+                          <>
+                            <Link
+                              href={`/admin/academic/courses/${course.id}/documents`}
+                              className="p-2 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg"
+                              title="Manage Documents"
+                            >
+                              <FileText className="w-4 h-4" />
+                            </Link>
+                            <Link
+                              href={course.jarvis?.profileUrl || "#"}
+                              target="_blank"
+                              className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg"
+                              title="View Jarvis Profile"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </Link>
+                          </>
                         ) : (
                           <button
                             onClick={() => handleCreateJarvis(course.id)}

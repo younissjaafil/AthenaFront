@@ -56,6 +56,12 @@
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
+        "app/admin/academic/courses/[courseId]/documents/page": {
+          "moduleId": 71518,
+          "async": false,
+          "exportedName": "detectKeylessEnvDriftAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
         "app/admin/academic/page": {
           "moduleId": 11913,
           "async": false,
@@ -271,6 +277,7 @@
         "app/(social)/subscriptions/page": "action-browser",
         "app/[username]/page": "action-browser",
         "app/_not-found/page": "action-browser",
+        "app/admin/academic/courses/[courseId]/documents/page": "action-browser",
         "app/admin/academic/page": "action-browser",
         "app/admin/agents/page": "action-browser",
         "app/admin/dashboard/page": "action-browser",
@@ -365,6 +372,12 @@
           "exportedName": "invalidateCacheAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
         },
+        "app/admin/academic/courses/[courseId]/documents/page": {
+          "moduleId": 71518,
+          "async": false,
+          "exportedName": "invalidateCacheAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
+        },
         "app/admin/academic/page": {
           "moduleId": 11913,
           "async": false,
@@ -580,6 +593,7 @@
         "app/(social)/subscriptions/page": "action-browser",
         "app/[username]/page": "action-browser",
         "app/_not-found/page": "action-browser",
+        "app/admin/academic/courses/[courseId]/documents/page": "action-browser",
         "app/admin/academic/page": "action-browser",
         "app/admin/agents/page": "action-browser",
         "app/admin/dashboard/page": "action-browser",
@@ -674,6 +688,12 @@
           "exportedName": "createOrReadKeylessAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
+        "app/admin/academic/courses/[courseId]/documents/page": {
+          "moduleId": 71518,
+          "async": false,
+          "exportedName": "createOrReadKeylessAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
         "app/admin/academic/page": {
           "moduleId": 11913,
           "async": false,
@@ -889,6 +909,7 @@
         "app/(social)/subscriptions/page": "action-browser",
         "app/[username]/page": "action-browser",
         "app/_not-found/page": "action-browser",
+        "app/admin/academic/courses/[courseId]/documents/page": "action-browser",
         "app/admin/academic/page": "action-browser",
         "app/admin/agents/page": "action-browser",
         "app/admin/dashboard/page": "action-browser",
