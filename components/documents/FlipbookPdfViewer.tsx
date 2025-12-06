@@ -1,26 +1,23 @@
 "use client";
 
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  forwardRef,
-} from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Loader2,
   AlertCircle,
   ZoomIn,
   ZoomOut,
   Maximize2,
+  Grid,
+  FileText,
 } from "lucide-react";
 
 // Dynamic imports to avoid SSR issues
 let pdfjs: typeof import("pdfjs-dist") | null = null;
-let HTMLFlipBook: React.ComponentType<any> | null = null;
 
 interface FlipbookPdfViewerProps {
   /** Direct URL to the PDF file (should be a signed S3 URL) */
@@ -33,30 +30,7 @@ interface FlipbookPdfViewerProps {
   className?: string;
 }
 
-interface PageProps {
-  number: number;
-  children?: React.ReactNode;
-}
-
-// Page component for flipbook - must use forwardRef for react-pageflip
-const Page = forwardRef<HTMLDivElement, PageProps>(
-  ({ number, children }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className="bg-white shadow-lg flex items-center justify-center relative overflow-hidden"
-        style={{ width: "100%", height: "100%" }}
-      >
-        {children}
-        {/* Page number */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-400">
-          {number}
-        </div>
-      </div>
-    );
-  }
-);
-Page.displayName = "Page";
+type ViewMode = "single" | "scroll";
 
 export function FlipbookPdfViewer({
   pdfUrl,
@@ -66,32 +40,25 @@ export function FlipbookPdfViewer({
 }: FlipbookPdfViewerProps) {
   const [pages, setPages] = useState<string[]>([]);
   const [pageCount, setPageCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [libsLoaded, setLibsLoaded] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("single");
 
-  const bookRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Load libraries dynamically
   useEffect(() => {
     const loadLibraries = async () => {
       try {
-        // Load pdfjs-dist
         const pdfjsLib = await import("pdfjs-dist");
         pdfjs = pdfjsLib;
-
-        // Set worker - use local file first (copied to /public), fallback to CDN
-        // The local file is more reliable and faster
         pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-
-        // Load react-pageflip
-        const pageflipModule = await import("react-pageflip");
-        HTMLFlipBook = pageflipModule.default;
-
         setLibsLoaded(true);
       } catch (err) {
         console.error("Failed to load libraries:", err);
@@ -99,7 +66,6 @@ export function FlipbookPdfViewer({
         setIsLoading(false);
       }
     };
-
     loadLibraries();
   }, []);
 
@@ -110,36 +76,33 @@ export function FlipbookPdfViewer({
     const loadPdf = async () => {
       setIsLoading(true);
       setError(null);
+      setLoadingProgress(0);
 
       try {
-        // Load the PDF document
         const loadingTask = pdfjs!.getDocument(pdfUrl);
         const pdf = await loadingTask.promise;
         setPageCount(pdf.numPages);
 
-        // Render each page to canvas and extract as image
         const pageImages: string[] = [];
-        const baseScale = 1.5; // Higher = better quality
+        const renderScale = 2; // High quality rendering
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: baseScale });
+          const viewport = page.getViewport({ scale: renderScale });
 
-          // Create canvas
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d")!;
           canvas.height = viewport.height;
           canvas.width = viewport.width;
 
-          // Render page to canvas
           await page.render({
             canvasContext: context,
             viewport: viewport,
           }).promise;
 
-          // Convert to data URL
-          const imageUrl = canvas.toDataURL("image/jpeg", 0.9);
+          const imageUrl = canvas.toDataURL("image/png");
           pageImages.push(imageUrl);
+          setLoadingProgress(Math.round((i / pdf.numPages) * 100));
         }
 
         setPages(pageImages);
@@ -156,30 +119,21 @@ export function FlipbookPdfViewer({
 
   // Navigation
   const goToPrevPage = useCallback(() => {
-    if (bookRef.current) {
-      bookRef.current.pageFlip().flipPrev();
-    }
+    setCurrentPage((p) => Math.max(1, p - 1));
   }, []);
 
   const goToNextPage = useCallback(() => {
-    if (bookRef.current) {
-      bookRef.current.pageFlip().flipNext();
-    }
-  }, []);
-
-  // Handle page flip event
-  const onFlip = useCallback((e: { data: number }) => {
-    setCurrentPage(e.data);
-  }, []);
+    setCurrentPage((p) => Math.min(pageCount, p + 1));
+  }, [pageCount]);
 
   // Zoom controls
-  const zoomIn = () => setScale((s) => Math.min(1.5, s + 0.1));
-  const zoomOut = () => setScale((s) => Math.max(0.5, s - 0.1));
+  const zoomIn = () => setScale((s) => Math.min(3, s + 0.25));
+  const zoomOut = () => setScale((s) => Math.max(0.5, s - 0.25));
+  const resetZoom = () => setScale(1);
 
   // Fullscreen toggle
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
-
     if (!document.fullscreenElement) {
       containerRef.current.requestFullscreen();
       setIsFullscreen(true);
@@ -192,46 +146,57 @@ export function FlipbookPdfViewer({
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") goToPrevPage();
-      if (e.key === "ArrowRight") goToNextPage();
+      if (viewMode === "single") {
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") goToPrevPage();
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") goToNextPage();
+      }
       if (e.key === "Escape" && onClose) onClose();
+      if (e.key === "+" || e.key === "=") zoomIn();
+      if (e.key === "-") zoomOut();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToPrevPage, goToNextPage, onClose]);
+  }, [goToPrevPage, goToNextPage, onClose, viewMode]);
+
+  // Scroll to page in scroll mode
+  useEffect(() => {
+    if (viewMode === "scroll" && scrollContainerRef.current) {
+      const pageElement = scrollContainerRef.current.querySelector(
+        `[data-page="${currentPage}"]`
+      );
+      if (pageElement) {
+        pageElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, [currentPage, viewMode]);
 
   // Loading state
   if (isLoading || !libsLoaded) {
     return (
       <div
-        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden ${className}`}
+        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className}`}
       >
-        <div className="flex items-center justify-between px-4 py-3 bg-gray-800 text-white">
-          <span className="text-sm font-medium truncate flex-1">{title}</span>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="ml-2 p-1.5 rounded hover:bg-gray-700 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-        </div>
-        <div
-          className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900"
-          style={{ minHeight: 500 }}
-        >
+        <Header title={title} onClose={onClose} />
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
           <div className="flex flex-col items-center gap-4 text-gray-400">
-            <Loader2 className="h-10 w-10 animate-spin text-purple-500" />
-            <span>Loading PDF...</span>
+            <Loader2 className="h-12 w-12 animate-spin text-purple-500" />
+            <span className="text-lg">Loading PDF...</span>
+            {loadingProgress > 0 && (
+              <div className="w-48">
+                <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-purple-500 transition-all duration-300"
+                    style={{ width: `${loadingProgress}%` }}
+                  />
+                </div>
+                <span className="text-xs text-gray-500 mt-1">
+                  {loadingProgress}%
+                </span>
+              </div>
+            )}
           </div>
         </div>
-        {/* Watermark footer */}
-        <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-teal-500 text-center">
-          <span className="text-sm font-semibold text-white tracking-wide">
-            📚 athena-ai.pro
-          </span>
-        </div>
+        <Footer />
       </div>
     );
   }
@@ -240,35 +205,17 @@ export function FlipbookPdfViewer({
   if (error) {
     return (
       <div
-        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden ${className}`}
+        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className}`}
       >
-        <div className="flex items-center justify-between px-4 py-3 bg-gray-800 text-white">
-          <span className="text-sm font-medium truncate flex-1">{title}</span>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="ml-2 p-1.5 rounded hover:bg-gray-700 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-        </div>
-        <div
-          className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900"
-          style={{ minHeight: 500 }}
-        >
-          <div className="flex flex-col items-center gap-4 text-red-400">
-            <AlertCircle className="h-10 w-10" />
-            <span>Failed to load PDF</span>
+        <Header title={title} onClose={onClose} />
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+          <div className="flex flex-col items-center gap-4 text-red-400 max-w-md text-center px-4">
+            <AlertCircle className="h-12 w-12" />
+            <span className="text-lg font-medium">Failed to load PDF</span>
             <span className="text-sm text-gray-500">{error}</span>
           </div>
         </div>
-        {/* Watermark footer */}
-        <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-teal-500 text-center">
-          <span className="text-sm font-semibold text-white tracking-wide">
-            📚 athena-ai.pro
-          </span>
-        </div>
+        <Footer />
       </div>
     );
   }
@@ -277,73 +224,81 @@ export function FlipbookPdfViewer({
   if (pages.length === 0) {
     return (
       <div
-        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden ${className}`}
+        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className}`}
       >
-        <div className="flex items-center justify-between px-4 py-3 bg-gray-800 text-white">
-          <span className="text-sm font-medium truncate flex-1">{title}</span>
-        </div>
-        <div
-          className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900"
-          style={{ minHeight: 500 }}
-        >
+        <Header title={title} onClose={onClose} />
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
           <span className="text-gray-500">No pages found in document</span>
         </div>
-        {/* Watermark footer */}
-        <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-teal-500 text-center">
-          <span className="text-sm font-semibold text-white tracking-wide">
-            📚 athena-ai.pro
-          </span>
-        </div>
+        <Footer />
       </div>
     );
   }
 
-  // Calculate book dimensions based on container
-  const bookWidth =
-    Math.min(
-      400,
-      (typeof window !== "undefined" ? window.innerWidth : 800) * 0.4
-    ) * scale;
-  const bookHeight = bookWidth * 1.4; // A4 ratio
-
   return (
     <div
       ref={containerRef}
-      className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden ${className} ${
+      className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className} ${
         isFullscreen ? "fixed inset-0 z-50 rounded-none" : ""
       }`}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-gray-800 text-white">
-        <span className="text-sm font-medium truncate flex-1">{title}</span>
+      {/* Header with controls */}
+      <div className="flex items-center justify-between px-4 py-3 bg-gray-800 text-white border-b border-gray-700">
+        <span className="text-sm font-medium truncate flex-1 mr-4">
+          {title}
+        </span>
 
-        {/* Controls */}
-        <div className="flex items-center gap-2">
-          {/* Zoom */}
+        <div className="flex items-center gap-1">
+          {/* View mode toggle */}
+          <button
+            onClick={() =>
+              setViewMode(viewMode === "single" ? "scroll" : "single")
+            }
+            className={`p-2 rounded hover:bg-gray-700 transition-colors ${
+              viewMode === "scroll" ? "bg-gray-700" : ""
+            }`}
+            title={viewMode === "single" ? "Scroll view" : "Single page view"}
+          >
+            {viewMode === "single" ? (
+              <Grid className="h-4 w-4" />
+            ) : (
+              <FileText className="h-4 w-4" />
+            )}
+          </button>
+
+          <div className="w-px h-6 bg-gray-600 mx-1" />
+
+          {/* Zoom controls */}
           <button
             onClick={zoomOut}
             disabled={scale <= 0.5}
-            className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 transition-colors"
-            title="Zoom out"
+            className="p-2 rounded hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            title="Zoom out (-)"
           >
             <ZoomOut className="h-4 w-4" />
           </button>
-          <span className="text-xs w-12 text-center">
+          <button
+            onClick={resetZoom}
+            className="px-2 py-1 text-xs rounded hover:bg-gray-700 transition-colors min-w-[50px]"
+            title="Reset zoom"
+          >
             {Math.round(scale * 100)}%
-          </span>
+          </button>
           <button
             onClick={zoomIn}
-            disabled={scale >= 1.5}
-            className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 transition-colors"
-            title="Zoom in"
+            disabled={scale >= 3}
+            className="p-2 rounded hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            title="Zoom in (+)"
           >
             <ZoomIn className="h-4 w-4" />
           </button>
 
+          <div className="w-px h-6 bg-gray-600 mx-1" />
+
           {/* Fullscreen */}
           <button
             onClick={toggleFullscreen}
-            className="p-1.5 rounded hover:bg-gray-700 transition-colors"
+            className="p-2 rounded hover:bg-gray-700 transition-colors"
             title="Toggle fullscreen"
           >
             <Maximize2 className="h-4 w-4" />
@@ -353,7 +308,8 @@ export function FlipbookPdfViewer({
           {onClose && (
             <button
               onClick={onClose}
-              className="ml-2 p-1.5 rounded hover:bg-gray-700 transition-colors"
+              className="p-2 rounded hover:bg-gray-700 transition-colors ml-1"
+              title="Close"
             >
               <X className="h-5 w-5" />
             </button>
@@ -361,106 +317,179 @@ export function FlipbookPdfViewer({
         </div>
       </div>
 
-      {/* Flipbook container */}
-      <div
-        className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 relative overflow-hidden"
-        style={{ minHeight: isFullscreen ? "calc(100vh - 120px)" : 500 }}
-      >
-        {/* Navigation arrows */}
-        <button
-          onClick={goToPrevPage}
-          disabled={currentPage <= 0}
-          className="absolute left-4 z-10 p-3 bg-white/10 hover:bg-white/20 rounded-full disabled:opacity-30 transition-all"
-        >
-          <ChevronLeft className="h-6 w-6 text-white" />
-        </button>
+      {/* Main content area */}
+      <div className="flex-1 relative overflow-hidden bg-gray-950">
+        {viewMode === "single" ? (
+          /* Single page view */
+          <div className="h-full flex items-center justify-center p-4">
+            {/* Navigation arrows */}
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage <= 1}
+              className="absolute left-4 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full disabled:opacity-30 transition-all"
+              title="Previous page"
+            >
+              <ChevronLeft className="h-6 w-6 text-white" />
+            </button>
 
-        <button
-          onClick={goToNextPage}
-          disabled={currentPage >= pageCount - 1}
-          className="absolute right-4 z-10 p-3 bg-white/10 hover:bg-white/20 rounded-full disabled:opacity-30 transition-all"
-        >
-          <ChevronRight className="h-6 w-6 text-white" />
-        </button>
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage >= pageCount}
+              className="absolute right-4 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full disabled:opacity-30 transition-all"
+              title="Next page"
+            >
+              <ChevronRight className="h-6 w-6 text-white" />
+            </button>
 
-        {/* The Flipbook */}
-        {HTMLFlipBook && (
-          <HTMLFlipBook
-            ref={bookRef}
-            width={bookWidth}
-            height={bookHeight}
-            size="stretch"
-            minWidth={300}
-            maxWidth={600}
-            minHeight={400}
-            maxHeight={800}
-            showCover={true}
-            flippingTime={600}
-            usePortrait={false}
-            startZIndex={0}
-            autoSize={true}
-            maxShadowOpacity={0.5}
-            mobileScrollSupport={true}
-            onFlip={onFlip}
-            className="shadow-2xl"
-            style={{}}
-            drawShadow={true}
-            useMouseEvents={true}
+            {/* Page image */}
+            <div
+              className="overflow-auto max-h-full max-w-full"
+              style={{
+                transform: `scale(${scale})`,
+                transformOrigin: "center",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={pages[currentPage - 1]}
+                alt={`Page ${currentPage}`}
+                className="max-h-[calc(100vh-200px)] w-auto mx-auto shadow-2xl rounded-sm"
+                style={{
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  maxWidth: "100%",
+                }}
+                draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
+              />
+            </div>
+
+            {/* Watermark */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.03]">
+              <span className="text-8xl font-bold text-white rotate-[-30deg] select-none whitespace-nowrap">
+                ATHENA
+              </span>
+            </div>
+          </div>
+        ) : (
+          /* Scroll view - all pages vertically */
+          <div
+            ref={scrollContainerRef}
+            className="h-full overflow-auto p-4 space-y-4"
           >
             {pages.map((pageImage, index) => (
-              <Page key={index} number={index + 1}>
+              <div
+                key={index}
+                data-page={index + 1}
+                className="flex justify-center"
+                style={{
+                  transform: `scale(${scale})`,
+                  transformOrigin: "top center",
+                }}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={pageImage}
                   alt={`Page ${index + 1}`}
-                  className="w-full h-full object-contain"
+                  className="max-w-full shadow-2xl rounded-sm"
                   style={{ pointerEvents: "none", userSelect: "none" }}
                   draggable={false}
                   onContextMenu={(e) => e.preventDefault()}
                 />
-              </Page>
+              </div>
             ))}
-          </HTMLFlipBook>
-        )}
-
-        {/* Diagonal watermark overlay */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center opacity-[0.04]">
-            <span className="text-7xl font-bold text-white rotate-[-30deg] select-none whitespace-nowrap">
-              athena-ai.pro
-            </span>
+            {/* Watermark in scroll mode */}
+            <div className="fixed inset-0 pointer-events-none flex items-center justify-center opacity-[0.02] z-10">
+              <span className="text-9xl font-bold text-white rotate-[-30deg] select-none whitespace-nowrap">
+                ATHENA
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Page indicator */}
-      <div className="px-4 py-2 bg-gray-800/80 flex items-center justify-center gap-4">
-        <span className="text-sm text-gray-400">
-          Page {currentPage + 1} of {pageCount}
-        </span>
-        <div className="flex-1 max-w-xs">
+      {/* Page navigation bar */}
+      <div className="px-4 py-3 bg-gray-800 flex items-center justify-center gap-4 border-t border-gray-700">
+        {viewMode === "single" && (
+          <>
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage <= 1}
+              className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-30 transition-colors"
+            >
+              <ChevronUp className="h-4 w-4 text-white" />
+            </button>
+          </>
+        )}
+
+        <div className="flex items-center gap-2">
           <input
-            type="range"
-            min={0}
-            max={pageCount - 1}
+            type="number"
+            min={1}
+            max={pageCount}
             value={currentPage}
             onChange={(e) => {
               const page = parseInt(e.target.value);
-              if (bookRef.current) {
-                bookRef.current.pageFlip().turnToPage(page);
+              if (page >= 1 && page <= pageCount) {
+                setCurrentPage(page);
               }
             }}
-            className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+            className="w-14 px-2 py-1 text-center text-sm bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-purple-500"
           />
+          <span className="text-sm text-gray-400">of {pageCount}</span>
         </div>
+
+        {viewMode === "single" && (
+          <button
+            onClick={goToNextPage}
+            disabled={currentPage >= pageCount}
+            className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-30 transition-colors"
+          >
+            <ChevronDown className="h-4 w-4 text-white" />
+          </button>
+        )}
+
+        {/* Page slider */}
+        <input
+          type="range"
+          min={1}
+          max={pageCount}
+          value={currentPage}
+          onChange={(e) => setCurrentPage(parseInt(e.target.value))}
+          className="flex-1 max-w-xs h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+        />
       </div>
 
-      {/* Watermark footer - athena-ai.pro branding */}
-      <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-teal-500 text-center">
-        <span className="text-sm font-semibold text-white tracking-wide">
-          📚 athena-ai.pro
-        </span>
-      </div>
+      {/* Footer branding */}
+      <Footer />
+    </div>
+  );
+}
+
+// Header component
+function Header({ title, onClose }: { title: string; onClose?: () => void }) {
+  return (
+    <div className="flex items-center justify-between px-4 py-3 bg-gray-800 text-white">
+      <span className="text-sm font-medium truncate flex-1">{title}</span>
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="ml-2 p-1.5 rounded hover:bg-gray-700 transition-colors"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Footer component
+function Footer() {
+  return (
+    <div className="px-4 py-2 bg-gradient-to-r from-purple-600 to-teal-500 text-center">
+      <span className="text-xs font-semibold text-white tracking-wide">
+        📚 athena-ai.pro
+      </span>
     </div>
   );
 }
