@@ -47,10 +47,28 @@ export function FlipbookPdfViewer({
   const [scale, setScale] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [libsLoaded, setLibsLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("single");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Detect mobile device and set default view mode once on mount
+  const initialViewModeSet = useRef(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // On mobile, default to scroll view for better readability (only on first check)
+      if (!initialViewModeSet.current && mobile) {
+        setViewMode("scroll");
+        initialViewModeSet.current = true;
+      }
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Load libraries dynamically
   useEffect(() => {
@@ -322,28 +340,36 @@ export function FlipbookPdfViewer({
         {viewMode === "single" ? (
           /* Single page view */
           <div className="h-full flex items-center justify-center p-4">
-            {/* Navigation arrows */}
+            {/* Navigation arrows - smaller on mobile */}
             <button
               onClick={goToPrevPage}
               disabled={currentPage <= 1}
-              className="absolute left-4 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full disabled:opacity-30 transition-all"
+              className={`absolute left-2 md:left-4 z-10 ${
+                isMobile ? "p-2" : "p-3"
+              } bg-black/50 hover:bg-black/70 rounded-full disabled:opacity-30 transition-all`}
               title="Previous page"
             >
-              <ChevronLeft className="h-6 w-6 text-white" />
+              <ChevronLeft
+                className={`${isMobile ? "h-5 w-5" : "h-6 w-6"} text-white`}
+              />
             </button>
 
             <button
               onClick={goToNextPage}
               disabled={currentPage >= pageCount}
-              className="absolute right-4 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full disabled:opacity-30 transition-all"
+              className={`absolute right-2 md:right-4 z-10 ${
+                isMobile ? "p-2" : "p-3"
+              } bg-black/50 hover:bg-black/70 rounded-full disabled:opacity-30 transition-all`}
               title="Next page"
             >
-              <ChevronRight className="h-6 w-6 text-white" />
+              <ChevronRight
+                className={`${isMobile ? "h-5 w-5" : "h-6 w-6"} text-white`}
+              />
             </button>
 
             {/* Page image */}
             <div
-              className="overflow-auto max-h-full max-w-full"
+              className="overflow-auto max-h-full w-full flex items-center justify-center"
               style={{
                 transform: `scale(${scale})`,
                 transformOrigin: "center",
@@ -353,11 +379,14 @@ export function FlipbookPdfViewer({
               <img
                 src={pages[currentPage - 1]}
                 alt={`Page ${currentPage}`}
-                className="max-h-[calc(100vh-200px)] w-auto mx-auto shadow-2xl rounded-sm"
+                className={`shadow-2xl rounded-sm ${
+                  isMobile
+                    ? "w-full h-auto"
+                    : "max-h-[calc(100vh-180px)] w-auto max-w-full"
+                }`}
                 style={{
                   pointerEvents: "none",
                   userSelect: "none",
-                  maxWidth: "100%",
                 }}
                 draggable={false}
                 onContextMenu={(e) => e.preventDefault()}
@@ -375,7 +404,9 @@ export function FlipbookPdfViewer({
           /* Scroll view - all pages vertically */
           <div
             ref={scrollContainerRef}
-            className="h-full overflow-auto p-4 space-y-4"
+            className={`h-full overflow-auto space-y-4 ${
+              isMobile ? "p-2" : "p-4"
+            }`}
           >
             {pages.map((pageImage, index) => (
               <div
@@ -391,7 +422,9 @@ export function FlipbookPdfViewer({
                 <img
                   src={pageImage}
                   alt={`Page ${index + 1}`}
-                  className="max-w-full shadow-2xl rounded-sm"
+                  className={`shadow-2xl rounded-sm ${
+                    isMobile ? "w-full" : "max-w-full"
+                  }`}
                   style={{ pointerEvents: "none", userSelect: "none" }}
                   draggable={false}
                   onContextMenu={(e) => e.preventDefault()}
