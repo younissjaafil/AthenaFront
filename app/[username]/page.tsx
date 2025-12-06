@@ -26,7 +26,7 @@ import {
 } from "@/hooks/useSessions";
 import { PostCard } from "@/components/feed";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { SecurePdfViewer } from "@/components/documents/SecurePdfViewer";
+import { FlipbookPdfViewer } from "@/components/documents/FlipbookPdfViewer";
 import {
   DAY_NAMES,
   type AvailabilitySlot,
@@ -93,6 +93,7 @@ export default function PublicProfilePage() {
     creatorId?: string;
     fileType?: string | null;
     fileSize?: number | null;
+    s3Url?: string;
   } | null>(null);
   const [deleteDocId, setDeleteDocId] = useState<string | null>(null);
 
@@ -242,9 +243,10 @@ export default function PublicProfilePage() {
 
               {/* Document Preview */}
               <div className="h-[calc(100%-80px)] overflow-auto bg-gray-50 dark:bg-gray-950">
-                {previewDoc.fileType?.toLowerCase() === "pdf" ? (
-                  <SecurePdfViewer
-                    documentId={previewDoc.id}
+                {previewDoc.fileType?.toLowerCase() === "pdf" &&
+                previewDoc.s3Url ? (
+                  <FlipbookPdfViewer
+                    pdfUrl={previewDoc.s3Url}
                     title={previewDoc.filename || "Document"}
                     onClose={() => setPreviewDoc(null)}
                   />
@@ -879,6 +881,7 @@ export default function PublicProfilePage() {
                                       creatorId: profile?.creatorId,
                                       fileType: doc.fileType,
                                       fileSize: doc.fileSize,
+                                      s3Url: doc.s3Url,
                                     });
                                   }}
                                 >
@@ -941,6 +944,7 @@ export default function PublicProfilePage() {
                                       creatorId: profile?.creatorId,
                                       fileType: doc.fileType,
                                       fileSize: doc.fileSize,
+                                      s3Url: doc.s3Url,
                                     })
                                   }
                                   className="ml-auto text-purple-600 dark:text-purple-400 font-medium hover:underline"

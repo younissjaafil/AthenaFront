@@ -31,7 +31,7 @@ import {
 } from "@/hooks/useDocuments";
 import { FileUpload } from "@/components/ui/file-upload";
 import { DocumentStatus, formatFileSize } from "@/lib/types/document";
-import { SecurePdfViewer } from "@/components/documents/SecurePdfViewer";
+import { FlipbookPdfViewer } from "@/components/documents/FlipbookPdfViewer";
 
 export default function CourseDocumentsPage({
   params,
@@ -73,6 +73,7 @@ export default function CourseDocumentsPage({
   const [previewDoc, setPreviewDoc] = useState<{
     id: string;
     title: string;
+    s3Url?: string;
   } | null>(null);
 
   // Poll for recent upload status
@@ -463,6 +464,7 @@ export default function CourseDocumentsPage({
                         setPreviewDoc({
                           id: doc.id,
                           title: doc.originalFilename,
+                          s3Url: doc.s3Url,
                         })
                       }
                       className="p-2 text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg"
@@ -524,11 +526,17 @@ export default function CourseDocumentsPage({
               className="w-full max-w-5xl max-h-[90vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <SecurePdfViewer
-                documentId={previewDoc.id}
-                title={previewDoc.title}
-                onClose={() => setPreviewDoc(null)}
-              />
+              {previewDoc.s3Url ? (
+                <FlipbookPdfViewer
+                  pdfUrl={previewDoc.s3Url}
+                  title={previewDoc.title}
+                  onClose={() => setPreviewDoc(null)}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-64 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <p className="text-gray-500">No preview URL available</p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
