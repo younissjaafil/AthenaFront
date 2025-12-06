@@ -395,10 +395,13 @@ export function useIsFollowingCreator(
   creatorId: string,
   isSignedIn: boolean = false
 ) {
+  const { getToken } = useAuth();
+
   return useQuery({
     queryKey: ["isFollowingCreator", creatorId],
     queryFn: async (): Promise<{ isFollowing: boolean }> => {
-      const res = await apiClient.get(`/creators/${creatorId}/is-following`);
+      const authedClient = createClientApiClient(getToken);
+      const res = await authedClient.get(`/creators/${creatorId}/is-following`);
       return res.data;
     },
     enabled: !!creatorId && isSignedIn,
