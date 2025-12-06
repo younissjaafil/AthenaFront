@@ -84,8 +84,9 @@ export function FlipbookPdfViewer({
         const pdfjsLib = await import("pdfjs-dist");
         pdfjs = pdfjsLib;
 
-        // Set worker - use CDN for simplicity
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+        // Set worker - use local file first (copied to /public), fallback to CDN
+        // The local file is more reliable and faster
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
         // Load react-pageflip
         const pageflipModule = await import("react-pageflip");
