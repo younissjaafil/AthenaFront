@@ -15,7 +15,10 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCreatorPosts } from "@/hooks/useFeed";
 import { useCreatorAgents } from "@/hooks/useAgents";
-import { useCreatorProfileDocuments, useDeleteDocument } from "@/hooks/useDocuments";
+import {
+  useCreatorProfileDocuments,
+  useDeleteDocument,
+} from "@/hooks/useDocuments";
 import {
   useCreatorAvailability,
   useCreatorSessionSettings,
@@ -23,6 +26,7 @@ import {
 } from "@/hooks/useSessions";
 import { PostCard } from "@/components/feed";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SecurePdfViewer } from "@/components/documents/SecurePdfViewer";
 import {
   DAY_NAMES,
   type AvailabilitySlot,
@@ -83,7 +87,13 @@ export default function PublicProfilePage() {
   const username = params.username as string;
   const [activeTab, setActiveTab] = useState<TabType>("posts");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [previewDoc, setPreviewDoc] = useState<any>(null);
+  const [previewDoc, setPreviewDoc] = useState<{
+    id: string;
+    filename?: string;
+    creatorId?: string;
+    fileType?: string | null;
+    fileSize?: number | null;
+  } | null>(null);
   const [deleteDocId, setDeleteDocId] = useState<string | null>(null);
 
   const { isSignedIn } = useAuth();
@@ -197,7 +207,7 @@ export default function PublicProfilePage() {
     <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* Document Preview Modal */}
       <AnimatePresence>
-        {previewDoc && (
+        {previewDoc?.id && (
           <div
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
             onClick={() => setPreviewDoc(null)}
@@ -213,12 +223,12 @@ export default function PublicProfilePage() {
               <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                    {previewDoc.filename || previewDoc.originalFilename}
+                    {previewDoc.filename || "Document"}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {previewDoc.fileType?.toUpperCase()} •{" "}
+                    {previewDoc.fileType?.toUpperCase()}
                     {previewDoc.fileSize
-                      ? `${(previewDoc.fileSize / 1024).toFixed(1)} KB`
+                      ? ` • ${(previewDoc.fileSize / 1024).toFixed(1)} KB`
                       : ""}
                   </p>
                 </div>
@@ -232,46 +242,20 @@ export default function PublicProfilePage() {
 
               {/* Document Preview */}
               <div className="h-[calc(100%-80px)] overflow-auto bg-gray-50 dark:bg-gray-950">
-                {previewDoc.s3Url && (
-                  <>
-                    {previewDoc.fileType?.toLowerCase() === "pdf" ? (
-                      <iframe
-                        src={previewDoc.s3Url}
-                        className="w-full h-full border-0"
-                        title={previewDoc.filename}
-                      />
-                    ) : previewDoc.fileType?.toLowerCase() === "docx" ||
-                      previewDoc.fileType?.toLowerCase() === "doc" ? (
-                      <div className="p-8 max-w-4xl mx-auto">
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-                          {previewDoc.metadata?.title && (
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                              {previewDoc.metadata.title}
-                            </h1>
-                          )}
-                          {previewDoc.metadata?.description && (
-                            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 border-l-4 border-purple-500 pl-4">
-                              {previewDoc.metadata.description}
-                            </p>
-                          )}
-                          <div className="prose dark:prose-invert max-w-none">
-                            <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed">
-                              {previewDoc.metadata?.extractedText ||
-                                "Document content is being processed..."}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full p-8">
-                        <FileText className="w-16 h-16 text-gray-400 mb-4" />
-                        <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
-                          Preview not available for{" "}
-                          {previewDoc.fileType?.toUpperCase()} files
-                        </p>
-                      </div>
-                    )}
-                  </>
+                {previewDoc.fileType?.toLowerCase() === "pdf" ? (
+                  <SecurePdfViewer
+                    documentId={previewDoc.id}
+                    title={previewDoc.filename || "Document"}
+                    onClose={() => setPreviewDoc(null)}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full p-8">
+                    <FileText className="w-16 h-16 text-gray-400 mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
+                      Preview not available for{" "}
+                      {previewDoc.fileType?.toUpperCase() || "this"} files
+                    </p>
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -302,7 +286,8 @@ export default function PublicProfilePage() {
                 </h3>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Are you sure you want to delete this document? This will also remove all embeddings and cannot be undone.
+                Are you sure you want to delete this document? This will also
+                remove all embeddings and cannot be undone.
               </p>
               <div className="flex gap-3 justify-end">
                 <button
@@ -885,12 +870,16 @@ export default function PublicProfilePage() {
                               className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:border-purple-500 dark:hover:border-purple-500 transition-all hover:shadow-lg"
                             >
                               <div className="flex items-start gap-4">
-                                <div 
+                                <div
                                   className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 cursor-pointer"
                                   onClick={() => {
-                                    if (doc.s3Url) {
-                                      setPreviewDoc(doc);
-                                    }
+                                    setPreviewDoc({
+                                      id: doc.id,
+                                      filename: doc.filename,
+                                      creatorId: profile?.creatorId,
+                                      fileType: doc.fileType,
+                                      fileSize: doc.fileSize,
+                                    });
                                   }}
                                 >
                                   <FileText className="w-6 h-6 text-white" />
@@ -945,11 +934,15 @@ export default function PublicProfilePage() {
                                   <span>{doc.chunkCount} chunks</span>
                                 )}
                                 <button
-                                  onClick={() => {
-                                    if (doc.s3Url) {
-                                      setPreviewDoc(doc);
-                                    }
-                                  }}
+                                  onClick={() =>
+                                    setPreviewDoc({
+                                      id: doc.id,
+                                      filename: doc.filename,
+                                      creatorId: profile?.creatorId,
+                                      fileType: doc.fileType,
+                                      fileSize: doc.fileSize,
+                                    })
+                                  }
                                   className="ml-auto text-purple-600 dark:text-purple-400 font-medium hover:underline"
                                 >
                                   Click to preview
