@@ -19,9 +19,18 @@ export const documentKeys = {
   byCreatorProfile: (creatorId: string) =>
     ["documents", "creator", creatorId, "profile"] as const,
   detail: (id: string) => ["documents", id] as const,
+  preview: (id: string) => ["documents", "preview", id] as const,
   stats: (agentId: string) => ["documents", "stats", agentId] as const,
   myDocuments: ["documents", "my-documents"] as const,
 };
+
+// Preview response type
+export interface DocumentPreviewResponse {
+  previewUrl: string;
+  fileType: string;
+  filename: string;
+  pageCount?: number;
+}
 
 // Fetch documents for an agent
 export function useAgentDocuments(agentId: string) {
@@ -87,6 +96,26 @@ export function useMyDocuments() {
       );
       return response.data;
     },
+  });
+}
+
+// Fetch document preview URL (public endpoint - no auth needed)
+export function useDocumentPreview(documentId: string | null) {
+  return useQuery({
+    queryKey: documentKeys.preview(documentId || ""),
+    queryFn: async (): Promise<DocumentPreviewResponse> => {
+      const API_URL = process.env.NEXT_PUBLIC_ATHENA_CORE_URL;
+      const response = await fetch(
+        `${API_URL}/api/documents/${documentId}/preview`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch preview URL");
+      }
+      return response.json();
+    },
+    enabled: !!documentId,
+    staleTime: 10 * 60 * 1000, // Consider stale after 10 minutes (URL valid for 15)
+    gcTime: 12 * 60 * 1000, // Cache for 12 minutes
   });
 }
 
