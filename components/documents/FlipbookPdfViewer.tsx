@@ -121,11 +121,12 @@ export function FlipbookPdfViewer({
         setPageCount(pdf.numPages);
 
         const pageImages: string[] = [];
-        // Use higher render scale for sharp text on high-DPI screens
-        // devicePixelRatio is typically 2-3 on modern phones
+        // Use high render scale for sharp text - especially important on mobile
+        // Higher scale = better text quality when zoomed/scaled down
         const dpr =
           typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-        const renderScale = Math.max(2.5, dpr * 1.5); // Minimum 2.5x, scales with device
+        // Render at 3x minimum, up to 4x on high-DPI devices
+        const renderScale = Math.max(3, dpr * 2);
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
