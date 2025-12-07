@@ -77,6 +77,14 @@ export function FlipbookPdfViewer({
         const pdfjsLib = await import("pdfjs-dist");
         pdfjs = pdfjsLib;
         pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+
+        // Configure standard fonts for better text rendering
+        // This helps PDFs that don't have fonts embedded
+        const PDFJS_CDN = "https://unpkg.com/pdfjs-dist@4.4.168";
+        (
+          pdfjsLib as any
+        ).GlobalWorkerOptions.standardFontDataUrl = `${PDFJS_CDN}/standard_fonts/`;
+
         setLibsLoaded(true);
       } catch (err) {
         console.error("Failed to load libraries:", err);
@@ -97,7 +105,18 @@ export function FlipbookPdfViewer({
       setLoadingProgress(0);
 
       try {
-        const loadingTask = pdfjs!.getDocument(pdfUrl);
+        // Configure document loading with font support
+        const PDFJS_CDN = "https://unpkg.com/pdfjs-dist@4.4.168";
+        const loadingTask = pdfjs!.getDocument({
+          url: pdfUrl,
+          // Enable standard fonts for PDFs without embedded fonts
+          standardFontDataUrl: `${PDFJS_CDN}/standard_fonts/`,
+          // Enable character maps for proper text rendering
+          cMapUrl: `${PDFJS_CDN}/cmaps/`,
+          cMapPacked: true,
+          // Use fake workers for better compatibility
+          useSystemFonts: true,
+        });
         const pdf = await loadingTask.promise;
         setPageCount(pdf.numPages);
 
