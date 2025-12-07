@@ -105,71 +105,49 @@ export function FlipbookPdfViewer({
       setLoadingProgress(0);
 
       try {
-        // Configure document loading with font support
-        const PDFJS_CDN = "https://unpkg.com/pdfjs-dist@4.4.168";
+        // Use local fonts (in public folder) instead of CDN for reliability on mobile
         const loadingTask = pdfjs!.getDocument({
           url: pdfUrl,
-          // Enable standard fonts for PDFs without embedded fonts
-          standardFontDataUrl: `${PDFJS_CDN}/standard_fonts/`,
-          // Enable character maps for proper text rendering
-          cMapUrl: `${PDFJS_CDN}/cmaps/`,
+          // Local standard fonts - served from our own domain, no CORS issues
+          standardFontDataUrl: "/pdfjs-fonts/",
+          // CMaps from CDN (these are just character mappings, less critical)
+          cMapUrl: "https://unpkg.com/pdfjs-dist@4.4.168/cmaps/",
           cMapPacked: true,
-          // Use fake workers for better compatibility
-          useSystemFonts: true,
         });
         const pdf = await loadingTask.promise;
         setPageCount(pdf.numPages);
 
         const pageImages: string[] = [];
 
-        // Get device pixel ratio for crisp rendering on high-DPI screens
-        const dpr =
-          typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-
-        // Get screen width to determine optimal render size
-        const screenWidth =
-          typeof window !== "undefined" ? window.innerWidth : 1920;
-        const isMobileDevice = screenWidth < 768;
-
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
 
-          // Get the page's natural size at scale 1
-          const naturalViewport = page.getViewport({ scale: 1 });
-
-          // For mobile: render at screen width × DPR (pixel-perfect for the device)
-          // For desktop: render at minimum 1500px width for quality
-          let targetWidth: number;
-          if (isMobileDevice) {
-            // Mobile: exact screen width × pixel ratio = pixel-perfect
-            targetWidth = screenWidth * dpr;
-          } else {
-            // Desktop: high quality fixed width
-            targetWidth = Math.max(1500, screenWidth) * dpr;
-          }
-
-          const renderScale = targetWidth / naturalViewport.width;
-          const viewport = page.getViewport({ scale: renderScale });
+          // Simple approach: render at 4x scale for crisp text on all devices
+          // This creates ~2400px wide images for standard US Letter PDFs (612pt)
+          const RENDER_SCALE = 4;
+          const viewport = page.getViewport({ scale: RENDER_SCALE });
 
           const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d")!;
+          const context = canvas.getContext("2d", {
+            alpha: false, // No transparency = faster
+          })!;
 
           // Set canvas to exact pixel dimensions
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
 
-          // Disable image smoothing - we want sharp pixels
-          context.imageSmoothingEnabled = false;
+          // White background (some PDFs have transparent backgrounds)
+          context.fillStyle = "#FFFFFF";
+          context.fillRect(0, 0, canvas.width, canvas.height);
 
           await page.render({
             canvasContext: context,
             viewport: viewport,
+            background: "white",
           }).promise;
 
-          // Use PNG for mobile (sharper text), JPEG for desktop (smaller files)
-          const imageUrl = isMobileDevice
-            ? canvas.toDataURL("image/png")
-            : canvas.toDataURL("image/jpeg", 0.92);
+          // Always use PNG for maximum text clarity
+          const imageUrl = canvas.toDataURL("image/png");
           pageImages.push(imageUrl);
           setLoadingProgress(Math.round((i / pdf.numPages) * 100));
         }
