@@ -121,33 +121,47 @@ export function FlipbookPdfViewer({
         setPageCount(pdf.numPages);
 
         const pageImages: string[] = [];
-        // Use high render scale for sharp text - especially important on mobile
-        // Higher scale = better text quality when zoomed/scaled down
+
+        // Get device pixel ratio for crisp rendering on high-DPI screens
         const dpr =
           typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-        // Render at 3x minimum, up to 4x on high-DPI devices
-        const renderScale = Math.max(3, dpr * 2);
+
+        // Target minimum 2000px width for crisp text
+        const MIN_WIDTH = 2000;
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: renderScale });
+
+          // Get the page's natural size at scale 1
+          const naturalViewport = page.getViewport({ scale: 1 });
+
+          // Calculate scale to achieve minimum width, then apply DPR
+          const baseScale = Math.max(2.5, MIN_WIDTH / naturalViewport.width);
+          const finalScale = baseScale * dpr;
+
+          const viewport = page.getViewport({ scale: finalScale });
 
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d")!;
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
 
-          // Enable image smoothing for better text quality
-          context.imageSmoothingEnabled = true;
-          context.imageSmoothingQuality = "high";
+          // Set canvas size to match viewport (already scaled by DPR)
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+
+          // Apply CSS size for proper display density
+          canvas.style.width = `${viewport.width / dpr}px`;
+          canvas.style.height = `${viewport.height / dpr}px`;
+
+          // Disable image smoothing for sharper text (we're already at high res)
+          context.imageSmoothingEnabled = false;
 
           await page.render({
             canvasContext: context,
             viewport: viewport,
           }).promise;
 
-          // Use higher quality JPEG for faster loading, or PNG for best quality
-          const imageUrl = canvas.toDataURL("image/png", 1.0);
+          // Export as high-quality JPEG (smaller than PNG, still looks great)
+          const imageUrl = canvas.toDataURL("image/jpeg", 0.92);
           pageImages.push(imageUrl);
           setLoadingProgress(Math.round((i / pdf.numPages) * 100));
         }
@@ -416,6 +430,10 @@ export function FlipbookPdfViewer({
                 style={{
                   pointerEvents: "none",
                   userSelect: "none",
+                  transform: "translateZ(0)", // GPU acceleration, prevents blurry scaling
+                  imageRendering: "crisp-edges", // Sharper text
+                  WebkitBackfaceVisibility: "hidden",
+                  backfaceVisibility: "hidden",
                 }}
                 draggable={false}
                 onContextMenu={(e) => e.preventDefault()}
@@ -454,7 +472,14 @@ export function FlipbookPdfViewer({
                   className={`shadow-2xl rounded-sm ${
                     isMobile ? "w-full" : "max-w-full"
                   }`}
-                  style={{ pointerEvents: "none", userSelect: "none" }}
+                  style={{
+                    pointerEvents: "none",
+                    userSelect: "none",
+                    transform: "translateZ(0)", // GPU acceleration, prevents blurry scaling
+                    imageRendering: "crisp-edges", // Sharper text
+                    WebkitBackfaceVisibility: "hidden",
+                    backfaceVisibility: "hidden",
+                  }}
                   draggable={false}
                   onContextMenu={(e) => e.preventDefault()}
                 />
