@@ -102,7 +102,11 @@ export function FlipbookPdfViewer({
         setPageCount(pdf.numPages);
 
         const pageImages: string[] = [];
-        const renderScale = 2; // High quality rendering
+        // Use higher render scale for sharp text on high-DPI screens
+        // devicePixelRatio is typically 2-3 on modern phones
+        const dpr =
+          typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+        const renderScale = Math.max(2.5, dpr * 1.5); // Minimum 2.5x, scales with device
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
@@ -113,12 +117,17 @@ export function FlipbookPdfViewer({
           canvas.height = viewport.height;
           canvas.width = viewport.width;
 
+          // Enable image smoothing for better text quality
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = "high";
+
           await page.render({
             canvasContext: context,
             viewport: viewport,
           }).promise;
 
-          const imageUrl = canvas.toDataURL("image/png");
+          // Use higher quality JPEG for faster loading, or PNG for best quality
+          const imageUrl = canvas.toDataURL("image/png", 1.0);
           pageImages.push(imageUrl);
           setLoadingProgress(Math.round((i / pdf.numPages) * 100));
         }
