@@ -126,8 +126,10 @@ export function FlipbookPdfViewer({
         const dpr =
           typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
 
-        // Target minimum 2000px width for crisp text
-        const MIN_WIDTH = 2000;
+        // Get screen width to determine optimal render size
+        const screenWidth =
+          typeof window !== "undefined" ? window.innerWidth : 1920;
+        const isMobileDevice = screenWidth < 768;
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
@@ -135,24 +137,28 @@ export function FlipbookPdfViewer({
           // Get the page's natural size at scale 1
           const naturalViewport = page.getViewport({ scale: 1 });
 
-          // Calculate scale to achieve minimum width, then apply DPR
-          const baseScale = Math.max(2.5, MIN_WIDTH / naturalViewport.width);
-          const finalScale = baseScale * dpr;
+          // For mobile: render at screen width × DPR (pixel-perfect for the device)
+          // For desktop: render at minimum 1500px width for quality
+          let targetWidth: number;
+          if (isMobileDevice) {
+            // Mobile: exact screen width × pixel ratio = pixel-perfect
+            targetWidth = screenWidth * dpr;
+          } else {
+            // Desktop: high quality fixed width
+            targetWidth = Math.max(1500, screenWidth) * dpr;
+          }
 
-          const viewport = page.getViewport({ scale: finalScale });
+          const renderScale = targetWidth / naturalViewport.width;
+          const viewport = page.getViewport({ scale: renderScale });
 
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d")!;
 
-          // Set canvas size to match viewport (already scaled by DPR)
+          // Set canvas to exact pixel dimensions
           canvas.width = viewport.width;
           canvas.height = viewport.height;
 
-          // Apply CSS size for proper display density
-          canvas.style.width = `${viewport.width / dpr}px`;
-          canvas.style.height = `${viewport.height / dpr}px`;
-
-          // Disable image smoothing for sharper text (we're already at high res)
+          // Disable image smoothing - we want sharp pixels
           context.imageSmoothingEnabled = false;
 
           await page.render({
@@ -160,8 +166,10 @@ export function FlipbookPdfViewer({
             viewport: viewport,
           }).promise;
 
-          // Export as high-quality JPEG (smaller than PNG, still looks great)
-          const imageUrl = canvas.toDataURL("image/jpeg", 0.92);
+          // Use PNG for mobile (sharper text), JPEG for desktop (smaller files)
+          const imageUrl = isMobileDevice
+            ? canvas.toDataURL("image/png")
+            : canvas.toDataURL("image/jpeg", 0.92);
           pageImages.push(imageUrl);
           setLoadingProgress(Math.round((i / pdf.numPages) * 100));
         }
@@ -430,10 +438,12 @@ export function FlipbookPdfViewer({
                 style={{
                   pointerEvents: "none",
                   userSelect: "none",
-                  transform: "translateZ(0)", // GPU acceleration, prevents blurry scaling
-                  imageRendering: "crisp-edges", // Sharper text
-                  WebkitBackfaceVisibility: "hidden",
-                  backfaceVisibility: "hidden",
+                  // Critical for mobile: prevent browser from blurring the image
+                  imageRendering: "auto", // 'auto' works better than 'crisp-edges' for photos/text
+                  WebkitFontSmoothing: "antialiased",
+                  // Force GPU layer for smooth rendering
+                  transform: "translateZ(0)",
+                  willChange: "transform",
                 }}
                 draggable={false}
                 onContextMenu={(e) => e.preventDefault()}
@@ -475,10 +485,10 @@ export function FlipbookPdfViewer({
                   style={{
                     pointerEvents: "none",
                     userSelect: "none",
-                    transform: "translateZ(0)", // GPU acceleration, prevents blurry scaling
-                    imageRendering: "crisp-edges", // Sharper text
-                    WebkitBackfaceVisibility: "hidden",
-                    backfaceVisibility: "hidden",
+                    imageRendering: "auto",
+                    WebkitFontSmoothing: "antialiased",
+                    transform: "translateZ(0)",
+                    willChange: "transform",
                   }}
                   draggable={false}
                   onContextMenu={(e) => e.preventDefault()}
