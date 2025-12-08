@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   ChevronLeft,
@@ -15,6 +16,7 @@ import {
   Grid,
   FileText,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Dynamic imports to avoid SSR issues
 let pdfjs: typeof import("pdfjs-dist") | null = null;
@@ -38,6 +40,7 @@ export function FlipbookPdfViewer({
   onClose,
   className = "",
 }: FlipbookPdfViewerProps) {
+  const router = useRouter();
   const [pages, setPages] = useState<string[]>([]);
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,20 +51,91 @@ export function FlipbookPdfViewer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [libsLoaded, setLibsLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("single");
+
+  // Pan/Zoom state
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0 });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const handleExit = useCallback(() => {
+    if (onClose) {
+      onClose();
+    } else {
+      router.back();
+    }
+  }, [onClose, router]);
+
+  // Reset pan when page changes
+  useEffect(() => {
+    setPan({ x: 0, y: 0 });
+  }, [currentPage]);
+
+  // Mouse/Touch handlers for panning
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (scale > 1 || viewMode === "single") {
+      e.preventDefault();
+      setIsDragging(true);
+      dragStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      e.preventDefault();
+      setPan({
+        x: e.clientX - dragStart.current.x,
+        y: e.clientY - dragStart.current.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseLeave = () => setIsDragging(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      dragStart.current = {
+        x: e.touches[0].clientX - pan.x,
+        y: e.touches[0].clientY - pan.y,
+      };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDragging && e.touches.length === 1) {
+      // Prevent scrolling document while dragging
+      if (scale > 1) e.preventDefault();
+      setPan({
+        x: e.touches[0].clientX - dragStart.current.x,
+        y: e.touches[0].clientY - dragStart.current.y,
+      });
+    }
+  };
+
+  const handleTouchEnd = () => setIsDragging(false);
+
   // Detect mobile device - simple check on mount
   useEffect(() => {
-    const mobile = window.innerWidth < 768;
-    setIsMobile(mobile);
-    // Mobile always uses scroll view (simpler, no pagination)
-    if (mobile) {
-      setViewMode("scroll");
-      setScale(1); // Always 1x scale on mobile
-    }
+    setMounted(true);
+    const checkMobile = () => {
+      // Increase threshold to 1024px to catch tablets and landscape phones
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) {
+        setViewMode("scroll");
+        setScale(1);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Load libraries dynamically
@@ -230,11 +304,16 @@ export function FlipbookPdfViewer({
 
   // Loading state
   if (isLoading || !libsLoaded) {
-    return (
+    const loadingContent = (
       <div
-        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className}`}
+        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className} ${
+          isMobile ? "fixed inset-0 z-[9999]" : ""
+        }`}
       >
-        <Header title={title} onClose={onClose} />
+        <Header
+          title={title}
+          onClose={onClose || isMobile ? handleExit : undefined}
+        />
         <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
           <div className="flex flex-col items-center gap-4 text-gray-400">
             <Loader2 className="h-12 w-12 animate-spin text-purple-500" />
@@ -257,15 +336,25 @@ export function FlipbookPdfViewer({
         <Footer />
       </div>
     );
+
+    if (mounted && isMobile) {
+      return createPortal(loadingContent, document.body);
+    }
+    return loadingContent;
   }
 
   // Error state
   if (error) {
-    return (
+    const errorContent = (
       <div
-        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className}`}
+        className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className} ${
+          isMobile ? "fixed inset-0 z-[9999]" : ""
+        }`}
       >
-        <Header title={title} onClose={onClose} />
+        <Header
+          title={title}
+          onClose={onClose || isMobile ? handleExit : undefined}
+        />
         <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
           <div className="flex flex-col items-center gap-4 text-red-400 max-w-md text-center px-4">
             <AlertCircle className="h-12 w-12" />
@@ -276,6 +365,11 @@ export function FlipbookPdfViewer({
         <Footer />
       </div>
     );
+
+    if (mounted && isMobile) {
+      return createPortal(errorContent, document.body);
+    }
+    return errorContent;
   }
 
   // No pages
@@ -284,7 +378,10 @@ export function FlipbookPdfViewer({
       <div
         className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className}`}
       >
-        <Header title={title} onClose={onClose} />
+        <Header
+          title={title}
+          onClose={onClose || isMobile ? handleExit : undefined}
+        />
         <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
           <span className="text-gray-500">No pages found in document</span>
         </div>
@@ -293,46 +390,43 @@ export function FlipbookPdfViewer({
     );
   }
 
-  return (
+  const viewerContent = (
     <div
       ref={containerRef}
-      className={`flex flex-col bg-gray-900 rounded-lg overflow-hidden h-full ${className} ${
-        isFullscreen ? "fixed inset-0 z-50 rounded-none" : ""
+      className={`flex flex-col bg-gray-900 overflow-hidden ${className} ${
+        isFullscreen || onClose || isMobile
+          ? "fixed inset-0 z-[9999] rounded-none" // Max z-index to cover everything
+          : "h-full rounded-lg"
       }`}
     >
       {/* Header with controls */}
-      <div className="flex items-center justify-between px-4 py-3 bg-gray-800 text-white border-b border-gray-700">
-        <span className="text-sm font-medium truncate flex-1 mr-4">
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-gray-800 text-white border-b border-gray-700 z-10 shadow-md">
+        <span className="text-sm font-medium truncate flex-1 mr-2">
           {title}
         </span>
 
         <div className="flex items-center gap-1">
-          {/* View mode toggle - hidden on mobile (always scroll) */}
-          {!isMobile && (
-            <>
-              <button
-                onClick={() =>
-                  setViewMode(viewMode === "single" ? "scroll" : "single")
-                }
-                className={`p-2 rounded hover:bg-gray-700 transition-colors ${
-                  viewMode === "scroll" ? "bg-gray-700" : ""
-                }`}
-                title={
-                  viewMode === "single" ? "Scroll view" : "Single page view"
-                }
-              >
-                {viewMode === "single" ? (
-                  <Grid className="h-4 w-4" />
-                ) : (
-                  <FileText className="h-4 w-4" />
-                )}
-              </button>
+          {/* View mode toggle - Desktop only */}
+          <div className="hidden md:flex items-center">
+            <button
+              onClick={() =>
+                setViewMode(viewMode === "single" ? "scroll" : "single")
+              }
+              className={`p-2 rounded hover:bg-gray-700 transition-colors ${
+                viewMode === "scroll" ? "bg-gray-700" : ""
+              }`}
+              title={viewMode === "single" ? "Scroll view" : "Single page view"}
+            >
+              {viewMode === "single" ? (
+                <Grid className="h-4 w-4" />
+              ) : (
+                <FileText className="h-4 w-4" />
+              )}
+            </button>
+            <div className="w-px h-6 bg-gray-600 mx-1" />
+          </div>
 
-              <div className="w-px h-6 bg-gray-600 mx-1" />
-            </>
-          )}
-
-          {/* Zoom controls - visible on all devices */}
+          {/* Zoom controls */}
           <button
             onClick={zoomOut}
             disabled={scale <= 0.5}
@@ -341,13 +435,16 @@ export function FlipbookPdfViewer({
           >
             <ZoomOut className="h-4 w-4" />
           </button>
+
+          {/* Hide percentage on very small screens */}
           <button
             onClick={resetZoom}
-            className="px-2 py-1 text-xs rounded hover:bg-gray-700 transition-colors min-w-[50px]"
+            className="hidden sm:block px-2 py-1 text-xs rounded hover:bg-gray-700 transition-colors min-w-[50px]"
             title="Reset zoom"
           >
             {Math.round(scale * 100)}%
           </button>
+
           <button
             onClick={zoomIn}
             disabled={scale >= 3}
@@ -359,20 +456,20 @@ export function FlipbookPdfViewer({
 
           <div className="w-px h-6 bg-gray-600 mx-1" />
 
-          {/* Fullscreen */}
+          {/* Fullscreen - Hide on mobile since it's forced full */}
           <button
             onClick={toggleFullscreen}
-            className="p-2 rounded hover:bg-gray-700 transition-colors"
+            className="hidden md:block p-2 rounded hover:bg-gray-700 transition-colors"
             title="Toggle fullscreen"
           >
             <Maximize2 className="h-4 w-4" />
           </button>
 
-          {/* Close */}
-          {onClose && (
+          {/* Close - Always visible on mobile or if onClose provided */}
+          {(onClose || isMobile) && (
             <button
-              onClick={onClose}
-              className="p-2 rounded hover:bg-gray-700 transition-colors ml-1"
+              onClick={handleExit}
+              className="p-2 rounded hover:bg-gray-700 transition-colors ml-1 bg-gray-700/50"
               title="Close"
             >
               <X className="h-5 w-5" />
@@ -385,7 +482,7 @@ export function FlipbookPdfViewer({
       <div className="flex-1 relative overflow-hidden bg-gray-950">
         {viewMode === "single" ? (
           /* Single page view */
-          <div className="h-full flex items-center justify-center p-4">
+          <div className="h-full flex items-center justify-center p-2">
             {/* Navigation arrows - smaller on mobile */}
             <button
               onClick={goToPrevPage}
@@ -415,11 +512,14 @@ export function FlipbookPdfViewer({
 
             {/* Page image */}
             <div
-              className="overflow-auto max-h-full w-full flex items-center justify-center"
-              style={{
-                transform: `scale(${scale})`,
-                transformOrigin: "center",
-              }}
+              className="w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -428,16 +528,16 @@ export function FlipbookPdfViewer({
                 className={`shadow-2xl rounded-sm ${
                   isMobile
                     ? "w-full h-auto"
-                    : "max-h-[calc(100vh-180px)] w-auto max-w-full"
+                    : "max-w-full max-h-full object-contain"
                 }`}
                 style={{
-                  pointerEvents: "none",
+                  transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+                  transformOrigin: "center",
+                  pointerEvents: "none", // Let events pass to container for dragging
                   userSelect: "none",
                   // Critical for mobile: prevent browser from blurring the image
-                  imageRendering: "auto", // 'auto' works better than 'crisp-edges' for photos/text
+                  imageRendering: "auto",
                   WebkitFontSmoothing: "antialiased",
-                  // Force GPU layer for smooth rendering
-                  transform: "translateZ(0)",
                   willChange: "transform",
                 }}
                 draggable={false}
@@ -565,6 +665,13 @@ export function FlipbookPdfViewer({
       <Footer />
     </div>
   );
+
+  // Use Portal for mobile/fullscreen to break out of parent containers
+  if (mounted && (isMobile || isFullscreen)) {
+    return createPortal(viewerContent, document.body);
+  }
+
+  return viewerContent;
 }
 
 // Header component
