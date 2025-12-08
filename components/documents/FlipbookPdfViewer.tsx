@@ -122,14 +122,15 @@ export function FlipbookPdfViewer({
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
 
-          // Simple approach: render at 4x scale for crisp text on all devices
-          // This creates ~2400px wide images for standard US Letter PDFs (612pt)
-          const RENDER_SCALE = 4;
+          // High-DPI mobile devices (Samsung, iPhone Pro) need much higher scale
+          // Render at 6x for ultra-crisp text on all devices
+          const RENDER_SCALE = 6;
           const viewport = page.getViewport({ scale: RENDER_SCALE });
 
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d", {
-            alpha: false, // No transparency = faster
+            alpha: false,
+            desynchronized: true, // Better performance
           })!;
 
           // Set canvas to exact pixel dimensions
@@ -139,6 +140,10 @@ export function FlipbookPdfViewer({
           // White background (some PDFs have transparent backgrounds)
           context.fillStyle = "#FFFFFF";
           context.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Enable text anti-aliasing for smoother rendering
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = "high";
 
           await page.render({
             canvasContext: context,
