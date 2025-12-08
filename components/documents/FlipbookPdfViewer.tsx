@@ -53,21 +53,15 @@ export function FlipbookPdfViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Detect mobile device and set default view mode once on mount
-  const initialViewModeSet = useRef(false);
+  // Detect mobile device - simple check on mount
   useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      // On mobile, default to scroll view for better readability (only on first check)
-      if (!initialViewModeSet.current && mobile) {
-        setViewMode("scroll");
-        initialViewModeSet.current = true;
-      }
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    const mobile = window.innerWidth < 768;
+    setIsMobile(mobile);
+    // Mobile always uses scroll view (simpler, no pagination)
+    if (mobile) {
+      setViewMode("scroll");
+      setScale(1); // Always 1x scale on mobile
+    }
   }, []);
 
   // Load libraries dynamically
@@ -76,10 +70,12 @@ export function FlipbookPdfViewer({
       try {
         const pdfjsLib = await import("pdfjs-dist");
         pdfjs = pdfjsLib;
-        pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+
+        // Use CDN for worker to ensure version match with fonts
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://unpkg.com/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
 
         // Configure standard fonts for better text rendering
-        // This helps PDFs that don't have fonts embedded
         const PDFJS_CDN = "https://unpkg.com/pdfjs-dist@4.4.168";
         (
           pdfjsLib as any
@@ -105,14 +101,16 @@ export function FlipbookPdfViewer({
       setLoadingProgress(0);
 
       try {
-        // Use local fonts (in public folder) instead of CDN for reliability on mobile
         const loadingTask = pdfjs!.getDocument({
           url: pdfUrl,
-          // Local standard fonts - served from our own domain, no CORS issues
-          standardFontDataUrl: "/pdfjs-fonts/",
-          // CMaps from CDN (these are just character mappings, less critical)
+          // Use CDN for standard fonts
+          standardFontDataUrl:
+            "https://unpkg.com/pdfjs-dist@4.4.168/standard_fonts/",
           cMapUrl: "https://unpkg.com/pdfjs-dist@4.4.168/cmaps/",
           cMapPacked: true,
+          // On mobile, force path rendering to fix "J aafil" spacing artifacts
+          // On desktop, allow native font loading for crisper text
+          disableFontFace: isMobile,
         });
         const pdf = await loadingTask.promise;
         setPageCount(pdf.numPages);
@@ -122,36 +120,26 @@ export function FlipbookPdfViewer({
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
 
-          // High-DPI mobile devices (Samsung, iPhone Pro) need much higher scale
-          // Render at 6x for ultra-crisp text on all devices
-          const RENDER_SCALE = 6;
+          // 3x scale is sufficient for mobile high DPI and avoids downscaling artifacts (too bold)
+          const RENDER_SCALE = 5;
           const viewport = page.getViewport({ scale: RENDER_SCALE });
 
           const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d", {
-            alpha: false,
-            desynchronized: true, // Better performance
-          })!;
+          const context = canvas.getContext("2d")!;
 
-          // Set canvas to exact pixel dimensions
           canvas.width = Math.floor(viewport.width);
           canvas.height = Math.floor(viewport.height);
 
-          // White background (some PDFs have transparent backgrounds)
+          // White background
           context.fillStyle = "#FFFFFF";
           context.fillRect(0, 0, canvas.width, canvas.height);
-
-          // Enable text anti-aliasing for smoother rendering
-          context.imageSmoothingEnabled = true;
-          context.imageSmoothingQuality = "high";
 
           await page.render({
             canvasContext: context,
             viewport: viewport,
-            background: "white",
           }).promise;
 
-          // Always use PNG for maximum text clarity
+          // PNG for quality
           const imageUrl = canvas.toDataURL("image/png");
           pageImages.push(imageUrl);
           setLoadingProgress(Math.round((i / pdf.numPages) * 100));
@@ -167,7 +155,7 @@ export function FlipbookPdfViewer({
     };
 
     loadPdf();
-  }, [pdfUrl, libsLoaded]);
+  }, [pdfUrl, libsLoaded, isMobile]);
 
   // Navigation
   const goToPrevPage = useCallback(() => {
@@ -179,9 +167,17 @@ export function FlipbookPdfViewer({
   }, [pageCount]);
 
   // Zoom controls
-  const zoomIn = () => setScale((s) => Math.min(3, s + 0.25));
-  const zoomOut = () => setScale((s) => Math.max(0.5, s - 0.25));
-  const resetZoom = () => setScale(1);
+  const zoomIn = useCallback(() => {
+    setScale((s) => Math.min(3, s + 0.25));
+  }, []);
+
+  const zoomOut = useCallback(() => {
+    setScale((s) => Math.max(0.5, s - 0.25));
+  }, []);
+
+  const resetZoom = useCallback(() => {
+    setScale(1);
+  }, []);
 
   // Fullscreen toggle
   const toggleFullscreen = () => {
@@ -203,12 +199,22 @@ export function FlipbookPdfViewer({
         if (e.key === "ArrowRight" || e.key === "ArrowDown") goToNextPage();
       }
       if (e.key === "Escape" && onClose) onClose();
-      if (e.key === "+" || e.key === "=") zoomIn();
-      if (e.key === "-") zoomOut();
+      if (!isMobile) {
+        if (e.key === "+" || e.key === "=") zoomIn();
+        if (e.key === "-") zoomOut();
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToPrevPage, goToNextPage, onClose, viewMode]);
+  }, [
+    goToPrevPage,
+    goToNextPage,
+    onClose,
+    viewMode,
+    isMobile,
+    zoomIn,
+    zoomOut,
+  ]);
 
   // Scroll to page in scroll mode
   useEffect(() => {
@@ -301,26 +307,32 @@ export function FlipbookPdfViewer({
         </span>
 
         <div className="flex items-center gap-1">
-          {/* View mode toggle */}
-          <button
-            onClick={() =>
-              setViewMode(viewMode === "single" ? "scroll" : "single")
-            }
-            className={`p-2 rounded hover:bg-gray-700 transition-colors ${
-              viewMode === "scroll" ? "bg-gray-700" : ""
-            }`}
-            title={viewMode === "single" ? "Scroll view" : "Single page view"}
-          >
-            {viewMode === "single" ? (
-              <Grid className="h-4 w-4" />
-            ) : (
-              <FileText className="h-4 w-4" />
-            )}
-          </button>
+          {/* View mode toggle - hidden on mobile (always scroll) */}
+          {!isMobile && (
+            <>
+              <button
+                onClick={() =>
+                  setViewMode(viewMode === "single" ? "scroll" : "single")
+                }
+                className={`p-2 rounded hover:bg-gray-700 transition-colors ${
+                  viewMode === "scroll" ? "bg-gray-700" : ""
+                }`}
+                title={
+                  viewMode === "single" ? "Scroll view" : "Single page view"
+                }
+              >
+                {viewMode === "single" ? (
+                  <Grid className="h-4 w-4" />
+                ) : (
+                  <FileText className="h-4 w-4" />
+                )}
+              </button>
 
-          <div className="w-px h-6 bg-gray-600 mx-1" />
+              <div className="w-px h-6 bg-gray-600 mx-1" />
+            </>
+          )}
 
-          {/* Zoom controls */}
+          {/* Zoom controls - visible on all devices */}
           <button
             onClick={zoomOut}
             disabled={scale <= 0.5}
@@ -441,46 +453,55 @@ export function FlipbookPdfViewer({
             </div>
           </div>
         ) : (
-          /* Scroll view - all pages vertically */
+          /* Scroll view - all pages vertically (mobile-friendly) */
           <div
             ref={scrollContainerRef}
-            className={`h-full overflow-auto space-y-4 ${
-              isMobile ? "p-2" : "p-4"
-            }`}
+            className="h-full overflow-auto bg-gray-900"
           >
-            {pages.map((pageImage, index) => (
-              <div
-                key={index}
-                data-page={index + 1}
-                className="flex justify-center"
-                style={{
-                  transform: `scale(${scale})`,
-                  transformOrigin: "top center",
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={pageImage}
-                  alt={`Page ${index + 1}`}
-                  className={`shadow-2xl rounded-sm ${
-                    isMobile ? "w-full" : "max-w-full"
-                  }`}
-                  style={{
-                    pointerEvents: "none",
-                    userSelect: "none",
-                    imageRendering: "auto",
-                    WebkitFontSmoothing: "antialiased",
-                    transform: "translateZ(0)",
-                    willChange: "transform",
-                  }}
-                  draggable={false}
-                  onContextMenu={(e) => e.preventDefault()}
-                />
-              </div>
-            ))}
-            {/* Watermark in scroll mode */}
-            <div className="fixed inset-0 pointer-events-none flex items-center justify-center opacity-[0.02] z-10">
-              <span className="text-9xl font-bold text-white rotate-[-30deg] select-none whitespace-nowrap">
+            <div className={`space-y-6 ${isMobile ? "p-2" : "p-6"}`}>
+              {pages.map((pageImage, index) => (
+                <div
+                  key={index}
+                  data-page={index + 1}
+                  className="flex justify-center"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={pageImage}
+                    alt={`Page ${index + 1}`}
+                    className={`shadow-2xl ${
+                      isMobile
+                        ? "rounded" // Mobile: full width, slightly rounded
+                        : "max-w-full rounded-lg" // Desktop: more rounded
+                    }`}
+                    style={
+                      isMobile
+                        ? {
+                            // Mobile: use width for scaling to allow scrolling
+                            display: "block",
+                            width: `${100 * scale}%`,
+                            maxWidth: "none",
+                            height: "auto",
+                            transition: "width 0.2s ease-out",
+                          }
+                        : {
+                            // Desktop: allow zoom
+                            transform: `scale(${scale})`,
+                            transformOrigin: "top center",
+                            pointerEvents: "none",
+                            userSelect: "none",
+                          }
+                    }
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Watermark - subtle */}
+            <div className="fixed inset-0 pointer-events-none flex items-center justify-center opacity-[0.015] z-10">
+              <span className="text-8xl font-bold text-white rotate-[-30deg] select-none whitespace-nowrap">
                 ATHENA
               </span>
             </div>
