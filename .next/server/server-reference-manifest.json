@@ -80,6 +80,12 @@
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
+        "app/admin/enterprise-monitor/page": {
+          "moduleId": 60833,
+          "async": false,
+          "exportedName": "detectKeylessEnvDriftAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
         "app/admin/page": {
           "moduleId": 51510,
           "async": false,
@@ -88,6 +94,12 @@
         },
         "app/creator/[creatorId]/page": {
           "moduleId": 94873,
+          "async": false,
+          "exportedName": "detectKeylessEnvDriftAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/creator/agents/[agentId]/analytics/page": {
+          "moduleId": 22050,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
@@ -166,6 +178,12 @@
         },
         "app/design-system/page": {
           "moduleId": 72780,
+          "async": false,
+          "exportedName": "detectKeylessEnvDriftAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/enterprise/demo/page": {
+          "moduleId": 23577,
           "async": false,
           "exportedName": "detectKeylessEnvDriftAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
@@ -281,8 +299,10 @@
         "app/admin/academic/page": "action-browser",
         "app/admin/agents/page": "action-browser",
         "app/admin/dashboard/page": "action-browser",
+        "app/admin/enterprise-monitor/page": "action-browser",
         "app/admin/page": "action-browser",
         "app/creator/[creatorId]/page": "action-browser",
+        "app/creator/agents/[agentId]/analytics/page": "action-browser",
         "app/creator/agents/[agentId]/documents/page": "action-browser",
         "app/creator/agents/[agentId]/edit/page": "action-browser",
         "app/creator/agents/[agentId]/pricing/page": "action-browser",
@@ -296,6 +316,7 @@
         "app/creator/sessions/page": "action-browser",
         "app/creator/sessions/settings/page": "action-browser",
         "app/design-system/page": "action-browser",
+        "app/enterprise/demo/page": "action-browser",
         "app/explore/agents/[id]/page": "action-browser",
         "app/explore/agents/page": "action-browser",
         "app/explore/page": "action-browser",
@@ -396,6 +417,12 @@
           "exportedName": "invalidateCacheAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
         },
+        "app/admin/enterprise-monitor/page": {
+          "moduleId": 60833,
+          "async": false,
+          "exportedName": "invalidateCacheAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
+        },
         "app/admin/page": {
           "moduleId": 51510,
           "async": false,
@@ -404,6 +431,12 @@
         },
         "app/creator/[creatorId]/page": {
           "moduleId": 94873,
+          "async": false,
+          "exportedName": "invalidateCacheAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
+        },
+        "app/creator/agents/[agentId]/analytics/page": {
+          "moduleId": 22050,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
@@ -482,6 +515,12 @@
         },
         "app/design-system/page": {
           "moduleId": 72780,
+          "async": false,
+          "exportedName": "invalidateCacheAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
+        },
+        "app/enterprise/demo/page": {
+          "moduleId": 23577,
           "async": false,
           "exportedName": "invalidateCacheAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js"
@@ -597,8 +636,10 @@
         "app/admin/academic/page": "action-browser",
         "app/admin/agents/page": "action-browser",
         "app/admin/dashboard/page": "action-browser",
+        "app/admin/enterprise-monitor/page": "action-browser",
         "app/admin/page": "action-browser",
         "app/creator/[creatorId]/page": "action-browser",
+        "app/creator/agents/[agentId]/analytics/page": "action-browser",
         "app/creator/agents/[agentId]/documents/page": "action-browser",
         "app/creator/agents/[agentId]/edit/page": "action-browser",
         "app/creator/agents/[agentId]/pricing/page": "action-browser",
@@ -612,6 +653,7 @@
         "app/creator/sessions/page": "action-browser",
         "app/creator/sessions/settings/page": "action-browser",
         "app/design-system/page": "action-browser",
+        "app/enterprise/demo/page": "action-browser",
         "app/explore/agents/[id]/page": "action-browser",
         "app/explore/agents/page": "action-browser",
         "app/explore/page": "action-browser",
@@ -712,6 +754,12 @@
           "exportedName": "createOrReadKeylessAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
         },
+        "app/admin/enterprise-monitor/page": {
+          "moduleId": 60833,
+          "async": false,
+          "exportedName": "createOrReadKeylessAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
         "app/admin/page": {
           "moduleId": 51510,
           "async": false,
@@ -720,6 +768,12 @@
         },
         "app/creator/[creatorId]/page": {
           "moduleId": 94873,
+          "async": false,
+          "exportedName": "createOrReadKeylessAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/creator/agents/[agentId]/analytics/page": {
+          "moduleId": 22050,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
@@ -798,6 +852,12 @@
         },
         "app/design-system/page": {
           "moduleId": 72780,
+          "async": false,
+          "exportedName": "createOrReadKeylessAction",
+          "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
+        },
+        "app/enterprise/demo/page": {
+          "moduleId": 23577,
           "async": false,
           "exportedName": "createOrReadKeylessAction",
           "filename": "node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js"
@@ -913,8 +973,10 @@
         "app/admin/academic/page": "action-browser",
         "app/admin/agents/page": "action-browser",
         "app/admin/dashboard/page": "action-browser",
+        "app/admin/enterprise-monitor/page": "action-browser",
         "app/admin/page": "action-browser",
         "app/creator/[creatorId]/page": "action-browser",
+        "app/creator/agents/[agentId]/analytics/page": "action-browser",
         "app/creator/agents/[agentId]/documents/page": "action-browser",
         "app/creator/agents/[agentId]/edit/page": "action-browser",
         "app/creator/agents/[agentId]/pricing/page": "action-browser",
@@ -928,6 +990,7 @@
         "app/creator/sessions/page": "action-browser",
         "app/creator/sessions/settings/page": "action-browser",
         "app/design-system/page": "action-browser",
+        "app/enterprise/demo/page": "action-browser",
         "app/explore/agents/[id]/page": "action-browser",
         "app/explore/agents/page": "action-browser",
         "app/explore/page": "action-browser",

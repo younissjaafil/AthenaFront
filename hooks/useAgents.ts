@@ -177,6 +177,131 @@ export function useDeleteAgent() {
   });
 }
 
+// =============================================
+// RAG Analytics Hooks
+// =============================================
+
+export interface AgentAnalytics {
+  totalQueries: number;
+  answeredCount: number;
+  idkCount: number;
+  idkRate: number;
+  avgSimilarity: number;
+  avgLatencyMs: number;
+  avgRetrievalMs: number;
+  avgOpenaiMs: number;
+  feedbackUpCount: number;
+  feedbackDownCount: number;
+  feedbackRate: number;
+  queriesOverTime: { date: string; count: number }[];
+  topIdkReasons: { reason: string; count: number }[];
+}
+
+export interface RagQueryLog {
+  id: string;
+  createdAt: string;
+  userId?: string;
+  agentId: string;
+  query: string;
+  topK: number;
+  retrievedCount: number;
+  maxSimilarity?: number;
+  rerankUsed: boolean;
+  latencyMs: number;
+  retrievalMs: number;
+  openaiMs: number;
+  contextTokenCount: number;
+  model: string;
+  totalTokensApprox: number;
+  outcome: 'answered' | 'idk';
+  idkReason?: string;
+  citations?: any[];
+  feedback?: 'up' | 'down';
+  feedbackComment?: string;
+  conversationId?: string;
+}
+
+export const analyticsKeys = {
+  analytics: (agentId: string) => ["agents", agentId, "analytics"] as const,
+  logs: (agentId: string) => ["agents", agentId, "logs"] as const,
+};
+
+// Fetch agent analytics
+export function useAgentAnalytics(agentId: string, days = 30) {
+  const { getToken } = useAuth();
+
+  return useQuery({
+    queryKey: [...analyticsKeys.analytics(agentId), days],
+    queryFn: async () => {
+      const apiClient = createClientApiClient(getToken);
+      const response = await apiClient.get<AgentAnalytics>(
+        `/agents/${agentId}/analytics?days=${days}`
+      );
+      return response.data;
+    },
+    enabled: !!agentId,
+    staleTime: 60000, // 1 minute
+  });
+}
+
+// Fetch agent query logs
+export function useAgentLogs(
+  agentId: string,
+  options?: {
+    limit?: number;
+    outcome?: 'answered' | 'idk';
+    feedback?: 'up' | 'down';
+  }
+) {
+  const { getToken } = useAuth();
+
+  return useQuery({
+    queryKey: [...analyticsKeys.logs(agentId), options],
+    queryFn: async () => {
+      const apiClient = createClientApiClient(getToken);
+      const params = new URLSearchParams();
+      if (options?.limit) params.set('limit', String(options.limit));
+      if (options?.outcome) params.set('outcome', options.outcome);
+      if (options?.feedback) params.set('feedback', options.feedback);
+      
+      const url = `/agents/${agentId}/logs${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await apiClient.get<RagQueryLog[]>(url);
+      return response.data;
+    },
+    enabled: !!agentId,
+    staleTime: 30000, // 30 seconds
+  });
+}
+
+// Submit feedback on a query log
+export function useSubmitFeedback() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      logId,
+      feedback,
+      comment,
+    }: {
+      logId: string;
+      feedback: 'up' | 'down';
+      comment?: string;
+    }) => {
+      const apiClient = createClientApiClient(getToken);
+      const response = await apiClient.post(`/agents/logs/${logId}/feedback`, {
+        feedback,
+        comment,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate all logs queries to refresh feedback status
+      queryClient.invalidateQueries({ queryKey: ["agents"] });
+    },
+  });
+}
+
 // Composite hook that returns all agent hooks
 export function useAgents() {
   return {
@@ -191,5 +316,8 @@ export function useAgents() {
     useCreateAgent,
     useUpdateAgent,
     useDeleteAgent,
+    useAgentAnalytics,
+    useAgentLogs,
+    useSubmitFeedback,
   };
 }

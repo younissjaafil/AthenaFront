@@ -35,6 +35,8 @@ import {
   PanelLeftClose,
   PanelLeft,
   History,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -81,6 +83,7 @@ function MessageBubble({
   message: Message;
   agentName?: string;
 }) {
+  const [showMetadata, setShowMetadata] = useState(false);
   const isUser = message.role === MessageRole.USER;
   const hasRagSources =
     message.metadata?.ragSources && message.metadata.ragSources.length > 0;
@@ -138,6 +141,94 @@ function MessageBubble({
             {message.content}
           </p>
         </div>
+
+        {/* Source Citations */}
+        {!isUser && hasRagSources && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-2 space-y-1"
+          >
+            {message.metadata?.ragSources?.map((source, index) => (
+              <div
+                key={`${source.documentId}-${source.chunkIndex}`}
+                className="flex items-center gap-2 text-xs text-gray-600 dark:text-slate-400"
+              >
+                <FileText className="w-3 h-3 flex-shrink-0" />
+                <span className="italic">
+                  Source: {source.documentName || `Document ${index + 1}`}
+                </span>
+                <span className="text-gray-400 dark:text-slate-600">•</span>
+                <span className="text-gray-500 dark:text-slate-500">
+                  {(source.similarity * 100).toFixed(0)}% relevance
+                </span>
+              </div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Debug Metadata (for agent messages only) */}
+        {!isUser && message.metadata && (
+          <div className="mt-2">
+            <button
+              onClick={() => setShowMetadata(!showMetadata)}
+              className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 transition-colors"
+            >
+              {showMetadata ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )}
+              <span>View metadata</span>
+            </button>
+            <AnimatePresence>
+              {showMetadata && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-2 p-3 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-xs overflow-hidden"
+                >
+                  <div className="space-y-2 font-mono">
+                    {message.metadata.model && (
+                      <div>
+                        <span className="text-gray-500 dark:text-slate-500">Model:</span>{" "}
+                        <span className="text-gray-900 dark:text-slate-100">{message.metadata.model}</span>
+                      </div>
+                    )}
+                    {message.metadata.ragContext !== undefined && (
+                      <div>
+                        <span className="text-gray-500 dark:text-slate-500">RAG Context:</span>{" "}
+                        <span className="text-gray-900 dark:text-slate-100">{message.metadata.ragContext ? "Yes" : "No"}</span>
+                      </div>
+                    )}
+                    {message.metadata.tokensUsed !== undefined && (
+                      <div>
+                        <span className="text-gray-500 dark:text-slate-500">Tokens:</span>{" "}
+                        <span className="text-gray-900 dark:text-slate-100">{message.metadata.tokensUsed}</span>
+                      </div>
+                    )}
+                    {message.metadata.ragSources && message.metadata.ragSources.length > 0 && (
+                      <div>
+                        <span className="text-gray-500 dark:text-slate-500">RAG Sources:</span>
+                        <div className="mt-1 space-y-1 pl-2">
+                          {message.metadata.ragSources.map((source, idx) => (
+                            <div key={`${source.documentId}-${source.chunkIndex}`} className="text-gray-700 dark:text-slate-300">
+                              <span className="text-purple-600 dark:text-purple-400">#{idx + 1}</span>{" "}
+                              {source.documentName || source.documentId.substring(0, 8)}...
+                              <span className="text-gray-500 dark:text-slate-500"> (chunk {source.chunkIndex}, {(source.similarity * 100).toFixed(1)}%)</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
 
         {/* Timestamp */}
         <div
