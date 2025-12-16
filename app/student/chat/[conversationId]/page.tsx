@@ -88,6 +88,18 @@ function MessageBubble({
   const hasRagSources =
     message.metadata?.ragSources && message.metadata.ragSources.length > 0;
 
+  // Remove markdown formatting (bold, italic, etc.)
+  const removeMarkdown = (text: string): string => {
+    return text
+      .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold **text**
+      .replace(/\*([^*]+)\*/g, '$1')     // Remove italic *text*
+      .replace(/__([^_]+)__/g, '$1')     // Remove bold __text__
+      .replace(/_([^_]+)_/g, '$1')       // Remove italic _text_
+      .replace(/~~([^~]+)~~/g, '$1');    // Remove strikethrough ~~text~~
+  };
+
+  const displayContent = removeMarkdown(message.content);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -138,7 +150,7 @@ function MessageBubble({
           }`}
         >
           <p className="whitespace-pre-wrap leading-relaxed">
-            {message.content}
+            {displayContent}
           </p>
         </div>
 
