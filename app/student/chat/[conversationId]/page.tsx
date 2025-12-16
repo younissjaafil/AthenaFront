@@ -154,29 +154,52 @@ function MessageBubble({
           </p>
         </div>
 
-        {/* Source Citations */}
+        {/* Source Citations - Enhanced Display */}
         {!isUser && hasRagSources && (
           <motion.div
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mt-2 space-y-1"
+            className="mt-3 p-3 rounded-lg bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800/30"
           >
-            {message.metadata?.ragSources?.map((source, index) => (
-              <div
-                key={`${source.documentId}-${source.chunkIndex}`}
-                className="flex items-center gap-2 text-xs text-gray-600 dark:text-slate-400"
-              >
-                <FileText className="w-3 h-3 flex-shrink-0" />
-                <span className="italic">
-                  Source: {source.documentName || `Document ${index + 1}`}
-                </span>
-                <span className="text-gray-400 dark:text-slate-600">•</span>
-                <span className="text-gray-500 dark:text-slate-500">
-                  {(source.similarity * 100).toFixed(0)}% relevance
-                </span>
-              </div>
-            ))}
+            <div className="flex items-center gap-2 mb-2">
+              <BookOpen className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+              <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
+                Sources Used
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {message.metadata?.ragSources?.slice(0, 5).map((source, index) => {
+                const relevanceColor = source.similarity >= 0.8 
+                  ? 'text-green-600 dark:text-green-400' 
+                  : source.similarity >= 0.65 
+                    ? 'text-yellow-600 dark:text-yellow-400'
+                    : 'text-gray-500 dark:text-slate-500';
+                
+                return (
+                  <div
+                    key={`${source.documentId}-${source.chunkIndex}`}
+                    className="flex items-start gap-2 text-xs"
+                  >
+                    <span className="text-purple-500 dark:text-purple-400 font-mono">
+                      #{index + 1}
+                    </span>
+                    <FileText className="w-3 h-3 flex-shrink-0 text-gray-400 dark:text-slate-500 mt-0.5" />
+                    <span className="text-gray-700 dark:text-slate-300 flex-1">
+                      {source.documentName || `Document ${index + 1}`}
+                    </span>
+                    <span className={`font-medium ${relevanceColor}`}>
+                      {(source.similarity * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                );
+              })}
+              {(message.metadata?.ragSources?.length || 0) > 5 && (
+                <div className="text-xs text-gray-500 dark:text-slate-500 italic pt-1">
+                  +{(message.metadata?.ragSources?.length || 0) - 5} more sources
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
 
@@ -204,27 +227,43 @@ function MessageBubble({
                 >
                   <div className="space-y-2 font-mono">
                     {message.metadata.model && (
-                      <div>
-                        <span className="text-gray-500 dark:text-slate-500">Model:</span>{" "}
-                        <span className="text-gray-900 dark:text-slate-100">{message.metadata.model}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 dark:text-slate-500">Model:</span>
+                        <span className="text-gray-900 dark:text-slate-100 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{message.metadata.model}</span>
                       </div>
                     )}
                     {message.metadata.ragContext !== undefined && (
-                      <div>
-                        <span className="text-gray-500 dark:text-slate-500">RAG Context:</span>{" "}
-                        <span className="text-gray-900 dark:text-slate-100">{message.metadata.ragContext ? "Yes" : "No"}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 dark:text-slate-500">RAG Context:</span>
+                        <span className={`px-1.5 py-0.5 rounded ${message.metadata.ragContext ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'}`}>
+                          {message.metadata.ragContext ? "Yes" : "No"}
+                        </span>
+                      </div>
+                    )}
+                    {message.metadata.ragOutcome && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 dark:text-slate-500">RAG Outcome:</span>
+                        <span className={`px-1.5 py-0.5 rounded ${message.metadata.ragOutcome === 'answered' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'}`}>
+                          {message.metadata.ragOutcome === 'answered' ? 'Answered' : 'IDK (Low confidence)'}
+                        </span>
+                      </div>
+                    )}
+                    {message.metadata.ragIdkReason && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 dark:text-slate-500">IDK Reason:</span>
+                        <span className="text-yellow-600 dark:text-yellow-400">{message.metadata.ragIdkReason}</span>
                       </div>
                     )}
                     {message.metadata.tokensUsed !== undefined && (
-                      <div>
-                        <span className="text-gray-500 dark:text-slate-500">Tokens:</span>{" "}
-                        <span className="text-gray-900 dark:text-slate-100">{message.metadata.tokensUsed}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 dark:text-slate-500">Tokens:</span>
+                        <span className="text-gray-900 dark:text-slate-100">{message.metadata.tokensUsed.toLocaleString()}</span>
                       </div>
                     )}
                     {message.metadata.ragSources && message.metadata.ragSources.length > 0 && (
                       <div>
-                        <span className="text-gray-500 dark:text-slate-500">RAG Sources:</span>
-                        <div className="mt-1 space-y-1 pl-2">
+                        <span className="text-gray-500 dark:text-slate-500">RAG Sources ({message.metadata.ragSources.length}):</span>
+                        <div className="mt-1 space-y-1 pl-2 max-h-40 overflow-y-auto">
                           {message.metadata.ragSources.map((source, idx) => (
                             <div key={`${source.documentId}-${source.chunkIndex}`} className="text-gray-700 dark:text-slate-300">
                               <span className="text-purple-600 dark:text-purple-400">#{idx + 1}</span>{" "}

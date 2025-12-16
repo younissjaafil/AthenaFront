@@ -21,6 +21,8 @@ export interface Message {
     model?: string;
     ragContext?: boolean;
     ragSources?: RagSource[];
+    ragOutcome?: 'answered' | 'idk';
+    ragIdkReason?: string;
     tokensUsed?: number;
   };
   tokenCount?: number;
