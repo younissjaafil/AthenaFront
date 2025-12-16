@@ -16,12 +16,14 @@ import {
   HelpCircle,
   RefreshCw,
   Filter,
+  Trash2,
 } from "lucide-react";
 import {
   useAgent,
   useAgentAnalytics,
   useAgentLogs,
   useSubmitFeedback,
+  useResetAnalytics,
   type RagQueryLog,
 } from "@/hooks/useAgents";
 
@@ -37,6 +39,7 @@ export default function AgentAnalyticsPage() {
   const [feedbackFilter, setFeedbackFilter] = useState<
     "all" | "up" | "down"
   >("all");
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const { data: agent, isLoading: agentLoading } = useAgent(agentId);
   const {
@@ -55,6 +58,18 @@ export default function AgentAnalyticsPage() {
   });
 
   const submitFeedback = useSubmitFeedback();
+  const resetAnalytics = useResetAnalytics();
+
+  const handleResetAnalytics = async () => {
+    try {
+      await resetAnalytics.mutateAsync(agentId);
+      setShowResetConfirm(false);
+      refetchAnalytics();
+      refetchLogs();
+    } catch (error) {
+      console.error("Failed to reset analytics:", error);
+    }
+  };
 
   const handleFeedback = async (
     logId: string,
@@ -132,8 +147,55 @@ export default function AgentAnalyticsPage() {
           >
             <RefreshCw className="w-5 h-5" />
           </button>
+          <button
+            onClick={() => setShowResetConfirm(true)}
+            className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            title="Reset analytics"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
         </div>
       </div>
+
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowResetConfirm(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-500" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Reset Analytics</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">This cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Are you sure you want to reset all analytics data for <strong>{agent.name}</strong>? This will permanently delete:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 mb-6 space-y-1">
+              <li>All query logs ({analytics?.totalQueries || 0} queries)</li>
+              <li>Feedback data</li>
+              <li>Performance metrics</li>
+            </ul>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResetAnalytics}
+                disabled={resetAnalytics.isPending}
+                className="flex-1 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium transition-colors disabled:opacity-50"
+              >
+                {resetAnalytics.isPending ? "Resetting..." : "Reset All"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

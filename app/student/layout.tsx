@@ -11,9 +11,6 @@ import { Menu, X, Home, Sparkles } from "lucide-react";
 const studentNav = [
   { name: "Dashboard", href: "/student/dashboard", icon: "📊" },
   { name: "My Chats", href: "/student/chats", icon: "💬" },
-  { name: "Payments", href: "/student/payments", icon: "💳" },
-  { name: "Sessions", href: "/student/sessions", icon: "📅" },
-  { name: "Settings", href: "/student/settings", icon: "⚙️" },
 ];
 
 export default function StudentLayout({

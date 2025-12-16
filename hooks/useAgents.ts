@@ -302,6 +302,27 @@ export function useSubmitFeedback() {
   });
 }
 
+// Reset analytics for an agent
+export function useResetAnalytics() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (agentId: string) => {
+      const apiClient = createClientApiClient(getToken);
+      const response = await apiClient.post<{ success: boolean; deletedCount: number }>(
+        `/agents/${agentId}/analytics/reset`
+      );
+      return response.data;
+    },
+    onSuccess: (_, agentId) => {
+      // Invalidate analytics and logs queries
+      queryClient.invalidateQueries({ queryKey: analyticsKeys.analytics(agentId) });
+      queryClient.invalidateQueries({ queryKey: analyticsKeys.logs(agentId) });
+    },
+  });
+}
+
 // Composite hook that returns all agent hooks
 export function useAgents() {
   return {
@@ -319,5 +340,6 @@ export function useAgents() {
     useAgentAnalytics,
     useAgentLogs,
     useSubmitFeedback,
+    useResetAnalytics,
   };
 }

@@ -8,6 +8,7 @@ import {
   useConversation,
   useSendMessage,
   useConversations,
+  useDeleteConversation,
 } from "@/hooks/useConversations";
 import { useAgentAccessInfo } from "@/hooks/usePayments";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -377,12 +378,14 @@ export default function ChatPage({
   const [showPaywall, setShowPaywall] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: currentUser } = useCurrentUser();
   const { data: conversations, isLoading: conversationsLoading } =
     useConversations();
+  const deleteConversation = useDeleteConversation();
 
   const {
     data: conversation,
@@ -432,6 +435,19 @@ export default function ChatPage({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleDeleteConversation = async (convId: string) => {
+    try {
+      await deleteConversation.mutateAsync(convId);
+      setDeleteConfirmId(null);
+      // If deleting current conversation, navigate to dashboard
+      if (convId === conversationId) {
+        router.push("/student/dashboard");
+      }
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
     }
   };
 
@@ -545,40 +561,77 @@ export default function ChatPage({
               ) : (
                 <div className="p-2">
                   {filteredConversations.map((conv) => (
-                    <button
+                    <div
                       key={conv.id}
-                      onClick={() => router.push(`/student/chat/${conv.id}`)}
-                      className={`w-full text-left px-3 py-3 rounded-lg mb-1 transition-all group ${
+                      className={`relative rounded-lg mb-1 transition-all group ${
                         conv.id === conversationId
                           ? "bg-purple-100 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-500/30"
                           : "hover:bg-gray-100 dark:hover:bg-slate-800 border border-transparent"
                       }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center flex-shrink-0">
-                          <Bot className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {conv.title || conv.agent?.name || "New Chat"}
-                          </h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {conv.agent?.name}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-gray-400 dark:text-gray-500">
-                              {formatDate(conv.updatedAt)}
-                            </span>
-                            <span className="text-xs text-gray-400 dark:text-gray-500">
-                              •
-                            </span>
-                            <span className="text-xs text-gray-400 dark:text-gray-500">
-                              {0} messages
-                            </span>
+                      {deleteConfirmId === conv.id ? (
+                        // Delete confirmation
+                        <div className="px-3 py-3">
+                          <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">Delete this chat?</p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleDeleteConversation(conv.id)}
+                              disabled={deleteConversation.isPending}
+                              className="flex-1 px-3 py-1.5 text-xs font-medium bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                            >
+                              {deleteConversation.isPending ? "Deleting..." : "Delete"}
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirmId(null)}
+                              className="flex-1 px-3 py-1.5 text-xs font-medium bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                            >
+                              Cancel
+                            </button>
                           </div>
                         </div>
-                      </div>
-                    </button>
+                      ) : (
+                        // Normal conversation item
+                        <button
+                          onClick={() => router.push(`/student/chat/${conv.id}`)}
+                          className="w-full text-left px-3 py-3"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center flex-shrink-0">
+                              <Bot className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {conv.title || conv.agent?.name || "New Chat"}
+                              </h4>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                {conv.agent?.name}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-gray-400 dark:text-gray-500">
+                                  {formatDate(conv.updatedAt)}
+                                </span>
+                                <span className="text-xs text-gray-400 dark:text-gray-500">
+                                  •
+                                </span>
+                                <span className="text-xs text-gray-400 dark:text-gray-500">
+                                  {0} messages
+                                </span>
+                              </div>
+                            </div>
+                            {/* Delete button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteConfirmId(conv.id);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
@@ -647,11 +700,22 @@ export default function ChatPage({
             </div>
 
             {/* Context indicator */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
-              <BookOpen className="w-4 h-4 text-purple-500 dark:text-purple-400" />
-              <span className="text-sm text-gray-700 dark:text-slate-300">
-                Powered by {agentName}&apos;s Knowledge
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                <BookOpen className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                <span className="text-sm text-gray-700 dark:text-slate-300">
+                  Powered by {agentName}&apos;s Knowledge
+                </span>
+              </div>
+              
+              {/* Delete current chat button */}
+              <button
+                onClick={() => setDeleteConfirmId(conversationId)}
+                className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all"
+                title="Delete chat"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </header>
@@ -746,6 +810,55 @@ export default function ChatPage({
           }}
         />
       )}
+
+      {/* Delete Confirmation Modal (for header delete) */}
+      <AnimatePresence>
+        {deleteConfirmId === conversationId && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            onClick={() => setDeleteConfirmId(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm mx-4 shadow-2xl"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Delete Chat</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">This cannot be undone</p>
+                </div>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Are you sure you want to delete this conversation with <strong>{agentName}</strong>? All messages will be permanently removed.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDeleteConversation(conversationId)}
+                  disabled={deleteConversation.isPending}
+                  className="flex-1 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium transition-colors disabled:opacity-50"
+                >
+                  {deleteConversation.isPending ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
