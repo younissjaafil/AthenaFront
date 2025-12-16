@@ -17,6 +17,8 @@ import {
   RefreshCw,
   Filter,
   Trash2,
+  DollarSign,
+  Coins,
 } from "lucide-react";
 import {
   useAgent,
@@ -26,6 +28,17 @@ import {
   useResetAnalytics,
   type RagQueryLog,
 } from "@/hooks/useAgents";
+
+// Format token count with K/M suffix
+function formatTokens(tokens: number): string {
+  if (tokens >= 1_000_000) {
+    return `${(tokens / 1_000_000).toFixed(2)}M`;
+  }
+  if (tokens >= 1_000) {
+    return `${(tokens / 1_000).toFixed(1)}K`;
+  }
+  return tokens.toString();
+}
 
 export default function AgentAnalyticsPage() {
   const params = useParams();
@@ -225,6 +238,24 @@ export default function AgentAnalyticsPage() {
           subtitle={`${Math.round(analytics?.avgRetrievalMs || 0)}ms retrieval`}
           icon={<Clock className="w-5 h-5" />}
           color="blue"
+        />
+      </div>
+
+      {/* Cost Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <StatCard
+          title="Total Tokens Used"
+          value={formatTokens(analytics?.totalTokens || 0)}
+          subtitle="across all queries"
+          icon={<Coins className="w-5 h-5" />}
+          color="blue"
+        />
+        <StatCard
+          title="Estimated Cost"
+          value={`$${(analytics?.estimatedCostUsd || 0).toFixed(4)}`}
+          subtitle="based on ~$3/1M tokens"
+          icon={<DollarSign className="w-5 h-5" />}
+          color="green"
         />
       </div>
 
