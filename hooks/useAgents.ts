@@ -195,6 +195,9 @@ export interface AgentAnalytics {
   feedbackRate: number;
   queriesOverTime: { date: string; count: number }[];
   topIdkReasons: { reason: string; count: number }[];
+  // Cost metrics
+  totalTokens: number;
+  estimatedCostUsd: number;
 }
 
 export interface RagQueryLog {
