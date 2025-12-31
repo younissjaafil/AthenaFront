@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { Menu, X, Home, Sparkles } from "lucide-react";
+import { Menu, X, Home, Sparkles, User } from "lucide-react";
 
 const studentNav = [
   { name: "Dashboard", href: "/student/dashboard", icon: "📊" },
@@ -104,21 +105,7 @@ export default function StudentLayout({
 
         {/* User Section */}
         <div className="p-4 border-t border-gray-200 dark:border-slate-800">
-          {/* <div className="flex items-center gap-3 px-4 py-2">
-            <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-600/20 flex items-center justify-center">
-              <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                S
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                Student
-              </p>
-              <p className="text-xs text-gray-500 dark:text-slate-500 truncate">
-                student@athena.ai
-              </p>
-            </div>
-          </div> */}
+          <UserSection />
         </div>
       </aside>
 
@@ -153,5 +140,46 @@ function QuickLinks() {
         </Link>
       )}
     </div>
+  );
+}
+
+function UserSection() {
+  const { data: currentUser } = useCurrentUser();
+
+  if (!currentUser) {
+    return null;
+  }
+
+  return (
+    <Link
+      href="/profile"
+      className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+    >
+      {currentUser.profileImageUrl ? (
+        <Image
+          src={currentUser.profileImageUrl}
+          alt={currentUser.username || "User"}
+          width={32}
+          height={32}
+          className="w-8 h-8 rounded-full object-cover"
+        />
+      ) : (
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center">
+          <span className="text-sm font-medium text-white">
+            {currentUser.firstName?.[0] ||
+              currentUser.username?.[0] ||
+              "U"}
+          </span>
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+          {currentUser.firstName || currentUser.username || "User"}
+        </p>
+        <p className="text-xs text-gray-500 dark:text-slate-500 truncate">
+          {currentUser.email || `@${currentUser.username || "user"}`}
+        </p>
+      </div>
+    </Link>
   );
 }
