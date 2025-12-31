@@ -7,11 +7,14 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { Menu, X, Home, Sparkles, User } from "lucide-react";
+import { Menu, X, Home, Sparkles, User, Calendar, Settings, CreditCard } from "lucide-react";
 
 const studentNav = [
   { name: "Dashboard", href: "/student/dashboard", icon: "📊" },
   { name: "My Chats", href: "/student/chats", icon: "💬" },
+  { name: "Sessions", href: "/student/sessions", icon: "📅" },
+  { name: "Payments", href: "/student/payments", icon: "💳" },
+  { name: "Settings", href: "/profile", icon: "⚙️" },
 ];
 
 export default function StudentLayout({
@@ -80,7 +83,8 @@ export default function StudentLayout({
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
           {studentNav.map((item) => {
-            const isActive = pathname === item.href;
+            // Check if current path matches or starts with the nav item href
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
