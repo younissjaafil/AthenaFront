@@ -39,6 +39,11 @@ export default function CreatorSessionDetailPage() {
   const { data: user } = useCurrentUser();
   const { data: session, isLoading, error } = useSession(sessionId);
 
+  // Prevent rendering during build/prerender
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const confirmSession = useConfirmSession(sessionId);
   const cancelSession = useCancelSession(sessionId);
   const startSession = useStartSession(sessionId);

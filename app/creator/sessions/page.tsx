@@ -32,6 +32,11 @@ export default function CreatorSessionsPage() {
     user?.creatorId || ""
   );
 
+  // Prevent rendering during build/prerender
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const isLoading = loadingUser || loadingSessions;
 
   // Filter sessions based on active tab

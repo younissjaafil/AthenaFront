@@ -36,6 +36,11 @@ export default function CreatorOnboardingPage() {
   const { data: currentUser } = useCurrentUser();
   const becomeCreator = useBecomeCreator();
 
+  // Prevent rendering during build/prerender
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const [currentStep, setCurrentStep] = useState<Step>("profile");
   const [profileData, setProfileData] = useState<ProfileData>({
     displayName: currentUser?.firstName

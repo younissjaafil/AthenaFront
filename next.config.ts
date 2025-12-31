@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Skip static generation for protected pages that use dynamic auth
+  staticPageGenerationTimeout: 120,
   images: {
     remotePatterns: [
       {

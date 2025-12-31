@@ -24,6 +24,11 @@ export default function CreatorDashboard() {
   const { data: revenueData } = useCreatorRevenue();
   const { data: creatorStats } = useMyCreatorStats();
 
+  // Prevent rendering during build/prerender
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const firstName = user?.firstName || "Creator";
   const totalAgents = agents?.length || 0;
   const activeAgents = agents?.filter((a) => a.status === "active").length || 0;

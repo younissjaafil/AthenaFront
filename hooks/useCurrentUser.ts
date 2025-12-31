@@ -43,6 +43,9 @@ export interface CurrentUser {
 export function useCurrentUser() {
   const { getToken, isSignedIn } = useAuth();
 
+  // Prevent execution during build/prerender
+  const isBrowser = typeof window !== "undefined";
+
   return useQuery({
     queryKey: ["currentUser"],
     queryFn: async (): Promise<CurrentUser> => {
@@ -84,7 +87,7 @@ export function useCurrentUser() {
         creatorId,
       };
     },
-    enabled: isSignedIn === true,
+    enabled: isBrowser && isSignedIn === true,
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });

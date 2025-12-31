@@ -385,6 +385,11 @@ export default function ChatPage({
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: currentUser } = useCurrentUser();
+
+  // Prevent rendering during build/prerender
+  if (typeof window === "undefined") {
+    return null;
+  }
   const { data: conversations, isLoading: conversationsLoading } =
     useConversations();
   const deleteConversation = useDeleteConversation();

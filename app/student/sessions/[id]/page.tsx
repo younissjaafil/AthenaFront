@@ -47,6 +47,11 @@ export default function SessionDetailPage() {
   const { data: user } = useCurrentUser();
   const { data: session, isLoading, error, refetch } = useSession(sessionId);
 
+  // Prevent rendering during build/prerender
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const cancelSession = useCancelSession(sessionId);
   const startSession = useStartSession(sessionId);
   const completeSession = useCompleteSession(sessionId);
