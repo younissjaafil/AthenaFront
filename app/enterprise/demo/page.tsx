@@ -418,11 +418,8 @@ function Badge({ label, value }: { label: string; value: string }) {
       <span className="text-[11px] font-semibold text-slate-800">{value}</span>
     </div>
   );
-}
-
-function computeGrounded(citations: Citation[]): boolean {
+}function computeGrounded(citations: Citation[]): boolean {
   if (!citations.length) return false;
   const maxSim = Math.max(...citations.map((c) => c.similarity));
   return maxSim >= 0.55;
 }
-

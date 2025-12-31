@@ -23,6 +23,8 @@ export interface Message {
     ragSources?: RagSource[];
     ragOutcome?: 'answered' | 'idk';
     ragIdkReason?: string;
+    webSearchEnabled?: boolean;
+    webSearchSources?: WebSearchSource[];
     tokensUsed?: number;
   };
   tokenCount?: number;
@@ -34,6 +36,12 @@ export interface RagSource {
   chunkIndex: number;
   similarity: number;
   documentName?: string;
+}
+
+export interface WebSearchSource {
+  title: string;
+  url: string;
+  snippet: string;
 }
 
 export interface Conversation {
@@ -63,6 +71,7 @@ export interface CreateConversationDto {
 export interface SendMessageDto {
   content: string;
   useRag?: boolean;
+  useWebSearch?: boolean;
 }
 
 export interface SendMessageResponse {

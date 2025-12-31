@@ -38,6 +38,7 @@ import {
   History,
   ChevronDown,
   ChevronUp,
+  Globe,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -379,6 +380,7 @@ export default function ChatPage({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [useWebSearch, setUseWebSearch] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -425,7 +427,11 @@ export default function ChatPage({
     setInputValue("");
 
     try {
-      await sendMessage.mutateAsync({ content, useRag: true });
+      await sendMessage.mutateAsync({
+        content,
+        useRag: true,
+        useWebSearch,
+      });
     } catch (error) {
       console.error("Failed to send message:", error);
     }
@@ -759,6 +765,19 @@ export default function ChatPage({
               </div>
             ) : (
               <>
+                <div className="flex items-center gap-2 mb-2">
+                  <button
+                    onClick={() => setUseWebSearch(!useWebSearch)}
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      useWebSearch
+                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700"
+                        : "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
+                    }`}
+                  >
+                    <Globe className="w-4 h-4" />
+                    <span>Web Search</span>
+                  </button>
+                </div>
                 <div className="relative flex items-end gap-3 bg-gray-100 dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 focus-within:border-purple-500/50 transition-colors">
                   <textarea
                     ref={inputRef}
