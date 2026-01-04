@@ -58,7 +58,7 @@ export function useDocument(documentId: string) {
     queryKey: documentKeys.detail(documentId),
     queryFn: async () => {
       const response = await apiClient.get<Document>(
-        `/api/documents/${documentId}`
+        `/documents/${documentId}`
       );
       return response.data;
     },
